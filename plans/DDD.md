@@ -2,7 +2,7 @@
 ## Główna
 
 * **Mapowanie położenia obiektów**  
-Głównym aspektem projektu jest przechowywanie podstawowych informacji o *Krasnalach* i obrazowanie ich pozycji na mapie. W tym celu przechowywane są dane geolokalizacyjne każdego z obiektów.
+Głównym aspektem projektu jest przechowywanie podstawowych informacji o *Krasnalach* i obrazowanie ich pozycji na mapie. W tym celu przechowywane są dane geolokalizacyjne każdego z obiektów. *Krasnale* mają przypisane kategorie, wedle których można filtrować ich obecność na mapie. Użytkownik ma możliwość dodawania *Krasnali* do indywidualnych kategorii, m.in. listy odwiedzonych *Krasnali*.
 
 ## Wspierające
 
@@ -10,8 +10,6 @@ Głównym aspektem projektu jest przechowywanie podstawowych informacji o *Krasn
 Dodatkowy aspekt projektu rozszerzający dostępne dane o *Krasnalach*. Użytkownicy aplikacji mają możliwość komentować i oceniać już odwiedzone obiekty w systemie.
 * **Weryfikacja nowych zgłoszeń dodania obiektów**  
 Dodatkowy aspekt projektu pozwalający użytkownikom na dodawanie nowych *Krasnali*. Po poprawnego dodania obiektu do aplikacji niezbędna jest weryfikacja administratora.
-* **Kategoryzacja krasnalo-podobnych obiektów**  
-Dodatkowy aspekt projektu pozwalający na filtrowanie i kategoryzowanie *Krasnali*. Użytkownik ma możliwość dodawać *Krasnale* do prywatnie stworzonych kategorii. Dodatkowo do każdego obiektu przypisano filtry pozwalające na sprawne wyszukiwanie podobnych *Krasnali*.
 
 ## Ogólna
 
@@ -22,7 +20,7 @@ Ogólny aspekt projektu pzowajalający na minipulację stanem użytkowników i n
 ## Mapowanie położenia obiektów
 
 * **Kontekst krasnali**  
-Przechowywanie i manipulowanie informacjami dotyczących *Krasnali*.  
+Przechowywanie i manipulowanie informacjami dotyczących *Krasnali*. 
 
 * **Kontekst mapowania (zewnętrzne API)**  
 Obrazowanie wykorzystując zewnętrzny system obiektów na mapie. 
@@ -30,35 +28,45 @@ Obrazowanie wykorzystując zewnętrzny system obiektów na mapie.
 ## Dodawanie komentarzy do obiektów
 
 * **Kontekst komentarzy**  
-Dodawanie komentarzy i opinii do każdego *Krasnala*
+Dodawanie komentarzy i ocen do każdego *Krasnala*
 
 ## Weryfikacja nowych zgłoszeń dodania obiektów
 
 * **Kontekst zgłoszeń**  
 Dodawanie zgłoszeń przez użytkowników aplikacji w celu dodania nowych *Krasnali* do systemu. Mozliwość akceptacji albo odrzucenia nowych zgłoszeń przez administratora.
 
-## Kategoryzacja
-
-* **Kontekst kategoryzacji lokalnej i globalnej**
-Dodanie fitrów globalnych i lokalnych. Globalne filtry są stale przypisane do każdego *Krasnala*. Lokalne filtry są tworzone przez każdego użytkownika osobno.
-
 ## Zarządzanie tożsamością i dostępem do danych
 
 * **Kontekst logowania**  
-Możliwość zalogowania się do systemu i uzyskania odpowiednich permiscji.
+Możliwość zalogowania się do systemu i uzyskania odpowiednich permisji.
 * **Kontekst zarządzania użytkownikami**  
 Dodawanie lub usuwanie dodatkowych permisji dla kont użytkowników. Możliwość ręcznego usuwania lub dodawania nowych użytkowników.
 
 # Język wszechobecny
 
-* **Krasnal** - Obiekt świata rzeczywistego zobrazowany na mapie przez system. Posiada dodatkowe pola pozwalające poznać historię obiektu i przeglądać sekcję komentarzy. Dodatkowo każdy obiekt posiada przypisane kategorie.
-* **Zgłoszenie** - Propozycja dodania nowego *Krasnala* do systemu.
-* **Komentarz** - Tekstowa adnotacja napisana przez użytkownika odnosząca się do konkretnego krasnala
-* **Kategoria (filtr globalny)** - znacznik klasyfikujący *Krasnala* (budynek, zabytek, krasnal, flora, miejsce).
-* **Weryfikacja** - proces zatwierdzenia zgłoszenia przez administratora. Możliwe jest zaakceptowanie, edycja lub odrzucenie.
-* **Sekcja odwiedzonych (filtr lokalny)** - znacznik pozwalający odróżnić *Krasnale*. Dodawany przez użytkownika aplikacji.
-* **Permicja** - uprawnienie danej z ról w systemie.
-* **Użytkownik systemu** - (Nie mylić z rolą użytkownik) osoba posiadając konto w systemie.
+## Kontekst Krasnali
+* **Krasnal | *Dwarf*** - Obiekt świata rzeczywistego zobrazowany na mapie przez system. Posiada dodatkowe pola pozwalające poznać historię obiektu i przeglądać sekcję komentarzy. Dodatkowo każdy obiekt posiada przypisane kategorie.
+* **Kategoria (filtr globalny) | *category (global filter)*** - Znacznik klasyfikujący *Krasnala* (budynek, zabytek, krasnal, flora, miejsce).
+* **Lokalizacja | *location*** - Położenie *Krasnala* na mapie, na podstawie danych geolokalizacyjnych.
+* **Lista odwiedzonych | *visited list*** - Indywidualna lista użytkownika, na której znajdują się *Krasnale* z przypisaną przez użytkownika kategorią odwiedzonego *Krasnala*.
+
+## Kontekst mapowania (zewnętrzne API)
+* **Punkt mapowy | *map point*** - Reprezentacja lokalizacji *Krasnala* w systemie mapowym.
+* **Obszar | *area*** - Zakres współrzędnych wykorzystywanych przez system.
+
+## Kontekst komentarzy
+* **Komentarz | *comment*** - Tekstowa adnotacja napisana przez użytkownika odnosząca się do konkretnego *Krasnala*.
+* **Ocena | *rating*** - Adnotacja odnosząca się do konkretnego *Krasnala* wyrażana liczbą od 1 do 5, zostawiana przez użytkownika. Użytkownik widzi średnią ocen zostawionych przez wszystkich użytkowników.
+
+# Kontekst zgłoszeń
+* **Zgłoszenie | *report*** - Propozycja dodania nowego *Krasnala* do systemu.
+* **Weryfikacja | *verification*** - proces zatwierdzenia zgłoszenia przez administratora. Możliwe jest zaakceptowanie, edycja lub odrzucenie.
+
+# Kontekst logowania / Kontekst zarządzania tożsamością i dostępem do danych
+* **Permisja | *permission*** - uprawnienie danej z ról w systemie.
+* **Użytkownik systemu | *system user*** - (Nie mylić z rolą użytkownik) osoba posiadając konto w systemie.
+* **Logowanie | *login*** - proces potwierdzenia tożsamości w systemie przez gościa w celu uzyskania uprawnień użytkownika.
+* **Rejestracja | *registration*** - proces dodania swojej tożsamości do systemu przez gościa w celu uzyskania uprawnień użytkownika.
 
 ## Role
 
