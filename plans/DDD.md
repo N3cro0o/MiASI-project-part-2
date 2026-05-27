@@ -42,9 +42,9 @@ obiektów oznaczonych przez użytkownika jako odwiedzone.
 Rejestracja, uwierzytelnianie (logowanie) oraz autoryzacja (zarządzanie Rolami
 użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytkownika.
 
-## 6. Język Wszechobecny (Ubiquitous Language)
+## Język Wszechobecny (Ubiquitous Language)
  
-### 6.1 Kontekst Krasnali — *POI Catalog Context*
+### Kontekst Krasnali — *POI Catalog Context*
  
 | Termin PL | Termin EN | Definicja |
 |---|---|---|
@@ -56,7 +56,7 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
 | Kategoria | *DwarfCategory* | Enum klasyfikujący Krasnala: `MONUMENT`, `BUILDING`, `DWARF_FIGURINE`, `FLORA`, `PLACE`. |
 | Status | *DwarfStatus* | Enum określający widoczność Krasnala: `ACTIVE`, `INACTIVE`, `ARCHIVED`. |
  
-### 6.2 Kontekst Zgłoszeń — *Verification Context*
+### Kontekst Zgłoszeń — *Verification Context*
  
 | Termin PL | Termin EN | Definicja |
 |---|---|---|
@@ -66,7 +66,7 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
 | Powód odrzucenia | *rejectionReason* | Obowiązkowe wyjaśnienie podawane przez weryfikującego w przypadku odrzucenia Zgłoszenia. |
 | Status zgłoszenia | *SubmissionStatus* | Enum: `PENDING` (oczekuje), `ACCEPTED` (zaakceptowane), `REJECTED` (odrzucone). |
  
-### 6.3 Kontekst Interakcji — *Interaction Context*
+### Kontekst Interakcji — *Interaction Context*
  
 | Termin PL | Termin EN | Definicja |
 |---|---|---|
@@ -77,7 +77,7 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
 | Lista odwiedzonych | *visited list* | Prywatna lista Krasnali oznaczonych przez konkretnego użytkownika jako odwiedzone. |
 | Wpis odwiedzenia | *VisitedEntry* | Pojedynczy rekord na liście odwiedzonych: powiązanie użytkownika z Krasnale i czas oznaczenia. |
  
-### 6.4 Kontekst IAM — *IAM Context*
+### Kontekst IAM — *IAM Context*
  
 | Termin PL | Termin EN | Definicja |
 |---|---|---|
@@ -92,62 +92,42 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
 
 ---
 
-# Język wszechobecny
+## Historyjki użytkownika
+ 
+### Gość
+| ID | Historyjka |
+|---|---|
+| US1 | Jako gość chcę oglądać mapę *Krasnali*, aby wiedzieć, gdzie mogę znaleźć atrakcje we Wrocławiu. |
+| US2 | Jako gość chcę filtrować *Krasnale* na mapie na podstawie kategorii, aby widzieć jedynie te obiekty, które mnie interesują. |
+| US3 | Jako gość chcę wyświetlać informacje o *Krasnalach* (nazwa, opis, kategoria, średnia ocen, komentarze), aby zapoznać się z ich charakterystyką i opiniami użytkowników. |
+| US4 | Jako gość chcę zarejestrować się do systemu, aby uzyskać Rolę Użytkownika i móc korzystać z funkcji dostępnych tylko dla zalogowanych. |
 
-## Kontekst Krasnali
-* **Krasnal | *Dwarf*** - Obiekt świata rzeczywistego zobrazowany na mapie przez system. Posiada dodatkowe pola pozwalające poznać historię obiektu i przeglądać sekcję komentarzy. Dodatkowo każdy obiekt posiada przypisane kategorie.
-* **Kategoria (filtr globalny) | *category (global filter)*** - Znacznik klasyfikujący *Krasnala* (budynek, zabytek, krasnal, flora, miejsce).
-* **Lokalizacja | *location*** - Położenie *Krasnala* na mapie, na podstawie danych geolokalizacyjnych.
-* **Lista odwiedzonych | *visited list*** - Indywidualna lista użytkownika, na której znajdują się *Krasnale* z przypisaną przez użytkownika kategorią odwiedzonego *Krasnala*.
+### Użytkownik
+| ID | Historyjka |
+|---|---|
+| US5 | Jako użytkownik chcę logować się do systemu, aby uzyskać dostęp do swoich danych i uprawnień. |
+| US6 | Jako użytkownik chcę dodawać Recenzje (komentarz + ocena) do *Krasnali*, aby pozostali użytkownicy znali moją opinię. |
+| US7 | Jako użytkownik chcę usuwać własne Recenzje, aby móc zarządzać swoją aktywnością w systemie. |
+| US8 | Jako użytkownik chcę dodawać *Krasnale* do swojej listy odwiedzonych, aby śledzić odwiedzone atrakcje. |
+| US9 | Jako użytkownik chcę usuwać *Krasnale* ze swojej listy odwiedzonych, aby korygować swoje wpisy. |
+| US10 | Jako użytkownik chcę zgłaszać nowe *Krasnale*, aby mapa była aktualna i bogatsza w informacje. |
+| US11 | Jako użytkownik chcę przeglądać status moich Zgłoszeń, aby wiedzieć, czy zostały zaakceptowane lub odrzucone (wraz z powodem odrzucenia). |
 
-## Kontekst mapowania (zewnętrzne API)
-* **Punkt mapowy | *map point*** - Reprezentacja lokalizacji *Krasnala* w systemie mapowym.
-* **Obszar | *area*** - Zakres współrzędnych wykorzystywanych przez system.
+### Edytor
+| ID | Historyjka |
+|---|---|
+| US12 | Jako edytor chcę edytować dane *Krasnali* (nazwa, opis, kategoria, status), aby informacje były aktualne i poprawne. |
+| US13 | Jako edytor chcę przeglądać listę oczekujących Zgłoszeń, aby podejmować decyzje weryfikacyjne. |
+| US14 | Jako edytor chcę akceptować Zgłoszenia, aby nowe *Krasnale* pojawiały się na mapie. |
+| US15 | Jako edytor chcę odrzucać Zgłoszenia z podaniem powodu, aby zgłaszający wiedział, dlaczego jego propozycja nie przeszła weryfikacji. |
 
-## Kontekst komentarzy
-* **Komentarz | *comment*** - Tekstowa adnotacja napisana przez użytkownika odnosząca się do konkretnego *Krasnala*.
-* **Ocena | *rating*** - Adnotacja odnosząca się do konkretnego *Krasnala* wyrażana liczbą od 1 do 5, zostawiana przez użytkownika. Użytkownik widzi średnią ocen zostawionych przez wszystkich użytkowników.
+### Admin
+| ID | Historyjka |
+|---|---|
+| US16 | Jako admin chcę przeglądać listę wszystkich użytkowników systemu, aby mieć pełną kontrolę nad systemem. |
+| US17 | Jako admin chcę ręcznie dodawać nowych użytkowników systemu, aby tworzyć konta z pożądanymi Rolami. |
+| US18 | Jako admin chcę dezaktywować konta użytkowników systemu (miękkie usunięcie), aby pozbywać się szkodliwych lub nieaktywnych użytkowników bez utraty ich danych historycznych. |
+| US19 | Jako admin chcę nadawać Roly użytkownikom systemu, aby awansować Użytkowników na Edytorów lub Edytorów na Adminów. |
+| US20 | Jako admin chcę odbierać Role użytkownikom systemu, aby degradować Adminów do Edytorów lub Edytorów do Użytkowników. |
 
-# Kontekst zgłoszeń
-* **Zgłoszenie | *report*** - Propozycja dodania nowego *Krasnala* do systemu.
-* **Weryfikacja | *verification*** - proces zatwierdzenia zgłoszenia przez administratora. Możliwe jest zaakceptowanie, edycja lub odrzucenie.
-
-# Kontekst logowania / Kontekst zarządzania tożsamością i dostępem do danych
-* **Permisja | *permission*** - uprawnienie danej z ról w systemie.
-* **Użytkownik systemu | *system user*** - (Nie mylić z rolą użytkownik) osoba posiadając konto w systemie.
-* **Logowanie | *login*** - proces potwierdzenia tożsamości w systemie przez gościa w celu uzyskania uprawnień użytkownika.
-* **Rejestracja | *registration*** - proces dodania swojej tożsamości do systemu przez gościa w celu uzyskania uprawnień użytkownika.
-
-## Role
-
-* **Gość | *guest*** - Niezalogowana osoba do systemu. Posiada możliwość obejrzeć mapę *Krasnali* i wyszukać *Krasnale* wykorzystując kategorie.
-* **Użytkownik | *user*** - Zalogowana osoba. Posiada możliwość dodawania komentarzy, oceny *Krasnali* i dodawania ich do sekcji odwiedzonych. Dodatkowo ma możliwość wysłać zgłoszenie dodania nowego obiektu do systemu.
-* **Edytor | *editor*** - Zalogowana osoba z uprawnieniami edytorskimi. Może edytować obiekty krasnali oraz weryfikować zgłoszenia użytkowników.
-* **Admin** - Najważniejsza osoba w systemie. Posiada pełną władzę nad dostępnymi danymi w systemie. Ma możliwość dodawać i usuwać użytkowników. Ma możliwość dodawać i usuwać permisje użytkownikom systemu.
-
-> Każda rola dzieli uprawnienia z rolami wyżej wymienionymi.
-
-# Historyjki użytkownika
-
-## Gość
-* US1: Jako gość chcę oglądać mapę *Krasnali*, aby wiedzieć, gdzie mogę znaleźć atrakcje we Wrocławiu.
-* US2: Jako gość chcę filtrować *Krasnale* na mapie na podstawie kategorii, aby widzieć jedynie te obiekty, które mnie interesują.
-* US3: Jako gość chcę wyświetlać informacje o *Krasnalach* (nazwa, opis, kategoria, średnia ocen, komentarze), aby zapoznać się z ich charakterystyką oraz opiniami użytkowników.
-* US4: Jako gość chcę zarejestrować się do systemu, aby uzyskać rolę użytkownika i móc korzystać z funkcji dostępnych tylko dla zalogowanych użytkowników.
-
-## Użytkownik
-~~* US5: Jako użytkownik chcę logować się do systemu, aby uzyskać dostęp do swojej sekcji odwiedzonych *Krasnali* oraz móc dodawać opinie na ich temat i zgłaszać nowe *Krasnale*.~~
-* US5: Jako użytkownik chcę uzyskać dostęp do swojej sekcji odwiedzonych *Krasnali* oraz móc dodawać opinie na ich temat i zgłaszać nowe *Krasnale*.
-* US6: Jako użytkownik chcę dodawać komentarze i oceny do *Krasnali*, aby pozostali użytkownicy systemu i goście znali moją opinię.
-* US7: Jako użytkownik chcę dodawać *Krasnale* do swojej sekcji odwiedzonych, aby śledzić odwiedzone atrakcje oraz znajdować te, których jeszcze nie odwiedziłem.
-* US8: Jako użytkownik chcę zgłaszać nowe *Krasnale*, aby mapa była aktualna i uzupełniona o większą ilość informacji.
-
-## Edytor
-* US9: Jako edytor chcę edytować dane *Krasnali*, aby opisy na ich temat oraz kategorie były aktualne.
-* US10: Jako edytor chcę weryfikować zgłoszenia nowych *Krasnali*, aby zapewnić poprawność ich danych podanych przez użytkowników.
-
-## Admin
-* US11: Jako admin chcę dodawać nowych użytkowników systemu, aby tworzyć użytkowników systemu z pożądanymi przeze mnie uprawnieniami.
-* US12: Jako admin chcę usuwać użytkowników systemu, aby pozbywać się szkodliwych lub nieaktywnych użytkowników.
-* US13: Jako admin chcę dodawać permisje użytkowników systemu, aby móc awansować użytkowników na edytorów, bądź edytorów na adminów.
-* US14: Jako admin chcę usuwać permisje użytkowników systemu, aby móc degradować adminów do edytorów bądź edytorów do użytkowników.
+---
