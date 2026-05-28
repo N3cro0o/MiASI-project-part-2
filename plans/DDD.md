@@ -1,139 +1,186 @@
-# Dziedziny
-## Główna
+# Wrocławskie Krasnale
+> System mapowania punktów użyteczności publicznej - POI (ang. Point of interest) utrzymywany przez społeczność
+ 
+## Dziedziny
+### Główna
 
 * **Mapowanie położenia obiektów**  
 Głównym aspektem projektu jest przechowywanie podstawowych informacji o *Krasnalach* i obrazowanie ich pozycji na mapie. W tym celu przechowywane są dane geolokalizacyjne każdego z obiektów. *Krasnale* mają przypisane kategorie, wedle których można filtrować ich obecność na mapie. Użytkownik ma możliwość dodawania *Krasnali* do indywidualnych kategorii, m.in. listy odwiedzonych *Krasnali*.
 
-## Wspierające
+### Wspierające
 
-* **Dodawanie komentarzy do obiektów**  
-Dodatkowy aspekt projektu rozszerzający dostępne dane o *Krasnalach*. Użytkownicy aplikacji mają możliwość komentować i oceniać już odwiedzone obiekty w systemie.
 * **Weryfikacja nowych zgłoszeń dodania obiektów**  
 Dodatkowy aspekt projektu pozwalający użytkownikom na dodawanie nowych *Krasnali*. Po poprawnego dodania obiektu do aplikacji niezbędna jest weryfikacja administratora.
 
-## Ogólna
+* **Dodawanie komentarzy i ocen do obiektów**  
+Dodatkowy aspekt projektu rozszerzający dostępne dane o *Krasnalach*. Użytkownicy aplikacji mają możliwość komentować i oceniać już odwiedzone obiekty w systemie.
 
-* **Zarządzanie tożsamością i dostępem do danych**  
-Ogólny aspekt projektu pzowajalający na minipulację stanem użytkowników i na nadawnie lub usuwanie ich poszczególnych ról.
+### Ogólna
 
-# Konteksty
-## Mapowanie położenia obiektów
+* **Zarządzanie tożsamością i dostępem do danych (IAM)**  
+Ogólny aspekt projektu pzowajalający na rejestrację, logowanie i zarządzanie Rolami użytkowników systemu.
 
-* **Kontekst krasnali**  
-Przechowywanie i manipulowanie informacjami dotyczących *Krasnali*. 
+---
 
-* **Kontekst mapowania (zewnętrzne API)**  
-Obrazowanie wykorzystując zewnętrzny system obiektów na mapie. 
+## Konteksty
 
-## Dodawanie komentarzy do obiektów
+### * **Kontekst Krasnal**  
+Przechowywanie i manipulowanie informacjami dotyczącymi *Krasnali*: współrzędnymi, nazwą, opisem, kategorią i statusem. 
 
-* **Kontekst komentarzy**  
-Dodawanie komentarzy i ocen do każdego *Krasnala*
+~~* **Kontekst Mapowania (zewnętrzny)**
+Obrazowanie wykorzystując zewnętrzny system obiektów na mapie.~~
 
-## Weryfikacja nowych zgłoszeń dodania obiektów
+###* **Kontekst Zgłoszenie**
+Kolejka propozycji nowych *Krasnali* przesyłanych przez użytkowników, oczekujących
+na akceptację lub odrzucenie przez Edytora bądź Admina.
 
-* **Kontekst zgłoszeń**  
-Dodawanie zgłoszeń przez użytkowników aplikacji w celu dodania nowych *Krasnali* do systemu. Mozliwość akceptacji albo odrzucenia nowych zgłoszeń przez administratora.
+### * **Kontekst Interakcja**  
+Komentarze i oceny wystawiane przez użytkowników dla *Krasnali* oraz prywatna lista
+obiektów oznaczonych przez użytkownika jako odwiedzone.
 
-## Zarządzanie tożsamością i dostępem do danych
+### * **Kontekst IAM (ang. Identity and Access Management)**  
+Rejestracja, uwierzytelnianie (logowanie) oraz autoryzacja (zarządzanie Rolami
+użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytkownika.
 
-* **Kontekst logowania**  
-Możliwość zalogowania się do systemu i uzyskania odpowiednich permisji.
-* **Kontekst zarządzania użytkownikami**  
-Dodawanie lub usuwanie dodatkowych permisji dla kont użytkowników. Możliwość ręcznego usuwania lub dodawania nowych użytkowników.
+## Język Wszechobecny (Ubiquitous Language)
+ 
+### Kontekst Krasnali — *POI Catalog Context*
+ 
+| Termin PL | Termin EN | Definicja |
+|---|---|---|
+| Krasnal | *Dwarf* | Obiekt świata rzeczywistego zobrazowany na mapie. Posiada nazwę, opis, współrzędne, kategorię i status. |
+| Nazwa | *name* | Krótka identyfikująca etykieta Krasnala (max 255 znaków). |
+| Opis | *description* | Tekstowa informacja o historii i charakterystyce Krasnala. |
+| Lokalizacja | *location* | Położenie geograficzne Krasnala wyrażone parą współrzędnych (szerokość, długość). |
+| Współrzędne | *Coordinates* | Wartość złożona: `latitude` i `longitude` z walidacją zakresu. |
+| Kategoria | *DwarfCategory* | Enum klasyfikujący Krasnala: `MONUMENT`, `BUILDING`, `DWARF_FIGURINE`, `FLORA`, `PLACE`. |
+| Status | *DwarfStatus* | Enum określający widoczność Krasnala: `ACTIVE`, `INACTIVE`, `ARCHIVED`. |
+ 
+### Kontekst Zgłoszeń — *Verification Context*
+ 
+| Termin PL | Termin EN | Definicja |
+|---|---|---|
+| Zgłoszenie | *Submission* | Propozycja dodania nowego Krasnala przesłana przez użytkownika. Zawiera wszystkie dane wymagane do stworzenia Krasnala. |
+| Ładunek zgłoszenia | *SubmissionPayload* | Zestaw danych proponowanego Krasnala przechowywany jako JSONB do momentu weryfikacji. |
+| Weryfikacja | *Verification* | Proces przeglądu Zgłoszenia przez Edytora lub Admina. Może zakończyć się akceptacją, edycją lub odrzuceniem. |
+| Powód odrzucenia | *rejectionReason* | Obowiązkowe wyjaśnienie podawane przez weryfikującego w przypadku odrzucenia Zgłoszenia. |
+| Status zgłoszenia | *SubmissionStatus* | Enum: `PENDING` (oczekuje), `ACCEPTED` (zaakceptowane), `REJECTED` (odrzucone). |
+ 
+### Kontekst Interakcji — *Interaction Context*
+ 
+| Termin PL | Termin EN | Definicja |
+|---|---|---|
+| Komentarz | *comment* (część Review) | Tekstowa adnotacja użytkownika odnosząca się do konkretnego Krasnala (max 2000 znaków). |
+| Ocena | *Rating* | Wartość całkowita od 1 do 5 wystawiana przez użytkownika dla Krasnala. |
+| Recenzja | *Review* | Agregat łączący Ocenę i Komentarz — użytkownik wystawia je razem. |
+| Średnia ocen | *average rating* | Wartość wyliczana na żądanie ze wszystkich Recenzji danego Krasnala. |
+| Lista odwiedzonych | *visited list* | Prywatna lista Krasnali oznaczonych przez konkretnego użytkownika jako odwiedzone. |
+| Wpis odwiedzenia | *VisitedEntry* | Pojedynczy rekord na liście odwiedzonych: powiązanie użytkownika z Krasnale i czas oznaczenia. |
+ 
+### Kontekst IAM — *IAM Context*
+ 
+| Termin PL | Termin EN | Definicja |
+|---|---|---|
+| Użytkownik systemu | *SystemUser* | (Nie mylić z Rolą USER) — każda osoba posiadająca konto w systemie. |
+| Rola | *UserRole* | Enum określający poziom uprawnień w systemie: `GUEST`, `USER`, `EDITOR`, `ADMIN`. |
+| Rejestracja | *registration* | Proces założenia konta przez Gościa w celu uzyskania Roli `USER`. |
+| Logowanie | *login* | Proces potwierdzenia tożsamości przez użytkownika systemu w celu uzyskania sesji. |
+| Gość | *Guest* | Niezalogowana osoba. Rola `GUEST` — może przeglądać mapę i filtrować Krasnale. |
+| Użytkownik | *User* | Zalogowana osoba z Rolą `USER` — może dodawać Recenzje, oznaczać Krasnale jako odwiedzone i zgłaszać nowe. |
+| Edytor | *Editor* | Zalogowana osoba z Rolą `EDITOR` — może edytować Krasnale i weryfikować Zgłoszenia. |
+| Admin | *Admin* | Najwyższy poziom uprawnień. Posiada wszystkie uprawnienia Edytora, plus zarządzanie kontami i Rolami. |
 
-# Język wszechobecny
+---
 
-## Kontekst Krasnali
-* **Krasnal | *Dwarf*** - Obiekt świata rzeczywistego zobrazowany na mapie przez system. Posiada dodatkowe pola pozwalające poznać historię obiektu i przeglądać sekcję komentarzy. Dodatkowo każdy obiekt posiada przypisane kategorie.
-* **Kategoria (filtr globalny) | *category (global filter)*** - Znacznik klasyfikujący *Krasnala* (budynek, zabytek, krasnal, flora, miejsce).
-* **Lokalizacja | *location*** - Położenie *Krasnala* na mapie, na podstawie danych geolokalizacyjnych.
-* **Lista odwiedzonych | *visited list*** - Indywidualna lista użytkownika, na której znajdują się *Krasnale* z przypisaną przez użytkownika kategorią odwiedzonego *Krasnala*.
-
-## Kontekst mapowania (zewnętrzne API)
-* **Punkt mapowy | *map point*** - Reprezentacja lokalizacji *Krasnala* w systemie mapowym.
-* **Obszar | *area*** - Zakres współrzędnych wykorzystywanych przez system.
-
-## Kontekst komentarzy
-* **Komentarz | *comment*** - Tekstowa adnotacja napisana przez użytkownika odnosząca się do konkretnego *Krasnala*.
-* **Ocena | *rating*** - Adnotacja odnosząca się do konkretnego *Krasnala* wyrażana liczbą od 1 do 5, zostawiana przez użytkownika. Użytkownik widzi średnią ocen zostawionych przez wszystkich użytkowników.
-
-# Kontekst zgłoszeń
-* **Zgłoszenie | *report*** - Propozycja dodania nowego *Krasnala* do systemu.
-* **Weryfikacja | *verification*** - proces zatwierdzenia zgłoszenia przez administratora. Możliwe jest zaakceptowanie, edycja lub odrzucenie.
-
-# Kontekst logowania / Kontekst zarządzania tożsamością i dostępem do danych
-* **Permisja | *permission*** - uprawnienie danej z ról w systemie.
-* **Użytkownik systemu | *system user*** - (Nie mylić z rolą użytkownik) osoba posiadając konto w systemie.
-* **Logowanie | *login*** - proces potwierdzenia tożsamości w systemie przez gościa w celu uzyskania uprawnień użytkownika.
-* **Rejestracja | *registration*** - proces dodania swojej tożsamości do systemu przez gościa w celu uzyskania uprawnień użytkownika.
-
-## Role
-
-* **Gość | *guest*** - Niezalogowana osoba do systemu. Posiada możliwość obejrzeć mapę *Krasnali* i wyszukać *Krasnale* wykorzystując kategorie.
-* **Użytkownik | *user*** - Zalogowana osoba. Posiada możliwość dodawania komentarzy, oceny *Krasnali* i dodawania ich do sekcji odwiedzonych. Dodatkowo ma możliwość wysłać zgłoszenie dodania nowego obiektu do systemu.
-* **Edytor | *editor*** - Zalogowana osoba z uprawnieniami edytorskimi. Może edytować obiekty krasnali oraz weryfikować zgłoszenia użytkowników.
-* **Admin** - Najważniejsza osoba w systemie. Posiada pełną władzę nad dostępnymi danymi w systemie. Ma możliwość dodawać i usuwać użytkowników. Ma możliwość dodawać i usuwać permisje użytkownikom systemu.
-
-> Każda rola dzieli uprawnienia z rolami wyżej wymienionymi.
-
-# Historyjki użytkownika
-
-## Gość
+## Historyjki użytkownika
+ 
+### Gość
+ 
 * **US1**: Jako gość chcę oglądać mapę *Krasnali*, aby wiedzieć, gdzie mogę znaleźć atrakcje we Wrocławiu.
-  * **Kryteria akceptacyjne**:
-    - na mapie wyświetlają się *Krasnale*,
-    - *Krasnale* nie znajdują się poza obszarem Wrocławia
+  * **Kryteria akceptacyjne:**
+    - na mapie wyświetlają się *Krasnale* o statusie `ACTIVE`,
+    - *Krasnale* nie znajdują się poza obszarem Wrocławia.
 * **US2**: Jako gość chcę filtrować *Krasnale* na mapie na podstawie kategorii, aby widzieć jedynie te obiekty, które mnie interesują.
-  * **Kryteria akceptacyjne**:
-    - wyświetlane na mapie *Krasnale* mają przypisaną jedną z wybranych przeze mnie kategorii
-* **US3**: Jako gość chcę wyświetlać informacje o *Krasnalach*, aby zapoznać się z ich opisem oraz opiniami użytkowników.
-  * **Kryteria akceptacyjne**:
-    - widoczny jest opis *Krasnala*,
-    - widoczne są opinie użytkowników wraz z nazwą użytkownika,
-    - widoczna jest średnia ocen wszystkich użytkowników
-* **US4**: Jako gość chcę zarejestrować się do systemu, aby uzyskać rolę użytkownika i móc korzystać z funkcji dostępnych tylko dla zalogowanych użytkowników.
-  * **Kryteria akceptacyjne**:
-    - otrzymuję dostęp do funkcji dostępnych tylko dla zalogowanych użytkowników
-
-## Użytkownik
-* **US5**: Jako użytkownik chcę logować się do systemu, aby uzyskać dostęp do swojej sekcji odwiedzonych *Krasnali* oraz móc dodawać opinie na ich temat i zgłaszać nowe *Krasnale*.
-  * **Kryteria akceptacyjne**:
-    - sekcja moich odwiedzonych *Krasnali* nie zmieniła się względem ostatniego razu, gdy korzystałem z aplikacji,
-    - mogę dodawać komentarze oraz oceny do *Krasnali*,
-    - mogę dodać zgłoszenie nowego *Krasnala*
-* **US6**: Jako użytkownik chcę dodawać komentarze i oceny do *Krasnali*, aby pozostali użytkownicy systemu i goście znali moją opinię.
-  * **Kryteria akceptacyjne**:
-    - widzę swoją ocenę *Krasnala* w sekcji wystawionych przeze mnie ocen,
-    - widzę swój komentarz na temat *Krasnala* w sekcji napisanych przeze mnie komentarzy,
-    - pozostali goście i użytkownicy widzą mój komentarz
-* **US7**: Jako użytkownik chcę dodawać *Krasnale* do swojej sekcji odwiedzonych, aby śledzić odwiedzone atrakcje oraz znajdować te, których jeszcze nie odwiedziłem.
-  * **Kryteria akceptacyjne**:
-    - w mojej sekcji odwiedzonych *Krasnali* znajduje się właśnie dodany do niej *Krasnal*,
-    - na mapie mogę filtrować odwiedzone *Krasnale*, aby wyświetlały się tylko te nieodwiedzone
-* **US8**: Jako użytkownik chcę zgłaszać nowe *Krasnale*, aby mapa była aktualna i uzupełniona o większą ilość informacji.
-  * **Kryteria akceptacyjne**:
-    - zgłoszenie *Krasnala* jest widoczne w mojej sekcji zgłoszeń
-
-## Edytor
-* **US9**: Jako edytor chcę edytować dane *Krasnali*, aby opisy na ich temat oraz kategorie były aktualne.
-  * **Kryteria akceptacyjne**:
-    - w sekcji *Krasnala* widoczny jest jego nowy opis lub kategoria
-* **US10**: Jako edytor chcę weryfikować zgłoszenia nowych *Krasnali*, aby zapewnić poprawność ich danych podanych przez użytkowników.
-  * **Kryteria akceptacyjne**:
-    - po pozytywnej weryfikacji zgłoszenia nowy *Krasnal* pojawia się na mapie,
-    - w przypadku odrzucenia zgłoszenia przestaje się ono pojawiać w sekcji zgłoszeń użytkownika, który je wykonał
-
-## Admin
-* **US11**: Jako admin chcę dodawać nowych użytkowników systemu, aby tworzyć użytkowników systemu z pożądanymi przeze mnie uprawnieniami.
-  * **Kryteria akceptacyjne**:
-    - użytkownik systemu może zalogować się na konto z wykorzystaniem podanych przeze mnie danych
-* **US12**: Jako admin chcę usuwać użytkowników systemu, aby pozbywać się szkodliwych lub nieaktywnych użytkowników.
-  * **Kryteria akceptacyjne**:
-    - konto użytkownika systemu nie istnieje i nie można się na nie zalogować
-* **US13**: Jako admin chcę dodawać permisje użytkowników systemu, aby móc awansować użytkowników na edytorów, bądź edytorów na adminów.
-  * **Kryteria akceptacyjne**:
-    - użytkownik otrzymuje dostęp do funkcji edytora, bądź edytor dostaje dostęp do funkcji admina
-* **US14**: Jako admin chcę usuwać permisje użytkowników systemu, aby móc degradować adminów do edytorów bądź edytorów do użytkowników.
-  * **Kryteria akceptacyjne**:
-    - edytor traci swoje funkcje i może jedynie korzystać z funkcji użytkownika, lub admin traci możliwość korzystania z funkcji dostępnych wyłącznie dla jego roli
+  * **Kryteria akceptacyjne:**
+    - wyświetlane na mapie *Krasnale* mają przypisaną jedną z wybranych przeze mnie kategorii.
+* **US3**: Jako gość chcę wyświetlać informacje o *Krasnalach* (nazwa, opis, kategoria, średnia ocen, komentarze), aby zapoznać się z ich charakterystyką i opiniami użytkowników.
+  * **Kryteria akceptacyjne:**
+    - widoczna jest nazwa i opis *Krasnala*,
+    - widoczne są Recenzje wraz z nazwą użytkownika,
+    - widoczna jest średnia ocen wszystkich użytkowników.
+* **US4**: Jako gość chcę zarejestrować się do systemu, aby uzyskać Rolę Użytkownika i móc korzystać z funkcji dostępnych tylko dla zalogowanych.
+  * **Kryteria akceptacyjne:**
+    - po rejestracji mogę się zalogować i uzyskuję dostęp do funkcji Użytkownika.
+---
+ 
+### Użytkownik
+ 
+* **US5**: Jako użytkownik chcę logować się do systemu, aby uzyskać dostęp do swoich danych i uprawnień.
+  * **Kryteria akceptacyjne:**
+    - moja lista odwiedzonych *Krasnali* nie zmieniła się względem ostatniej sesji,
+    - mogę dodawać Recenzje do *Krasnali*,
+    - mogę wysłać Zgłoszenie nowego *Krasnala*.
+* **US6**: Jako użytkownik chcę dodawać Recenzje (komentarz + ocena) do *Krasnali*, aby pozostali użytkownicy i goście znali moją opinię.
+  * **Kryteria akceptacyjne:**
+    - widzę swoją ocenę i komentarz w sekcji wystawionych przeze mnie Recenzji,
+    - pozostali goście i użytkownicy widzą mój komentarz i ocenę.
+* **US7**: Jako użytkownik chcę usuwać własne Recenzje, aby móc zarządzać swoją aktywnością w systemie.
+  * **Kryteria akceptacyjne:**
+    - usunięta Recenzja nie jest widoczna dla żadnego użytkownika ani gościa.
+* **US8**: Jako użytkownik chcę dodawać *Krasnale* do swojej listy odwiedzonych, aby śledzić odwiedzone atrakcje.
+  * **Kryteria akceptacyjne:**
+    - w mojej liście odwiedzonych *Krasnali* znajduje się właśnie dodany *Krasnal*,
+    - na mapie mogę filtrować odwiedzone *Krasnale*, aby wyświetlały się tylko te nieodwiedzone.
+* **US9**: Jako użytkownik chcę usuwać *Krasnale* ze swojej listy odwiedzonych, aby korygować swoje wpisy.
+  * **Kryteria akceptacyjne:**
+    - usunięty *Krasnal* nie widnieje na mojej liście odwiedzonych.
+* **US10**: Jako użytkownik chcę zgłaszać nowe *Krasnale*, aby mapa była aktualna i bogatsza w informacje.
+  * **Kryteria akceptacyjne:**
+    - Zgłoszenie jest widoczne w mojej sekcji Zgłoszeń ze statusem `PENDING`.
+* **US11**: Jako użytkownik chcę przeglądać status moich Zgłoszeń, aby wiedzieć, czy zostały zaakceptowane lub odrzucone (wraz z powodem odrzucenia).
+  * **Kryteria akceptacyjne:**
+    - widzę aktualny status każdego ze swoich Zgłoszeń (`PENDING`, `ACCEPTED`, `REJECTED`),
+    - dla statusu `REJECTED` widoczny jest powód odrzucenia podany przez weryfikującego.
+---
+ 
+### Edytor
+ 
+* **US12**: Jako edytor chcę edytować dane *Krasnali* (nazwa, opis, kategoria, status), aby informacje były aktualne i poprawne.
+  * **Kryteria akceptacyjne:**
+    - w sekcji *Krasnala* widoczne są jego nowe dane po edycji.
+* **US13**: Jako edytor chcę przeglądać listę oczekujących Zgłoszeń, aby podejmować decyzje weryfikacyjne.
+  * **Kryteria akceptacyjne:**
+    - widzę listę Zgłoszeń ze statusem `PENDING` wraz z ich ładunkiem danych.
+* **US14**: Jako edytor chcę akceptować Zgłoszenia, aby nowe *Krasnale* pojawiały się na mapie.
+  * **Kryteria akceptacyjne:**
+    - po akceptacji nowy *Krasnal* pojawia się na mapie ze statusem `ACTIVE`,
+    - Zgłoszenie zmienia status na `ACCEPTED`.
+* **US15**: Jako edytor chcę odrzucać Zgłoszenia z podaniem powodu, aby zgłaszający wiedział, dlaczego jego propozycja nie przeszła weryfikacji.
+  * **Kryteria akceptacyjne:**
+    - Zgłoszenie zmienia status na `REJECTED`,
+    - zgłaszający widzi powód odrzucenia w swojej sekcji Zgłoszeń.
+---
+ 
+### Admin
+ 
+* **US16**: Jako admin chcę przeglądać listę wszystkich użytkowników systemu, aby mieć pełną kontrolę nad systemem.
+  * **Kryteria akceptacyjne:**
+    - widzę listę wszystkich kont z ich Rolami i statusem aktywności.
+* **US17**: Jako admin chcę ręcznie dodawać nowych użytkowników systemu, aby tworzyć konta z pożądanymi Rolami.
+  * **Kryteria akceptacyjne:**
+    - nowy użytkownik systemu może zalogować się na konto z wykorzystaniem podanych przeze mnie danych.
+* **US18**: Jako admin chcę dezaktywować konta użytkowników systemu, aby blokować szkodliwych lub nieaktywnych użytkowników bez utraty ich danych historycznych.
+  * **Kryteria akceptacyjne:**
+    - zdezaktywowany użytkownik nie może się zalogować,
+    - jego Recenzje i Zgłoszenia pozostają widoczne w systemie (dane historyczne zachowane),
+    - konto widnieje na liście adminów jako nieaktywne (`active = false`).
+  > **Decyzja architektoniczna:** Zamiast twardego usunięcia konta (jak w oryginalnym US12)
+  > stosujemy **miękkie usunięcie** (`active = false`). Twarde usunięcie powodowałoby
+  > osierocone rekordy w Interaction Context i Verification Context (naruszenie spójności
+  > soft FK w architekturze EDA).
+* **US19**: Jako admin chcę nadawać Role użytkownikom systemu, aby awansować Użytkowników na Edytorów lub Edytorów na Adminów.
+  * **Kryteria akceptacyjne:**
+    - użytkownik otrzymuje dostęp do funkcji przypisanych do nowej Roli.
+* **US20**: Jako admin chcę odbierać Role użytkownikom systemu, aby degradować Adminów do Edytorów lub Edytorów do Użytkowników.
+  * **Kryteria akceptacyjne:**
+    - użytkownik traci dostęp do funkcji przypisanych do poprzedniej Roli.
