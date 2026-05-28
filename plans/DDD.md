@@ -1,6 +1,8 @@
 # Wrocławskie Krasnale
 > System mapowania punktów użyteczności publicznej - POI (ang. Point of interest) utrzymywany przez społeczność
- 
+
+---
+
 ## Dziedziny
 ### Główna
 
@@ -17,30 +19,32 @@ Dodatkowy aspekt projektu rozszerzający dostępne dane o *Krasnalach*. Użytkow
 
 ### Ogólna
 
-* **Zarządzanie tożsamością i dostępem do danych (IAM)**  
+* **Zarządzanie tożsamością i dostępem do danych (IAM - ang. Identity and Access Management)**  
 Ogólny aspekt projektu pzowajalający na rejestrację, logowanie i zarządzanie Rolami użytkowników systemu.
 
 ---
 
 ## Konteksty
 
-### * **Kontekst Krasnal**  
+### Kontekst Krasnal
 Przechowywanie i manipulowanie informacjami dotyczącymi *Krasnali*: współrzędnymi, nazwą, opisem, kategorią i statusem. 
 
-~~* **Kontekst Mapowania (zewnętrzny)**
+~~### Kontekst Mapowania (zewnętrzny)
 Obrazowanie wykorzystując zewnętrzny system obiektów na mapie.~~
 
-###* **Kontekst Zgłoszenie**
+### Kontekst Zgłoszenie
 Kolejka propozycji nowych *Krasnali* przesyłanych przez użytkowników, oczekujących
 na akceptację lub odrzucenie przez Edytora bądź Admina.
 
-### * **Kontekst Interakcja**  
+### Kontekst Interakcja
 Komentarze i oceny wystawiane przez użytkowników dla *Krasnali* oraz prywatna lista
 obiektów oznaczonych przez użytkownika jako odwiedzone.
 
-### * **Kontekst IAM (ang. Identity and Access Management)**  
+### Kontekst IAM (ang. Identity and Access Management)
 Rejestracja, uwierzytelnianie (logowanie) oraz autoryzacja (zarządzanie Rolami
 użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytkownika.
+
+---
 
 ## Język Wszechobecny (Ubiquitous Language)
  
