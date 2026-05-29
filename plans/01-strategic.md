@@ -1,9 +1,9 @@
-# Wrocławskie Krasnale
+# Krasmap
 > System mapowania punktów użyteczności publicznej - POI (ang. Point of interest) utrzymywany przez społeczność
 
 ---
 
-## Dziedziny
+## 1. Dziedziny
 ### Główna
 
 * **Mapowanie położenia obiektów**  
@@ -24,13 +24,10 @@ Ogólny aspekt projektu pzowajalający na rejestrację, logowanie i zarządzanie
 
 ---
 
-## Konteksty
+## 2. Konteksty
 
 ### Kontekst Krasnal
 Przechowywanie i manipulowanie informacjami dotyczącymi *Krasnali*: współrzędnymi, nazwą, opisem, kategorią i statusem. 
-
-~~### Kontekst Mapowania (zewnętrzny)
-Obrazowanie wykorzystując zewnętrzny system obiektów na mapie.~~
 
 ### Kontekst Zgłoszenie
 Kolejka propozycji nowych *Krasnali* przesyłanych przez użytkowników, oczekujących
@@ -46,7 +43,7 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
 
 ---
 
-## Język Wszechobecny (Ubiquitous Language)
+## 3. Język Wszechobecny
  
 ### Kontekst Krasnali — *POI Catalog Context*
  
@@ -96,7 +93,7 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
 
 ---
 
-## Historyjki użytkownika
+## 4. Historyjki użytkownika
  
 ### Gość
  
@@ -188,3 +185,20 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
 * **US20**: Jako admin chcę odbierać Role użytkownikom systemu, aby degradować Adminów do Edytorów lub Edytorów do Użytkowników.
   * **Kryteria akceptacyjne:**
     - użytkownik traci dostęp do funkcji przypisanych do poprzedniej Roli.
+
+---
+ 
+## 5. Reguły Biznesowe (Business Rules)
+ 
+| ID | Reguła |
+|---|---|
+| BR1 | Krasnal jest widoczny na mapie publicznej tylko wtedy, gdy jego status to `ACTIVE`. |
+| BR2 | Jeden użytkownik może wystawić tylko jedną Recenzję dla danego Krasnala (unique constraint: `dwarfId` + `authorUserId`). |
+| BR3 | Jeden użytkownik może mieć dany Krasnal tylko raz na swojej liście odwiedzonych (unique constraint: `dwarfId` + `userId`). |
+| BR4 | Zgłoszenie po akceptacji (`ACCEPTED`) emituje `SubmissionAcceptedEvent`, który jest jedynym mechanizmem tworzenia Krasnala z poziomu Kontekstu Zgłoszeń. |
+| BR5 | Odrzucenie Zgłoszenia (`REJECTED`) wymaga podania niepustego `rejectionReason`. |
+| BR6 | Użytkownik może zgłosić nowego Krasnala tylko wtedy, gdy jego Rola to co najmniej `USER`. |
+| BR7 | Edycja Krasnali i weryfikacja Zgłoszeń wymaga Roli co najmniej `EDITOR`. |
+| BR8 | Zarządzanie kontami i Rolami wymaga Roli `ADMIN`. |
+| BR9 | Usunięcie konta realizowane jest jako miękkie usunięcie (`active = false`) — dane historyczne (Recenzje, Zgłoszenia) są zachowane. |
+| BR10 | Ocena (`Rating`) musi być liczbą całkowitą z zakresu 1–5 (walidacja na poziomie Value Object). |
