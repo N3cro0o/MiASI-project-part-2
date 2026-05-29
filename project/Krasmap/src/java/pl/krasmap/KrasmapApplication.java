@@ -11,4 +11,8 @@ public class KrasmapApplication {
         SpringApplication.run(KrasmapApplication.class, args);
     }
 
+    public KrasmapApplication() {
+
+    }
+
 }

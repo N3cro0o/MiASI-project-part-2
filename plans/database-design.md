@@ -1,10 +1,10 @@
-# 🗄️ Projekt Bazy Danych (Database Design)
+# Projekt Bazy Danych (Database Design)
 
 Niniejszy dokument przedstawia formalny projekt relacyjnej bazy danych (PostgreSQL) dla systemu **Wrocławskie Krasnale**, zaimplementowany zgodnie z rygorystycznymi zasadami **Domain-Driven Design (DDD)** oraz **Architecture-Driven Development (Modular Monolith / MSA)**.
 
 ---
 
-### 🧱 Główne Założenia Architektoniczne Bazy Danych
+### Główne Założenia Architektoniczne Bazy Danych
 
 Zgodnie z wymaganiami kursu dotyczącymi architektury heksagonalnej, EDA oraz paradygmatu SOA/MSA, projekt bazy danych opiera się na trzech fundamentalnych zasadach:
 
@@ -14,7 +14,7 @@ Zgodnie z wymaganiami kursu dotyczącymi architektury heksagonalnej, EDA oraz pa
 
 ---
 
-### 📊 Diagram Związków Encji (ERD)
+### Diagram Związków Encji (ERD)
 
 Poniższy diagram Mermaid jest natywnie renderowany przez interfejs GitHub i przedstawia logiczne powiązania struktur z podziałem na Konteksty Ograniczone.
 
@@ -80,7 +80,7 @@ erDiagram
 
 ---
 
-### 📑 Szczegółowa Specyfikacja Tabel z podziałem na Konteksty
+### Szczegółowa Specyfikacja Tabel z podziałem na Konteksty
 
 #### 1. Kontekst: Zarządzanie tożsamością i dostępem (IAM Context)
 Odpowiada za rejestrację, uwierzytelnianie, logowanie oraz zmianę uprawnień i ról użytkowników systemu.

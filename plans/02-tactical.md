@@ -63,26 +63,26 @@
 ```mermaid
 graph TB
     subgraph ADAPTERS_IN["⬅️ Primary Adapters — Driving (Infrastructure)"]
-        WEB["🌐 DwarfController\nSubmissionController\nReviewController\nAuthController"]
+        WEB["DwarfController\nSubmissionController\nReviewController\nAuthController"]
     end
 
-    subgraph CORE["🏛️ Application Core (Pure Java — no Spring)"]
+    subgraph CORE["Application Core (Pure Java — no Spring)"]
         subgraph APP["Application Layer"]
-            SVC["📋 Input Ports\n(Service Interfaces)\nDwarfService\nSubmissionService\nReviewService\nUserService"]
+            SVC["Input Ports\n(Service Interfaces)\nDwarfService\nSubmissionService\nReviewService\nUserService"]
         end
         subgraph DOMAIN["Domain Layer"]
-            AGG["🧩 Aggregates\nDwarf · Submission\nReview · VisitedEntry\nSystemUser"]
-            VO["💎 Value Objects\nCoordinates · DwarfName\nRating · Email · ..."]
-            EVT["⚡ Domain Events\nDwarfCreatedEvent\nSubmissionAcceptedEvent\n..."]
-            REPO_IF["🔌 Output Ports\n(Repository Interfaces)\nDwarfRepository\nSubmissionRepository\n..."]
+            AGG["Aggregates\nDwarf · Submission\nReview · VisitedEntry\nSystemUser"]
+            VO["Value Objects\nCoordinates · DwarfName\nRating · Email · ..."]
+            EVT["Domain Events\nDwarfCreatedEvent\nSubmissionAcceptedEvent\n..."]
+            REPO_IF["Output Ports\n(Repository Interfaces)\nDwarfRepository\nSubmissionRepository\n..."]
         end
     end
 
-    subgraph ADAPTERS_OUT["➡️ Secondary Adapters — Driven (Infrastructure)"]
-        JPA["🗄️ Spring Data JPA\nJpaDwarfRepository\nJpaSubmissionRepository\n..."]
-        PG[("🐘 PostgreSQL\nschema: poi_catalog\nschema: verification\nschema: interaction\nschema: iam")]
-        PUB["📢 ApplicationEventPublisher\nSpring Event Bus"]
-        LISTENER["👂 Event Listeners\nSubmissionAcceptedListener\n(infrastructure)"]
+    subgraph ADAPTERS_OUT["Secondary Adapters — Driven (Infrastructure)"]
+        JPA["Spring Data JPA\nJpaDwarfRepository\nJpaSubmissionRepository\n..."]
+        PG[("PostgreSQL\nschema: poi_catalog\nschema: verification\nschema: interaction\nschema: iam")]
+        PUB["ApplicationEventPublisher\nSpring Event Bus"]
+        LISTENER["Event Listeners\nSubmissionAcceptedListener\n(infrastructure)"]
     end
 
     WEB -->|calls| SVC
