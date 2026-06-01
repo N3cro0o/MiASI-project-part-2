@@ -49,42 +49,42 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
  
 | Termin PL | Termin EN | Definicja |
 |---|---|---|
-| Krasnal | *Dwarf* | Obiekt świata rzeczywistego zobrazowany na mapie. Posiada nazwę, opis, współrzędne, kategorię i status. |
-| Nazwa | *name* | Krótka identyfikująca etykieta Krasnala (max 255 znaków). |
-| Opis | *description* | Tekstowa informacja o historii i charakterystyce Krasnala. |
+| Krasnal | *Krasnal* | Obiekt świata rzeczywistego zobrazowany na mapie. Posiada nazwę, opis, współrzędne, kategorię i status. |
+| Nazwa | *Name* | Krótka identyfikująca etykieta Krasnala (max 255 znaków). |
+| Opis | *Description* | Tekstowa informacja o historii i charakterystyce Krasnala. |
 | Lokalizacja | *location* | Położenie geograficzne Krasnala wyrażone parą współrzędnych (szerokość, długość). |
 | Współrzędne | *Coordinates* | Wartość złożona: `latitude` i `longitude` z walidacją zakresu. |
-| Kategoria | *DwarfCategory* | Enum klasyfikujący Krasnala: `MONUMENT`, `BUILDING`, `DWARF_FIGURINE`, `FLORA`, `PLACE`. |
-| Status | *DwarfStatus* | Enum określający widoczność Krasnala: `ACTIVE`, `INACTIVE`, `ARCHIVED`. |
+| Kategoria | *Category* | Enum klasyfikujący Krasnala: `MONUMENT`, `BUILDING`, `DWARF_FIGURINE`, `FLORA`, `PLACE`. |
+| Status | *Status* | Enum określający widoczność Krasnala: `ACTIVE`, `INACTIVE`, `ARCHIVED`. |
  
 ### Kontekst Zgłoszeń — *Verification Context*
  
 | Termin PL | Termin EN | Definicja |
 |---|---|---|
 | Zgłoszenie | *Submission* | Propozycja dodania nowego Krasnala przesłana przez użytkownika. Zawiera wszystkie dane wymagane do stworzenia Krasnala. |
-| Ładunek zgłoszenia | *SubmissionPayload* | Zestaw danych proponowanego Krasnala przechowywany jako JSONB do momentu weryfikacji. |
+| Ładunek zgłoszenia | *Submission Payload* | Zestaw danych proponowanego Krasnala przechowywany jako JSONB do momentu weryfikacji. |
 | Weryfikacja | *Verification* | Proces przeglądu Zgłoszenia przez Edytora lub Admina. Może zakończyć się akceptacją, edycją lub odrzuceniem. |
-| Powód odrzucenia | *rejectionReason* | Obowiązkowe wyjaśnienie podawane przez weryfikującego w przypadku odrzucenia Zgłoszenia. |
-| Status zgłoszenia | *SubmissionStatus* | Enum: `PENDING` (oczekuje), `ACCEPTED` (zaakceptowane), `REJECTED` (odrzucone). |
+| Powód odrzucenia | *Rejection Reason* | Obowiązkowe wyjaśnienie podawane przez weryfikującego w przypadku odrzucenia Zgłoszenia. |
+| Status zgłoszenia | *Submission Status* | Enum: `PENDING` (oczekuje), `ACCEPTED` (zaakceptowane), `REJECTED` (odrzucone). |
  
 ### Kontekst Interakcji — *Interaction Context*
  
 | Termin PL | Termin EN | Definicja |
 |---|---|---|
-| Komentarz | *comment* (część Review) | Tekstowa adnotacja użytkownika odnosząca się do konkretnego Krasnala (max 2000 znaków). |
+| Komentarz | *Comment* (część Review) | Tekstowa adnotacja użytkownika odnosząca się do konkretnego Krasnala (max 2000 znaków). |
 | Ocena | *Rating* | Wartość całkowita od 1 do 5 wystawiana przez użytkownika dla Krasnala. |
 | Recenzja | *Review* | Agregat łączący Ocenę i Komentarz — użytkownik wystawia je razem. |
-| Średnia ocen | *average rating* | Wartość wyliczana na żądanie ze wszystkich Recenzji danego Krasnala. |
-| Lista odwiedzonych | *visited list* | Prywatna lista Krasnali oznaczonych przez konkretnego użytkownika jako odwiedzone. |
-| Wpis odwiedzenia | *VisitedEntry* | Pojedynczy rekord na liście odwiedzonych: powiązanie użytkownika z Krasnale i czas oznaczenia. |
+| Średnia ocen | *Average Score* | Wartość wyliczana na żądanie ze wszystkich Recenzji danego Krasnala. |
+| Lista odwiedzonych | *Visited List* | Prywatna lista Krasnali oznaczonych przez konkretnego użytkownika jako odwiedzone. |
+| Wpis odwiedzenia | *Visited Entry* | Pojedynczy rekord na liście odwiedzonych: powiązanie użytkownika z Krasnale i czas oznaczenia. |
  
 ### Kontekst IAM — *IAM Context*
  
 | Termin PL | Termin EN | Definicja |
 |---|---|---|
-| Użytkownik systemu | *SystemUser* | (Nie mylić z Rolą USER) — każda osoba posiadająca konto w systemie. |
-| Rola | *UserRole* | Enum określający poziom uprawnień w systemie: `GUEST`, `USER`, `EDITOR`, `ADMIN`. |
-| Rejestracja | *registration* | Proces założenia konta przez Gościa w celu uzyskania Roli `USER`. |
+| Użytkownik systemu | *System User* | (Nie mylić z Rolą USER) — każda osoba posiadająca konto w systemie. |
+| Rola | *Role* | Enum określający poziom uprawnień w systemie: `GUEST`, `USER`, `EDITOR`, `ADMIN`. |
+| Rejestracja | *Registration* | Proces założenia konta przez Gościa w celu uzyskania Roli `USER`. |
 | Logowanie | *login* | Proces potwierdzenia tożsamości przez użytkownika systemu w celu uzyskania sesji. |
 | Gość | *Guest* | Niezalogowana osoba. Rola `GUEST` — może przeglądać mapę i filtrować Krasnale. |
 | Użytkownik | *User* | Zalogowana osoba z Rolą `USER` — może dodawać Recenzje, oznaczać Krasnale jako odwiedzone i zgłaszać nowe. |
@@ -193,12 +193,12 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
 | ID | Reguła |
 |---|---|
 | BR1 | Krasnal jest widoczny na mapie publicznej tylko wtedy, gdy jego status to `ACTIVE`. |
-| BR2 | Jeden użytkownik może wystawić tylko jedną Recenzję dla danego Krasnala (unique constraint: `dwarfId` + `authorUserId`). |
-| BR3 | Jeden użytkownik może mieć dany Krasnal tylko raz na swojej liście odwiedzonych (unique constraint: `dwarfId` + `userId`). |
-| BR4 | Zgłoszenie po akceptacji (`ACCEPTED`) emituje `SubmissionAcceptedEvent`, który jest jedynym mechanizmem tworzenia Krasnala z poziomu Kontekstu Zgłoszeń. |
-| BR5 | Odrzucenie Zgłoszenia (`REJECTED`) wymaga podania niepustego `rejectionReason`. |
-| BR6 | Użytkownik może zgłosić nowego Krasnala tylko wtedy, gdy jego Rola to co najmniej `USER`. |
+| BR2 | Jeden użytkownik może wystawić tylko jedną Recenzję dla danego Krasnala. |
+| BR3 | Jeden użytkownik może mieć dany Krasnal tylko raz na swojej liście odwiedzonych. |
+| BR4 | Zgłoszenie po akceptacji emituje wydarzenie, które tworzy nowego Krasnala w systemie. |
+| BR5 | Odrzucenie Zgłoszenia wymaga podania powodu. |
+| BR6 | Użytkownik może zgłosić nowego Krasnala tylko wtedy, kiedy jest zalogowany. |
 | BR7 | Edycja Krasnali i weryfikacja Zgłoszeń wymaga Roli co najmniej `EDITOR`. |
 | BR8 | Zarządzanie kontami i Rolami wymaga Roli `ADMIN`. |
-| BR9 | Usunięcie konta realizowane jest jako miękkie usunięcie (`active = false`) — dane historyczne (Recenzje, Zgłoszenia) są zachowane. |
-| BR10 | Ocena (`Rating`) musi być liczbą całkowitą z zakresu 1–5 (walidacja na poziomie Value Object). |
+| BR9 | Usunięcie konta realizowane jest jako wskazanie konta jako nieaktywne. |
+| BR10 | Ocena musi być liczbą całkowitą z zakresu 1–5. |
