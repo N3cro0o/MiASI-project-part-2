@@ -31,22 +31,22 @@ CREATE SCHEMA interaction;  -- Interaction Context
 
 -- IAM Context ─────────────────────────────────────────────────────────────────
 CREATE TYPE iam.user_role AS ENUM (
-    'GUEST',   -- unauthenticated person; no account or no active session
-    'USER',    -- authenticated user with basic privileges
-    'EDITOR',  -- authenticated user with content editing privileges
-    'ADMIN'    -- full system privileges; manages accounts and roles
+    'GUEST',      -- unauthenticated person; no account or no active session
+    'WANDERER',   -- authenticated wanderer; explores the city, adds reviews and submissions
+    'EDITOR',     -- authenticated user with content editing privileges
+    'ADMIN'       -- full system privileges; manages accounts and roles
 );
 
 -- POI Catalog Context ─────────────────────────────────────────────────────────
-CREATE TYPE poi_catalog.dwarf_category AS ENUM (
+CREATE TYPE poi_catalog.krasnal_category AS ENUM (
     'MONUMENT',       -- historical monument / zabytek
     'BUILDING',       -- building / budynek
-    'DWARF_FIGURINE', -- actual dwarf figurine / krasnal
+    'KRASNAL_FIGURINE', -- actual krasnal figurine / krasnal
     'FLORA',          -- park, tree, garden / flora
     'PLACE'           -- other place of interest / miejsce
 );
 
-CREATE TYPE poi_catalog.dwarf_status AS ENUM (
+CREATE TYPE poi_catalog.krasnal_status AS ENUM (
     'ACTIVE',   -- visible on public map
     'INACTIVE', -- temporarily hidden (e.g. under renovation)
     'ARCHIVED'  -- soft-deleted from public view
@@ -55,7 +55,7 @@ CREATE TYPE poi_catalog.dwarf_status AS ENUM (
 -- Verification Context ────────────────────────────────────────────────────────
 CREATE TYPE verification.submission_status AS ENUM (
     'PENDING',  -- awaiting review by Editor or Admin
-    'ACCEPTED', -- approved; DwarfCreatedEvent fired → Krasnal added to catalog
+    'ACCEPTED', -- approved; KrasnalCreatedEvent fired → Krasnal added to catalog
     'REJECTED'  -- rejected; rejection_reason is mandatory
 );
 
@@ -72,25 +72,25 @@ $$ LANGUAGE plpgsql;
 
 -- =============================================================================
 -- IAM CONTEXT
--- Aggregate Root: SystemUser
+-- Aggregate Root: User
 -- Value Objects:  UserId, Email, HashedPassword
 -- =============================================================================
 
-CREATE TABLE iam.system_users (
+CREATE TABLE iam.users (
     -- Identity (Value Object: UserId)
     id              BIGSERIAL       PRIMARY KEY,
 
     -- Value Object: Email (RFC-5322, lowercase, unique)
     email           VARCHAR(255)    NOT NULL
-                        CONSTRAINT uq_system_users_email UNIQUE
-                        CONSTRAINT ck_system_users_email_format
+                        CONSTRAINT uq_users_email UNIQUE
+                        CONSTRAINT ck_users_email_format
                             CHECK (email = LOWER(email) AND email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
 
     -- Value Object: HashedPassword (bcrypt hash; never plain-text)
     hashed_password VARCHAR(255)    NOT NULL,
 
-    -- UserRole enum — hierarchy: GUEST < USER < EDITOR < ADMIN
-    role            iam.user_role   NOT NULL DEFAULT 'USER',
+    -- UserRole enum — hierarchy: GUEST < WANDERER < EDITOR < ADMIN
+    role            iam.user_role   NOT NULL DEFAULT 'WANDERER',
 
     -- Soft delete (BR9): setting active=false blocks login without losing
     -- historical data in Verification and Interaction contexts
@@ -100,71 +100,71 @@ CREATE TABLE iam.system_users (
 );
 
 -- Indexes
-CREATE INDEX idx_system_users_email  ON iam.system_users (email);
-CREATE INDEX idx_system_users_role   ON iam.system_users (role);
-CREATE INDEX idx_system_users_active ON iam.system_users (active);
+CREATE INDEX idx_users_email  ON iam.users (email);
+CREATE INDEX idx_users_role   ON iam.users (role);
+CREATE INDEX idx_users_active ON iam.users (active);
 
 -- =============================================================================
 -- POI CATALOG CONTEXT
--- Aggregate Root: Dwarf
--- Value Objects:  DwarfId, DwarfName, Coordinates
+-- Aggregate Root: Krasnal
+-- Value Objects:  KrasnalId, KrasnalName, Coordinates
 -- =============================================================================
 
-CREATE TABLE poi_catalog.dwarfs (
-    -- Identity (Value Object: DwarfId)
+CREATE TABLE poi_catalog.krasnals (
+    -- Identity (Value Object: KrasnalId)
     id          BIGSERIAL                   PRIMARY KEY,
 
-    -- Value Object: DwarfName (non-empty, max 255 chars)
+    -- Value Object: KrasnalName (non-empty, max 255 chars)
     name        VARCHAR(255)                NOT NULL
-                    CONSTRAINT ck_dwarfs_name_not_empty CHECK (TRIM(name) <> ''),
+                    CONSTRAINT ck_krasnals_name_not_empty CHECK (TRIM(name) <> ''),
 
-    -- Textual description of the Dwarf's history and characteristics
+    -- Textual description of the Krasnal's history and characteristics
     description TEXT,
 
     -- Value Object: Coordinates — latitude ∈ ⟨-90, 90⟩
     latitude    DOUBLE PRECISION            NOT NULL
-                    CONSTRAINT ck_dwarfs_latitude CHECK (latitude BETWEEN -90 AND 90),
+                    CONSTRAINT ck_krasnals_latitude CHECK (latitude BETWEEN -90 AND 90),
 
     -- Value Object: Coordinates — longitude ∈ ⟨-180, 180⟩
     longitude   DOUBLE PRECISION            NOT NULL
-                    CONSTRAINT ck_dwarfs_longitude CHECK (longitude BETWEEN -180 AND 180),
+                    CONSTRAINT ck_krasnals_longitude CHECK (longitude BETWEEN -180 AND 180),
 
-    -- DwarfCategory enum (BR1: only ACTIVE dwarfs are visible on public map)
-    category    poi_catalog.dwarf_category  NOT NULL,
+    -- KrasnalCategory enum (BR1: only ACTIVE krasnals are visible on public map)
+    category    poi_catalog.krasnal_category  NOT NULL,
 
-    -- DwarfStatus enum
-    status      poi_catalog.dwarf_status    NOT NULL DEFAULT 'ACTIVE',
+    -- KrasnalStatus enum
+    status      poi_catalog.krasnal_status    NOT NULL DEFAULT 'ACTIVE',
 
     created_at  TIMESTAMPTZ                 NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ                 NOT NULL DEFAULT NOW()
 );
 
 -- Auto-update updated_at on every UPDATE
-CREATE TRIGGER trg_dwarfs_updated_at
-    BEFORE UPDATE ON poi_catalog.dwarfs
+CREATE TRIGGER trg_krasnals_updated_at
+    BEFORE UPDATE ON poi_catalog.krasnals
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Indexes
-CREATE INDEX idx_dwarfs_status   ON poi_catalog.dwarfs (status);
-CREATE INDEX idx_dwarfs_category ON poi_catalog.dwarfs (category);
+CREATE INDEX idx_krasnals_status   ON poi_catalog.krasnals (status);
+CREATE INDEX idx_krasnals_category ON poi_catalog.krasnals (category);
 
 -- Spatial index for map bounding-box queries (US1, US2)
-CREATE INDEX idx_dwarfs_location ON poi_catalog.dwarfs (latitude, longitude);
+CREATE INDEX idx_krasnals_location ON poi_catalog.krasnals (latitude, longitude);
 
 -- =============================================================================
 -- VERIFICATION CONTEXT
 -- Aggregate Root: Submission
 -- Value Objects:  SubmissionId, SubmissionPayload
--- Soft FKs:       submitted_by_user_id → iam.system_users.id
---                 reviewed_by_user_id  → iam.system_users.id
+-- Soft FKs:       submitted_by_user_id → iam.users.id
+--                 reviewed_by_user_id  → iam.users.id
 -- =============================================================================
 
 CREATE TABLE verification.submissions (
     -- Identity (Value Object: SubmissionId)
     id                    BIGSERIAL                       PRIMARY KEY,
 
-    -- Soft FK → iam.system_users.id (IAM Context — no declarative FOREIGN KEY)
-    -- Represents the User who submitted the proposal
+    -- Soft FK → iam.users.id (IAM Context — no declarative FOREIGN KEY)
+    -- Represents the Wanderer who submitted the proposal
     submitted_by_user_id  BIGINT                          NOT NULL,
 
     -- Value Object: SubmissionPayload stored as JSONB
@@ -179,7 +179,7 @@ CREATE TABLE verification.submissions (
     -- Enforced at application layer; DB-level check below as safety net
     rejection_reason      TEXT,
 
-    -- Soft FK → iam.system_users.id (Editor or Admin who reviewed)
+    -- Soft FK → iam.users.id (Editor or Admin who reviewed)
     reviewed_by_user_id   BIGINT,
 
     submitted_at          TIMESTAMPTZ                     NOT NULL DEFAULT NOW(),
@@ -212,8 +212,8 @@ CREATE INDEX idx_submissions_payload_gin   ON verification.submissions USING GIN
 -- INTERACTION CONTEXT
 -- Aggregate Roots: Review, VisitedEntry
 -- Value Objects:   ReviewId, VisitedEntryId, Rating, CommentContent
--- Soft FKs:        dwarf_id      → poi_catalog.dwarfs.id
---                  author_user_id / user_id → iam.system_users.id
+-- Soft FKs:        krasnal_id      → poi_catalog.krasnals.id
+--                  author_user_id / user_id → iam.users.id
 -- =============================================================================
 
 -- Review (Comment + Rating as one indivisible aggregate — BR2) ─────────────────
@@ -221,10 +221,10 @@ CREATE TABLE interaction.reviews (
     -- Identity (Value Object: ReviewId)
     id              BIGSERIAL       PRIMARY KEY,
 
-    -- Soft FK → poi_catalog.dwarfs.id
-    dwarf_id        BIGINT          NOT NULL,
+    -- Soft FK → poi_catalog.krasnals.id
+    krasnal_id        BIGINT          NOT NULL,
 
-    -- Soft FK → iam.system_users.id
+    -- Soft FK → iam.users.id
     author_user_id  BIGINT          NOT NULL,
 
     -- Value Object: Rating — integer ∈ ⟨1, 5⟩ (BR10)
@@ -237,12 +237,12 @@ CREATE TABLE interaction.reviews (
 
     created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
 
-    -- BR2: one Review per (dwarf, author) pair
-    CONSTRAINT uq_reviews_dwarf_author UNIQUE (dwarf_id, author_user_id)
+    -- BR2: one Review per (krasnal, author) pair
+    CONSTRAINT uq_reviews_krasnal_author UNIQUE (krasnal_id, author_user_id)
 );
 
 -- Indexes
-CREATE INDEX idx_reviews_dwarf_id       ON interaction.reviews (dwarf_id);
+CREATE INDEX idx_reviews_krasnal_id       ON interaction.reviews (krasnal_id);
 CREATE INDEX idx_reviews_author_user_id ON interaction.reviews (author_user_id);
 CREATE INDEX idx_reviews_created_at     ON interaction.reviews (created_at DESC);
 
@@ -251,21 +251,21 @@ CREATE TABLE interaction.visited_entries (
     -- Identity (Value Object: VisitedEntryId)
     id          BIGSERIAL   PRIMARY KEY,
 
-    -- Soft FK → poi_catalog.dwarfs.id
-    dwarf_id    BIGINT      NOT NULL,
+    -- Soft FK → poi_catalog.krasnals.id
+    krasnal_id    BIGINT      NOT NULL,
 
-    -- Soft FK → iam.system_users.id
+    -- Soft FK → iam.users.id
     user_id     BIGINT      NOT NULL,
 
     visited_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    -- BR3: one VisitedEntry per (dwarf, user) pair
-    CONSTRAINT uq_visited_entries_dwarf_user UNIQUE (dwarf_id, user_id)
+    -- BR3: one VisitedEntry per (krasnal, user) pair
+    CONSTRAINT uq_visited_entries_krasnal_user UNIQUE (krasnal_id, user_id)
 );
 
 -- Indexes
 CREATE INDEX idx_visited_entries_user_id  ON interaction.visited_entries (user_id);
-CREATE INDEX idx_visited_entries_dwarf_id ON interaction.visited_entries (dwarf_id);
+CREATE INDEX idx_visited_entries_krasnal_id ON interaction.visited_entries (krasnal_id);
 
 -- =============================================================================
 -- VIEWS
@@ -273,17 +273,17 @@ CREATE INDEX idx_visited_entries_dwarf_id ON interaction.visited_entries (dwarf_
 -- Views do NOT cross the domain boundary — they are infrastructure read-models.
 -- =============================================================================
 
--- Average rating per Dwarf (US3: visible to Guest)
-CREATE VIEW interaction.dwarf_average_ratings AS
+-- Average rating per Krasnal (US3: visible to Guest)
+CREATE VIEW interaction.krasnal_average_ratings AS
 SELECT
-    dwarf_id,
+    krasnal_id,
     COUNT(*)            AS review_count,
     ROUND(AVG(rating), 2) AS average_rating
 FROM interaction.reviews
-GROUP BY dwarf_id;
+GROUP BY krasnal_id;
 
--- Active Dwarfs visible on public map (BR1: only ACTIVE status)
-CREATE VIEW poi_catalog.active_dwarfs AS
+-- Active Krasnals visible on public map (BR1: only ACTIVE status)
+CREATE VIEW poi_catalog.active_krasnals AS
 SELECT
     id,
     name,
@@ -292,7 +292,7 @@ SELECT
     longitude,
     category,
     created_at
-FROM poi_catalog.dwarfs
+FROM poi_catalog.krasnals
 WHERE status = 'ACTIVE';
 
 -- Pending submissions queue for Editors/Admins (US13)
@@ -313,37 +313,46 @@ ORDER BY submitted_at ASC;
 
 -- Default Admin account
 -- Password: 'admin' hashed with bcrypt (cost=12) — CHANGE IN PRODUCTION
-INSERT INTO iam.system_users (email, hashed_password, role, active)
+INSERT INTO iam.users (email, hashed_password, role, active)
 VALUES (
-    'admin@krasnale.pl',
+    'admin@krasmap.pl',
     '$2a$12$placeholder_bcrypt_hash_replace_in_production_env',
     'ADMIN',
     TRUE
 );
 
 -- Default Editor account
-INSERT INTO iam.system_users (email, hashed_password, role, active)
+INSERT INTO iam.users (email, hashed_password, role, active)
 VALUES (
-    'editor@krasnale.pl',
+    'editor@krasmap.pl',
     '$2a$12$placeholder_bcrypt_hash_replace_in_production_env',
     'EDITOR',
     TRUE
 );
 
--- Sample Dwarfs in Wrocław (BR1: ACTIVE → visible on map)
-INSERT INTO poi_catalog.dwarfs (name, description, latitude, longitude, category, status)
+-- Default Wanderer account (for testing)
+INSERT INTO iam.users (email, hashed_password, role, active)
+VALUES (
+    'wanderer@krasmap.pl',
+    '$2a$12$placeholder_bcrypt_hash_replace_in_production_env',
+    'WANDERER',
+    TRUE
+);
+
+-- Sample Krasnals in Wrocław (BR1: ACTIVE → visible on map)
+INSERT INTO poi_catalog.krasnals (name, description, latitude, longitude, category, status)
 VALUES
     (
         'Papa Krasnal',
-        'The original Wrocław dwarf, placed in 2001 near Świdnicka Street. Symbol of the Orange Alternative movement.',
+        'The original Wrocław krasnal, placed in 2001 near Świdnicka Street. Symbol of the Orange Alternative movement.',
         51.1089, 17.0326,
-        'DWARF_FIGURINE', 'ACTIVE'
+        'KRASNAL_FIGURINE', 'ACTIVE'
     ),
     (
         'Krasnal Skrytek',
-        'A sneaky dwarf hiding near the Rynek. One of the most photographed dwarfs in the city.',
+        'A sneaky krasnal hiding near the Rynek. One of the most photographed krasnals in the city.',
         51.1100, 17.0319,
-        'DWARF_FIGURINE', 'ACTIVE'
+        'KRASNAL_FIGURINE', 'ACTIVE'
     ),
     (
         'Ratusz Wrocławski',
@@ -369,34 +378,34 @@ VALUES
 -- =============================================================================
 
 COMMENT ON SCHEMA iam          IS 'IAM Bounded Context — authentication and authorization';
-COMMENT ON SCHEMA poi_catalog  IS 'POI Catalog Bounded Context — Dwarf entities and their data';
+COMMENT ON SCHEMA poi_catalog  IS 'POI Catalog Bounded Context — Krasnal entities and their data';
 COMMENT ON SCHEMA verification IS 'Verification Bounded Context — submission queue and review workflow';
 COMMENT ON SCHEMA interaction  IS 'Interaction Bounded Context — reviews, ratings, visited entries';
 
-COMMENT ON TABLE iam.system_users
-    IS 'Aggregate Root: SystemUser. Stores all system accounts regardless of role.';
-COMMENT ON COLUMN iam.system_users.active
+COMMENT ON TABLE iam.users
+    IS 'Aggregate Root: User. Stores all system accounts regardless of role.';
+COMMENT ON COLUMN iam.users.active
     IS 'Soft delete flag (BR9). FALSE = account blocked, login denied. Historical data preserved.';
-COMMENT ON COLUMN iam.system_users.hashed_password
+COMMENT ON COLUMN iam.users.hashed_password
     IS 'Value Object: HashedPassword. BCrypt hash only — plain-text passwords are NEVER stored.';
 
-COMMENT ON TABLE poi_catalog.dwarfs
-    IS 'Aggregate Root: Dwarf. Core domain entity representing a real-world POI in Wrocław.';
-COMMENT ON COLUMN poi_catalog.dwarfs.latitude
+COMMENT ON TABLE poi_catalog.krasnals
+    IS 'Aggregate Root: Krasnal. Core domain entity representing a real-world POI in Wrocław.';
+COMMENT ON COLUMN poi_catalog.krasnals.latitude
     IS 'Value Object: Coordinates.latitude. Valid range: -90 to 90.';
-COMMENT ON COLUMN poi_catalog.dwarfs.longitude
+COMMENT ON COLUMN poi_catalog.krasnals.longitude
     IS 'Value Object: Coordinates.longitude. Valid range: -180 to 180.';
 
 COMMENT ON TABLE verification.submissions
-    IS 'Aggregate Root: Submission. JSONB payload awaits Editor/Admin review before becoming a Dwarf.';
+    IS 'Aggregate Root: Submission. JSONB payload awaits Editor/Admin review before becoming a Krasnal.';
 COMMENT ON COLUMN verification.submissions.payload_json
     IS 'Value Object: SubmissionPayload. Fields: name, description, latitude, longitude, category. Validated at domain layer.';
 COMMENT ON COLUMN verification.submissions.submitted_by_user_id
-    IS 'Soft FK → iam.system_users.id. No declarative FK — cross-context reference per BC isolation rules.';
+    IS 'Soft FK → iam.users.id. No declarative FK — cross-context reference per BC isolation rules.';
 
 COMMENT ON TABLE interaction.reviews
     IS 'Aggregate Root: Review. Combines Rating (1-5) and CommentContent as one indivisible unit (BR2).';
 COMMENT ON TABLE interaction.visited_entries
-    IS 'Aggregate Root: VisitedEntry. Private per-user list of visited Dwarfs (BR3).';
-COMMENT ON COLUMN interaction.reviews.dwarf_id
-    IS 'Soft FK → poi_catalog.dwarfs.id. No declarative FK — cross-context reference per BC isolation rules.';
+    IS 'Aggregate Root: VisitedEntry. Private per-user list of visited Krasnals (BR3).';
+COMMENT ON COLUMN interaction.reviews.krasnal_id
+    IS 'Soft FK → poi_catalog.krasnals.id. No declarative FK — cross-context reference per BC isolation rules.';
