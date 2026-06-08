@@ -11,6 +11,10 @@ public record Krasnal(int id, String name, String description, Position position
         return new Krasnal(id, name, desc, pos, KrasnalCategory.Dwarf, KrasnalStatus.Inactive, UpdateTime.now());
     }
 
+    public static Krasnal newObject(int id, String name, String desc, Position pos, KrasnalCategory cat, KrasnalStatus stat, UpdateTime time) {
+        return new Krasnal(id, name, desc, pos, cat, stat, time);
+    }
+
     public static Krasnal newObject(int id, String name, String desc, Position pos, UpdateTime time) {
         return new Krasnal(id, name, desc, pos, KrasnalCategory.Dwarf, KrasnalStatus.Inactive, time);
     }

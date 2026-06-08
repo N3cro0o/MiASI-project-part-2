@@ -12,7 +12,7 @@ import pl.krasmap.krasnal.application.service.HoldKrasnalRepo;
 import java.util.List;
 
 @RestController
-@RequestMapping("/krasnal")
+@RequestMapping("/api/krasnal")
 public class KrasnalControllerWeb implements KrasnalControllerInterface {
 
     private final HoldKrasnalRepo krasnalRepo;

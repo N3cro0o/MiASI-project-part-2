@@ -8,7 +8,7 @@ public enum KrasnalStatus {
     public static KrasnalStatus FromString(String stat) {
         return switch (stat.toLowerCase()) {
             case "active" -> KrasnalStatus.Active;
-            case "inactive", "non active" -> KrasnalStatus.Inactive;
+            case "inactive" -> KrasnalStatus.Inactive;
             default -> KrasnalStatus.Archived;
         };
     }

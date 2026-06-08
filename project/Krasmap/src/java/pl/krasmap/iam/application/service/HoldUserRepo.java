@@ -17,8 +17,15 @@ public class HoldUserRepo {
         userList = dbConn.GetAllUsers();
     }
 
+    public User GetUser(int id) {
+        User obj = null;
+        for (User k : userList) {
+            if (k.id() == id) { obj = k; break; }
+        }
+        return obj;
+    }
 
-    public User GetUser(int _id) {
-        return User.dummy();
+    public List<User> GetUserList() {
+        return userList;
     }
 }
