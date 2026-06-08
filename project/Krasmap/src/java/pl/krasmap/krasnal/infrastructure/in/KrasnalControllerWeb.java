@@ -15,12 +15,10 @@ import java.util.List;
 @RequestMapping("/krasnal")
 public class KrasnalControllerWeb implements KrasnalControllerInterface {
 
-    private HoldKrasnalRepo GetKrasnalContext() {
-        AnnotationConfigApplicationContext krasnalContext;
-        krasnalContext = new AnnotationConfigApplicationContext();
-        krasnalContext.scan("pl.krasmap.krasnal");
-        krasnalContext.refresh();
-        return krasnalContext.getBean(HoldKrasnalRepo.class);
+    private final HoldKrasnalRepo krasnalRepo;
+
+    KrasnalControllerWeb(HoldKrasnalRepo repo) {
+        krasnalRepo = repo;
     }
 
     // TODO
@@ -29,14 +27,12 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
     @GetMapping("/{krasnalId}")
     @Override
     public Krasnal GetKrasnal(@PathVariable int krasnalId) {
-        var krasnalContext = GetKrasnalContext();
-        return krasnalContext.GetKrasnal(krasnalId);
+        return krasnalRepo.GetKrasnal(krasnalId);
     }
 
     @GetMapping("/all")
     @Override
     public List<Krasnal> GetAllKrasnal() {
-        var krasnalContext = GetKrasnalContext();
-        return krasnalContext.GetKrasnalList();
+        return krasnalRepo.GetKrasnalList();
     }
 }
