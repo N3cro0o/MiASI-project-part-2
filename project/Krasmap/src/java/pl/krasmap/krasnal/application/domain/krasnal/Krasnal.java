@@ -1,8 +1,5 @@
 package pl.krasmap.krasnal.application.domain.krasnal;
 
-import pl.krasmap.common.Position;
-import pl.krasmap.common.UpdateTime;
-
 public record Krasnal(int id, String name, String description, Position position, KrasnalCategory category,
                       KrasnalStatus status, UpdateTime time) {
 
@@ -12,6 +9,10 @@ public record Krasnal(int id, String name, String description, Position position
 
     public static Krasnal newObject(int id, String name, String desc, Position pos) {
         return new Krasnal(id, name, desc, pos, KrasnalCategory.Dwarf, KrasnalStatus.Inactive, UpdateTime.now());
+    }
+
+    public static Krasnal newObject(int id, String name, String desc, Position pos, UpdateTime time) {
+        return new Krasnal(id, name, desc, pos, KrasnalCategory.Dwarf, KrasnalStatus.Inactive, time);
     }
 
     @Override
