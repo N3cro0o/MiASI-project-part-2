@@ -12,7 +12,8 @@ public class UserControllerWeb implements UserControllerInterface {
     @Override
     @GetMapping("/{userId}")
     public User GetUser(@PathVariable int userId) {
-        return User.dummy();
+        UserFetchPostgres dbConn = new UserFetchPostgres();
+        return dbConn.GetUser(userId);
     }
 
     @Override
