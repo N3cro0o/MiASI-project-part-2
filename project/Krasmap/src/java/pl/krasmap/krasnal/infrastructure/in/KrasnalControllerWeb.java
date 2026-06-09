@@ -1,10 +1,7 @@
 package pl.krasmap.krasnal.infrastructure.in;
 
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import pl.krasmap.krasnal.application.domain.krasnal.Krasnal;
 import pl.krasmap.krasnal.application.port.in.KrasnalControllerInterface;
 import pl.krasmap.krasnal.application.service.HoldKrasnalRepo;
@@ -34,5 +31,22 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
     @Override
     public List<Krasnal> GetAllKrasnal() {
         return krasnalRepo.GetKrasnalList();
+    }
+
+    @Override
+    @PostMapping("/new")
+    @RequestBody
+    public Krasnal SaveNewKrasnal(Krasnal newKrasnal) {
+        return null;
+    }
+
+    @Override
+    public boolean DeleteKrasnal(int krasnalID) {
+        return false;
+    }
+
+    @Override
+    public Krasnal UpdateKrasnal(Krasnal krasnalToUpdate) {
+        return null;
     }
 }

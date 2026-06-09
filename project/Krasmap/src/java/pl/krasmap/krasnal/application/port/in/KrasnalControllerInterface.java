@@ -7,4 +7,7 @@ import java.util.List;
 public interface KrasnalControllerInterface {
     Krasnal GetKrasnal(int krasnalId);
     List<Krasnal> GetAllKrasnal();
+    Krasnal SaveNewKrasnal(Krasnal newKrasnal);
+    boolean DeleteKrasnal(int krasnalID);
+    Krasnal UpdateKrasnal(Krasnal krasnalToUpdate);
 }
