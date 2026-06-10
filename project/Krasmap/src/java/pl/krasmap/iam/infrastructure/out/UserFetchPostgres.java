@@ -5,7 +5,6 @@ import pl.krasmap.iam.application.domain.UserWeb;
 import pl.krasmap.iam.application.domain.user.User;
 import pl.krasmap.iam.application.domain.user.UserRole;
 import pl.krasmap.iam.application.port.out.UserFetchInterface;
-import pl.krasmap.krasnal.application.domain.krasnal.KrasnalStatus;
 
 import java.sql.*;
 import java.time.OffsetDateTime;
@@ -20,7 +19,7 @@ public class UserFetchPostgres implements UserFetchInterface {
     private final String postgresUser = "krasnal_admin";
     private final String postgresPassword = "krasnal";
 
-    private Connection getConnection() throws Exception {
+    private Connection GetConnection() throws Exception {
         String targetString = String.format(postgresString, postgresAddr);
         return DriverManager.getConnection(targetString, postgresUser, postgresPassword);
     }
@@ -57,12 +56,13 @@ public class UserFetchPostgres implements UserFetchInterface {
     public User GetUser(int userId) {
         User user = null;
         try {
-            Connection connection = getConnection();
+            Connection connection = GetConnection();
             Statement statement = connection.createStatement();
             var output = statement.executeQuery(String.format("SELECT * FROM iam.users WHERE iam.users.id = %d;", userId));
             while (output.next()) {
                 user = GetUserFromStatement(output);
             }
+            connection.close();
         } catch (Exception e) {
             System.err.println(e.toString());
         }
@@ -73,13 +73,14 @@ public class UserFetchPostgres implements UserFetchInterface {
     public List<User> GetAllUsers() {
         List<User> list = null;
         try {
-            Connection connection = getConnection();
+            Connection connection = GetConnection();
             Statement statement = connection.createStatement();
             var output = statement.executeQuery("SELECT * FROM iam.users");
             list = new ArrayList<User>();
             while (output.next()) {
                 list.add(GetUserFromStatement(output));
             }
+            connection.close();
         } catch (Exception e) {
             System.err.println(e.toString());
         }
@@ -96,7 +97,7 @@ public class UserFetchPostgres implements UserFetchInterface {
                 String.format("'%s', ", user.role().toString()) +
                 String.format("'%s') RETURNING iam.users.id;", user.active());
         try {
-            Connection conn = getConnection();
+            Connection conn = GetConnection();
             Statement stat = conn.createStatement();
             var outcome = stat.executeQuery(sql);
             while(outcome.next()) {
@@ -120,7 +121,7 @@ public class UserFetchPostgres implements UserFetchInterface {
                 String.format("'%s') WHERE id = ", user.active()) + userId + ";";
 
         try {
-            Connection conn = getConnection();
+            Connection conn = GetConnection();
             Statement stat = conn.createStatement();
             stat.execute(sql);
             conn.close();
@@ -136,7 +137,7 @@ public class UserFetchPostgres implements UserFetchInterface {
         boolean check = false;
         String sql = "UPDATE iam.users SET active = 'f' WHERE id = " + userId + ";";
         try {
-            Connection conn = getConnection();
+            Connection conn = GetConnection();
             Statement stat = conn.createStatement();
             stat.execute(sql);
             check = true;

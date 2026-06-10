@@ -19,7 +19,7 @@ public class GetKrasnalReviewFromInteraction implements GetKrasnalReviewInterfac
 
     @Override
     public List<KrasnalReview> GetAllReviews(int krasnalId) {
-        var listToMap = reviewRepo.getReviewList(krasnalId);
+        var listToMap = reviewRepo.GetReviewsUnderKrasnal(krasnalId);
         List<KrasnalReview> list = new ArrayList<>();
         for (Review r : listToMap) {
             list.add(new KrasnalReview(r.id(), r.userId(), r.rating(), r.content(), r.created()));
