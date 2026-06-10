@@ -22,13 +22,13 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
     // TODO
     // Change methods to handle HTTP Error codes -> add another method and exception handling
 
-    @GetMapping("/{krasnalId}")
+    @GetMapping("/get/{krasnalId}")
     @Override
     public Krasnal GetKrasnal(@PathVariable int krasnalId) {
         return krasnalRepo.GetKrasnal(krasnalId);
     }
 
-    @GetMapping("/all")
+    @GetMapping("/get/all")
     @Override
     public List<Krasnal> GetAllKrasnal() {
         return krasnalRepo.GetKrasnalList();
@@ -47,6 +47,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
     }
 
     @Override
+    @PatchMapping("/update")
     public Krasnal UpdateKrasnal(@RequestBody Krasnal krasnalToUpdate) {
         return null;
     }
