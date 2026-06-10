@@ -46,24 +46,21 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     @Override
     @GetMapping("/get/{subId}")
     public Pair<Submission, Krasnal> GetSubmission(@PathVariable int subId) {
-        Submission sub = subRepo.GetSubmission(subId);
-        System.out.println(sub);
-        Krasnal kr = subCheck.GenerateKrasnalFromJson(sub.json());
-        return Pair.of(sub, kr);
+        return subCheck.GetSubmissonPair(subId);
     }
 
     @Override
-    public boolean RejectSubmission(int subId, String reason) {
-        return false;
+    public boolean RejectSubmission(int userId, int subId, String reason) {
+        return subCheck.RejectSubmission(userId, subId, reason);
     }
 
     @Override
-    public Krasnal AcceptSubmission(int subId) {
-        return null;
+    public Krasnal AcceptSubmission(int userId, int subId) {
+        return subCheck.AcceptSubmission(userId, subId);
     }
 
     @Override
     public Submission UpdateSubmission(int subId, NewSubmission submission) {
-        return null;
+        return subRepo.UpdateSubmission(subId, submission);
     }
 }

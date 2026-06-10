@@ -3,6 +3,7 @@ package pl.krasmap.submission.application.service;
 import org.springframework.stereotype.Repository;
 import pl.krasmap.submission.application.domain.NewSubmission;
 import pl.krasmap.submission.application.domain.submission.Submission;
+import pl.krasmap.submission.application.domain.submission.SubmissionReview;
 import pl.krasmap.submission.application.domain.submission.SubmissionStatus;
 import pl.krasmap.submission.application.port.out.SubmissionFetchInterface;
 
@@ -31,5 +32,14 @@ public class HoldSubmissionRepo {
 
     public Submission GetSubmission(int subId) {
         return subFetch.GetSubmission(subId);
+    }
+
+    public boolean UpdateSubReview(Submission newSub) {
+        return subFetch.UpdateSubReview(newSub);
+    }
+
+    public Submission UpdateSubmission(int subId, NewSubmission submission) {
+        int id = subFetch.UpdateSubmission(subId, submission);
+        return subFetch.GetSubmission(id);
     }
 }

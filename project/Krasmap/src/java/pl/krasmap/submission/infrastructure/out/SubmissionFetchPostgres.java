@@ -137,4 +137,41 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
         }
         return list;
     }
+
+    @Override
+    public boolean UpdateSubReview(Submission newSub) {
+        boolean check = false;
+        String sql = "UPDATE verification.submissions SET (status, rejection_reason, reviewed_by_user_id, reviewed_at) = (" +
+                String.format("'%s', ", newSub.status()) +
+                String.format("'%s', ", newSub.review().rejectionReason()) +
+                String.format("'%s', ", newSub.review().reviewerId()) +
+                String.format("'%s')", newSub.review().reviewTime()) +
+                "WHERE id = " + newSub.id() + ";";
+        try {
+            Connection conn = GetDatabaseConnection();
+            Statement stat = conn.createStatement();
+            stat.execute(sql);
+            conn.close();
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return check;
+    }
+
+    @Override
+    public int UpdateSubmission(int subId, NewSubmission submission) {
+        String sql = "UPDATE verification.submissions SET (submitted_by_user_id, payload_json) = (" +
+                String.format("'%s', ", submission.userId()) +
+                String.format("'%s')", GetJsonFromSub(submission)) +
+                "WHERE id = " + subId + ";";
+        try {
+            Connection conn = GetDatabaseConnection();
+            Statement stat = conn.createStatement();
+            stat.execute(sql);
+            conn.close();
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return subId;
+    }
 }

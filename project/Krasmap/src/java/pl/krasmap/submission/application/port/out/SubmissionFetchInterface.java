@@ -11,4 +11,6 @@ public interface SubmissionFetchInterface {
     Submission GetSubmission(int subId);
     SubmissionStatus CheckSubmission(int subId);
     List<Submission> GetSubmissionsFromUser(int userId);
+    boolean UpdateSubReview(Submission newSub);
+    int UpdateSubmission(int subId, NewSubmission submission);
 }
