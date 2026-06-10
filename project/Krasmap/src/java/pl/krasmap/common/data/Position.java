@@ -1,4 +1,4 @@
-package pl.krasmap.krasnal.application.domain.krasnal;
+package pl.krasmap.common.data;
 
 public record Position(double latitude, double longitude) {
 

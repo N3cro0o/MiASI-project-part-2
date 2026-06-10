@@ -1,4 +1,4 @@
-package pl.krasmap.iam.application.domain;
+package pl.krasmap.iam.application.domain.user;
 
 public enum UserRole {
     Guest,
@@ -12,6 +12,17 @@ public enum UserRole {
             case "admin" -> UserRole.Admin;
             case "editor" -> UserRole.Editor;
             default -> UserRole.Guest;
+        };
+    }
+
+
+    @Override
+    public String toString() {
+        return switch (this) {
+            case Guest -> "GUEST";
+            case Wanderer -> "WANDERER";
+            case Editor -> "EDITOR";
+            case Admin -> "ADMIN";
         };
     }
 }

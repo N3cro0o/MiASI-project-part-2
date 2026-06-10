@@ -1,4 +1,4 @@
-package pl.krasmap.submission.application.domain;
+package pl.krasmap.submission.application.domain.submission;
 
 import java.time.LocalDateTime;
 

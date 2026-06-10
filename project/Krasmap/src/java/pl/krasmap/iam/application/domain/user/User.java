@@ -1,4 +1,6 @@
-package pl.krasmap.iam.application.domain;
+package pl.krasmap.iam.application.domain.user;
+
+import pl.krasmap.iam.application.domain.UserWeb;
 
 import java.time.OffsetDateTime;
 
@@ -14,5 +16,14 @@ public record User(int id, String login, String email, UserRole role, boolean ac
     public static User dummy() {
         return User.newObject(-1, "debil", "debil@pwr.edu.pl", UserRole.Guest, false);
     }
+
+    public static User from(UserWeb user) {
+        return User.newObject(0, user.login(), user.email(), user.role(), user.active());
+    }
+
+    public static User from(int userId, UserWeb user) {
+        return User.newObject(userId, user.login(), user.email(), user.role(), user.active());
+    }
+
 
 }

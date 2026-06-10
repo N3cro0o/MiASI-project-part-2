@@ -1,7 +1,7 @@
 package pl.krasmap.krasnal.infrastructure.in;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import org.springframework.web.bind.annotation.*;
+import pl.krasmap.krasnal.application.domain.KrasnalWeb;
 import pl.krasmap.krasnal.application.domain.krasnal.Krasnal;
 import pl.krasmap.krasnal.application.port.in.KrasnalControllerInterface;
 import pl.krasmap.krasnal.application.service.HoldKrasnalRepo;
@@ -21,13 +21,13 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
     // TODO
     // Change methods to handle HTTP Error codes -> add another method and exception handling
 
-    @GetMapping("/{krasnalId}")
+    @GetMapping("/get/{krasnalId}")
     @Override
     public Krasnal GetKrasnal(@PathVariable int krasnalId) {
         return krasnalRepo.GetKrasnal(krasnalId);
     }
 
-    @GetMapping("/all")
+    @GetMapping("/get/all")
     @Override
     public List<Krasnal> GetAllKrasnal() {
         return krasnalRepo.GetKrasnalList();
@@ -35,18 +35,21 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
 
     @Override
     @PostMapping("/new")
-    @RequestBody
-    public Krasnal SaveNewKrasnal(Krasnal newKrasnal) {
-        return null;
+    public Krasnal SaveNewKrasnal(@RequestBody KrasnalWeb newKrasnal) {
+        System.out.println(newKrasnal);
+        return krasnalRepo.AddNewKrasnal(newKrasnal);
     }
 
     @Override
-    public boolean DeleteKrasnal(int krasnalID) {
-        return false;
+    @DeleteMapping("/delete/{krasnalId}")
+    public boolean DeleteKrasnal(@PathVariable int krasnalId) {
+        return krasnalRepo.HideKrasnal(krasnalId);
     }
 
     @Override
-    public Krasnal UpdateKrasnal(Krasnal krasnalToUpdate) {
-        return null;
+    @PatchMapping("/update/{krasnalId}")
+    public Krasnal UpdateKrasnal(@RequestBody KrasnalWeb krasnalToUpdate, @PathVariable int krasnalId) {
+        System.out.println(krasnalToUpdate);
+        return krasnalRepo.UpdateKrasnal(krasnalId, krasnalToUpdate);
     }
 }

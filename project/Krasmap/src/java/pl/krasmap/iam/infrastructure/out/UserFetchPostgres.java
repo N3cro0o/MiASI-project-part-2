@@ -1,14 +1,18 @@
 package pl.krasmap.iam.infrastructure.out;
 
-import pl.krasmap.iam.application.domain.User;
-import pl.krasmap.iam.application.domain.UserRole;
+import org.springframework.stereotype.Service;
+import pl.krasmap.iam.application.domain.UserWeb;
+import pl.krasmap.iam.application.domain.user.User;
+import pl.krasmap.iam.application.domain.user.UserRole;
 import pl.krasmap.iam.application.port.out.UserFetchInterface;
+import pl.krasmap.krasnal.application.domain.krasnal.KrasnalStatus;
+
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class UserFetchPostgres implements UserFetchInterface {
 
     private final String postgresAddr = "172.30.144.1:5432";
@@ -80,5 +84,72 @@ public class UserFetchPostgres implements UserFetchInterface {
             System.err.println(e.toString());
         }
         return list;
+    }
+
+    @Override
+    public int SaveUser(UserWeb user) {
+        int id = -1;
+        String sql = "INSERT INTO iam.users (login, email, hashed_password, role, active) VALUES (" +
+                String.format("'%s', ", user.login()) +
+                String.format("'%s', ", user.email()) +
+                String.format("'%s', ", user.password()) +
+                String.format("'%s', ", user.role().toString()) +
+                String.format("'%s') RETURNING iam.users.id;", user.active());
+        try {
+            Connection conn = getConnection();
+            Statement stat = conn.createStatement();
+            var outcome = stat.executeQuery(sql);
+            while(outcome.next()) {
+                id = outcome.getInt(1);
+            }
+            conn.close();
+        }
+        catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return id;
+    }
+
+    @Override
+    public int UpdateUser(int userId, UserWeb user) {
+        String sql = "UPDATE iam.users SET (login, email, hashed_password, role, active) = (" +
+                String.format("'%s', ", user.login()) +
+                String.format("'%s', ", user.email()) +
+                String.format("'%s', ", user.password()) +
+                String.format("'%s', ", user.role().toString()) +
+                String.format("'%s') WHERE id = ", user.active()) + userId + ";";
+
+        try {
+            Connection conn = getConnection();
+            Statement stat = conn.createStatement();
+            stat.execute(sql);
+            conn.close();
+        }
+        catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return userId;
+    }
+
+    @Override
+    public boolean HideUser(int userId) {
+        boolean check = false;
+        String sql = "UPDATE iam.users SET active = 'f' WHERE id = " + userId + ";";
+        try {
+            Connection conn = getConnection();
+            Statement stat = conn.createStatement();
+            stat.execute(sql);
+            check = true;
+            conn.close();
+        }
+        catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return check;
+    }
+
+    @Override
+    public boolean DeleteUser(int userId) {
+        return false;
     }
 }
