@@ -1,4 +1,4 @@
-package pl.krasmap.iam.application.domain;
+package pl.krasmap.iam.application.domain.user;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,5 +17,13 @@ public class UserRoleTest {
     void fromString_unknownRole_shouldReturnGuest() {
         assertEquals(UserRole.Guest, UserRole.FromString("cokolwiek"));
         assertEquals(UserRole.Guest, UserRole.FromString(""));
+    }
+
+    @Test
+    void toString_shouldReturnExpectedFormat() {
+        assertEquals("WANDERER", UserRole.Wanderer.toString());
+        assertEquals("GUEST", UserRole.Guest.toString());
+        assertEquals("EDITOR", UserRole.Editor.toString());
+        assertEquals("ADMIN", UserRole.Admin.toString());
     }
 }

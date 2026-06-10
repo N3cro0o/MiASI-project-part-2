@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 public class KrasnalFetchPostgres implements KrasnalFetchInterface {
 
-    private final String postgresAddr = "172.30.144.1:5432";
+    private final String postgresAddr = "127.0.0.1:5432";
     private final String postgresString = "jdbc:postgresql://%s/krasnal_db";
     private final String postgresUser = "krasnal_admin";
     private final String postgresPassword = "krasnal";

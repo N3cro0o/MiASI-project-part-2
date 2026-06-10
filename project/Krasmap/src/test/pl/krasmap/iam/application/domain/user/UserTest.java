@@ -1,4 +1,4 @@
-package pl.krasmap.iam.application.domain;
+package pl.krasmap.iam.application.domain.user;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
