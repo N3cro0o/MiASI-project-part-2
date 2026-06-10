@@ -1,5 +1,6 @@
 package pl.krasmap.iam.infrastructure.out;
 
+import org.springframework.stereotype.Service;
 import pl.krasmap.iam.application.domain.User;
 import pl.krasmap.iam.application.domain.UserRole;
 import pl.krasmap.iam.application.port.out.UserFetchInterface;
@@ -9,6 +10,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class UserFetchPostgres implements UserFetchInterface {
 
     private final String postgresAddr = "172.30.144.1:5432";

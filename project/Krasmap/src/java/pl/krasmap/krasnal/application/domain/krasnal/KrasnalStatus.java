@@ -12,5 +12,15 @@ public enum KrasnalStatus {
             default -> KrasnalStatus.Archived;
         };
     }
+
+
+    @Override
+    public String toString() {
+        return switch (this) {
+            case Active -> "ACTIVE";
+            case Inactive -> "INACTIVE";
+            case Archived -> "ARCHIVED";
+        };
+    }
 }
 

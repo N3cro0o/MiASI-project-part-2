@@ -10,5 +10,5 @@ public interface KrasnalControllerInterface {
     List<Krasnal> GetAllKrasnal();
     Krasnal SaveNewKrasnal(KrasnalWeb newKrasnal);
     boolean DeleteKrasnal(int krasnalID);
-    Krasnal UpdateKrasnal(Krasnal krasnalToUpdate);
+    Krasnal UpdateKrasnal(KrasnalWeb krasnalToUpdate, int krasnalId);
 }

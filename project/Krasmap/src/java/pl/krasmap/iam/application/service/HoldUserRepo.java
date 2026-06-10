@@ -9,23 +9,17 @@ import java.util.List;
 
 @Service
 public class HoldUserRepo {
+    final private UserFetchInterface userFetch;
 
-    final private List<User> userList;
-
-    public HoldUserRepo () {
-        UserFetchInterface dbConn = new UserFetchPostgres();
-        userList = dbConn.GetAllUsers();
+    public HoldUserRepo(UserFetchInterface fetch) {
+        userFetch = fetch;
     }
 
     public User GetUser(int id) {
-        User obj = null;
-        for (User k : userList) {
-            if (k.id() == id) { obj = k; break; }
-        }
-        return obj;
+        return userFetch.GetUser(id);
     }
 
     public List<User> GetUserList() {
-        return userList;
+        return userFetch.GetAllUsers();
     }
 }

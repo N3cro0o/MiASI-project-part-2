@@ -1,6 +1,5 @@
 package pl.krasmap.krasnal.infrastructure.in;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import org.springframework.web.bind.annotation.*;
 import pl.krasmap.krasnal.application.domain.KrasnalWeb;
 import pl.krasmap.krasnal.application.domain.krasnal.Krasnal;
@@ -37,18 +36,20 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
     @Override
     @PostMapping("/new")
     public Krasnal SaveNewKrasnal(@RequestBody KrasnalWeb newKrasnal) {
-        return null;
+        System.out.println(newKrasnal);
+        return krasnalRepo.AddNewKrasnal(newKrasnal);
     }
 
     @Override
     @DeleteMapping("/delete/{krasnalId}")
     public boolean DeleteKrasnal(@PathVariable int krasnalId) {
-        return false;
+        return krasnalRepo.HideKrasnal(krasnalId);
     }
 
     @Override
-    @PatchMapping("/update")
-    public Krasnal UpdateKrasnal(@RequestBody Krasnal krasnalToUpdate) {
-        return null;
+    @PatchMapping("/update/{krasnalId}")
+    public Krasnal UpdateKrasnal(@RequestBody KrasnalWeb krasnalToUpdate, @PathVariable int krasnalId) {
+        System.out.println(krasnalToUpdate);
+        return krasnalRepo.UpdateKrasnal(krasnalId, krasnalToUpdate);
     }
 }

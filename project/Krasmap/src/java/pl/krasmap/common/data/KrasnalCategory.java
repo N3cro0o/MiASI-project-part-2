@@ -16,4 +16,16 @@ public enum KrasnalCategory {
             default -> KrasnalCategory.Dwarf;
         };
     }
+
+
+    @Override
+    public String toString() {
+        return switch (this) {
+            case Monument -> "MONUMENT";
+            case Building -> "BUILDING";
+            case Dwarf -> "KRASNAL_FIGURINE";
+            case Flora -> "FLORA";
+            case Place -> "PLACE";
+        };
+    }
 }
