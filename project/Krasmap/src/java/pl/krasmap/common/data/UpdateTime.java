@@ -1,4 +1,4 @@
-package pl.krasmap.krasnal.application.domain.krasnal;
+package pl.krasmap.common.data;
 
 import java.time.OffsetDateTime;
 

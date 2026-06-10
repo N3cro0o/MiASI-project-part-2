@@ -1,5 +1,9 @@
 package pl.krasmap.krasnal.application.domain.krasnal;
 
+import pl.krasmap.common.data.KrasnalCategory;
+import pl.krasmap.common.data.Position;
+import pl.krasmap.common.data.UpdateTime;
+
 public record Krasnal(int id, String name, String description, Position position, KrasnalCategory category,
                       KrasnalStatus status, UpdateTime time) {
 

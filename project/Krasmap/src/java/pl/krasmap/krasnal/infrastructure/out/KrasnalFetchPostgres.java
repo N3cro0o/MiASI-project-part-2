@@ -1,5 +1,8 @@
 package pl.krasmap.krasnal.infrastructure.out;
 
+import pl.krasmap.common.data.KrasnalCategory;
+import pl.krasmap.common.data.Position;
+import pl.krasmap.common.data.UpdateTime;
 import pl.krasmap.krasnal.application.domain.krasnal.*;
 import pl.krasmap.krasnal.application.port.out.KrasnalFetchInterface;
 

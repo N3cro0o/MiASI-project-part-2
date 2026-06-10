@@ -1,5 +1,4 @@
-package pl.krasmap.krasnal.application.domain.krasnal;
-
+package pl.krasmap.common.data;
 
 public enum KrasnalCategory {
     Monument,
