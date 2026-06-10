@@ -1,5 +1,6 @@
 package pl.krasmap.krasnal.application.service;
 
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import pl.krasmap.krasnal.application.domain.KrasnalWeb;
 import pl.krasmap.krasnal.application.domain.krasnal.Krasnal;
@@ -8,7 +9,7 @@ import pl.krasmap.krasnal.infrastructure.out.KrasnalFetchPostgres;
 
 import java.util.List;
 
-@Service
+@Repository
 public class HoldKrasnalRepo {
     final private KrasnalFetchInterface krasnalFetch;
 
