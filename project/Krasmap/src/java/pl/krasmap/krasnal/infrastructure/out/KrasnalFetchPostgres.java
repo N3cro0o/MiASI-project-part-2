@@ -46,16 +46,6 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
         return Krasnal.newObject(id, name, desc, Position.from(lat, lon), cat, stat, times);
     }
 
-    private List<Krasnal> GetDummyKrasnalObjects() {
-        List<Krasnal> list = new ArrayList<>();
-        list.add(Krasnal.newObject(0, "test_0", "desc_0", new Position(10.0, 20.0)));
-        list.add(Krasnal.newObject(1, "test_1", "desc_1", new Position(11.0, 21.0)));
-        list.add(Krasnal.newObject(2, "test_2", "desc_2", new Position(12.0, 22.0)));
-        list.add(Krasnal.newObject(3, "test_3", "desc_3", new Position(13.0, 23.0)));
-        list.add(Krasnal.newObject(4, "test_4", "desc_4", new Position(14.0, 24.0)));
-        return list;
-    }
-
     @Override
     public List<Krasnal> GetAllKrasnalObjects() {
         List<Krasnal> list = null;

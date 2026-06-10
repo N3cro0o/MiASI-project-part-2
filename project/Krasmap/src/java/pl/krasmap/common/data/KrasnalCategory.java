@@ -1,5 +1,10 @@
 package pl.krasmap.common.data;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+@JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
 public enum KrasnalCategory {
     Monument,
     Building,
@@ -7,6 +12,7 @@ public enum KrasnalCategory {
     Flora,
     Place;
 
+    @JsonCreator
     public static KrasnalCategory FromString(String cat) {
         return switch (cat.toLowerCase()) {
             case "monument" -> KrasnalCategory.Monument;
@@ -19,6 +25,7 @@ public enum KrasnalCategory {
 
 
     @Override
+    @JsonValue
     public String toString() {
         return switch (this) {
             case Monument -> "MONUMENT";
