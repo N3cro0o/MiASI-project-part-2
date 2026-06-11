@@ -1,43 +1,61 @@
 import PoiCard from './PoiCard';
-import type { PoiCardProps } from './PoiCard';
+import { usePois } from '../api/usePois';
+import type { Poi } from '../models/Poi';
 
-/** Dummy data representing well-known Wrocław dwarfs */
-const DUMMY_POIS: PoiCardProps[] = [
-  {
-    name: 'Życzliwek',
-    description: 'The very first dwarf of Wrocław, spreading good wishes since 2001.',
-    rating: 4.9,
-    reviewCount: 312,
-  },
-  {
-    name: 'Papa Krasnal',
-    description: 'The wise elder of the dwarf community, found near the Town Hall.',
-    rating: 4.8,
-    reviewCount: 245,
-  },
-  {
-    name: 'Spioch',
-    description: 'A sleepy dwarf resting on a tiny bed beside Świdnicka Street.',
-    rating: 4.7,
-    reviewCount: 189,
-  },
-  {
-    name: 'W-Skers',
-    description: 'Two dwarfs riding a tandem bicycle near the Oder River promenade.',
-    rating: 4.6,
-    reviewCount: 156,
-  },
-];
+interface PoiListProps {
+  activeCategory: string;
+  onPoiSelect: (poi: Poi) => void;
+}
 
 /**
  * Scrollable vertical list of POI cards.
- * Receives items as props in the future; uses dummy data for now.
+ * Fetches and renders real POI data from the backend.
  */
-const PoiList: React.FC = () => {
+const PoiList: React.FC<PoiListProps> = ({ activeCategory, onPoiSelect }) => {
+  const { data: pois, isLoading, error } = usePois();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-32 items-center justify-center text-sm text-wroclaw-dark/60">
+        <span className="animate-pulse">Loading POIs...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center text-sm text-red-600">
+        <p className="font-semibold">Failed to load data</p>
+        <p className="mt-1 text-xs opacity-80">{error.message}</p>
+      </div>
+    );
+  }
+
+  if (!pois || pois.length === 0) {
+    return (
+      <div className="flex h-32 items-center justify-center text-sm text-wroclaw-dark/60">
+        No POIs found in this area.
+      </div>
+    );
+  }
+
+  const filteredPois =
+    activeCategory === 'ALL'
+      ? pois
+      : pois.filter((poi) => poi.category === activeCategory);
+
+  if (filteredPois.length === 0) {
+    return (
+      <div className="flex h-32 items-center justify-center text-sm text-wroclaw-dark/60">
+        No POIs found for this category.
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2">
-      {DUMMY_POIS.map((poi) => (
-        <PoiCard key={poi.name} {...poi} />
+      {filteredPois.map((poi) => (
+        <PoiCard key={poi.id} poi={poi} onClick={onPoiSelect} />
       ))}
     </div>
   );
