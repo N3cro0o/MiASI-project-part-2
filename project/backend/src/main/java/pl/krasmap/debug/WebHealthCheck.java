@@ -16,4 +16,10 @@ public class WebHealthCheck {
         System.out.println("DEBUG BODY: " + body);
         return body;
     }
+
+    @GetMapping("/db_conn")
+    public String db_check() {
+        var db = new DatabaseCheck();
+        return db.CheckDBConnection() ? "db working" : "ded";
+    }
 }
