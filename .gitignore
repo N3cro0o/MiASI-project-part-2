@@ -1,0 +1,7 @@
+# Ignore IDE configuration folders
+.idea/
+.vscode/
+*.iml
+
+# Global security rules - NEVER commit credentials
+.env
