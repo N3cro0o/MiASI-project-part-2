@@ -1,6 +1,7 @@
 package pl.krasmap.submission.infrastructure.out;
 
 import io.swagger.v3.core.util.Json;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.krasmap.submission.application.domain.NewSubmission;
 import pl.krasmap.submission.application.domain.submission.Submission;
@@ -18,14 +19,17 @@ import java.util.List;
 
 @Service
 public class SubmissionFetchPostgres implements SubmissionFetchInterface {
-    private final String postgresAddr = "172.30.144.1:5432";
-    private final String postgresString = "jdbc:postgresql://%s/krasnal_db";
-    private final String postgresUser = "krasnal_admin";
-    private final String postgresPassword = "krasnal";
+    @Value("${db.url}")
+    private String postgresString;
+
+    @Value("${db.user}")
+    private String postgresUser;
+
+    @Value("${db.password}")
+    private String postgresPassword;
 
     private Connection GetDatabaseConnection() throws Exception {
-        String targetString = String.format(postgresString, postgresAddr);
-        return DriverManager.getConnection(targetString, postgresUser, postgresPassword);
+        return DriverManager.getConnection(postgresString, postgresUser, postgresPassword);
     }
 
     private String GetJsonFromSub(NewSubmission sub) {

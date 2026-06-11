@@ -1,5 +1,6 @@
 package pl.krasmap.interaction.infrastructure.out;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.krasmap.interaction.application.domain.Review;
 import pl.krasmap.interaction.application.domain.ReviewWeb;
@@ -16,16 +17,18 @@ import java.util.List;
 @Service
 public class ReviewFetchPostgres implements ReviewFetchInterface {
 
-    private final String postgresAddr = "172.30.144.1:5432";
-    private final String postgresString = "jdbc:postgresql://%s/krasnal_db";
-    private final String postgresUser = "krasnal_admin";
-    private final String postgresPassword = "krasnal";
+    @Value("${db.url}")
+    private String postgresString;
 
-    private Connection GetConnection() throws Exception {
-        String targetString = String.format(postgresString, postgresAddr);
-        return DriverManager.getConnection(targetString, postgresUser, postgresPassword);
+    @Value("${db.user}")
+    private String postgresUser;
+
+    @Value("${db.password}")
+    private String postgresPassword;
+
+    private Connection GetDatabaseConnection() throws Exception {
+        return DriverManager.getConnection(postgresString, postgresUser, postgresPassword);
     }
-
     private Review ReviewFromStatement(ResultSet statement) throws Exception {
         int id, krasnalId, userId;
         short rating;
@@ -45,7 +48,7 @@ public class ReviewFetchPostgres implements ReviewFetchInterface {
     public Review GetReview(int reviewId) {
         Review obj = null;
         try{
-            Connection conn = GetConnection();
+            Connection conn = GetDatabaseConnection();
             Statement stat = conn.createStatement();
             var output = stat.executeQuery("SELECT * FROM interaction.reviews WHERE id = '" + reviewId + "';");
             while (output.next()){
@@ -62,7 +65,7 @@ public class ReviewFetchPostgres implements ReviewFetchInterface {
     public List<Review> GetReviewsUnderKrasnal(int krasnalId) {
         List<Review> list = null;
         try{
-            Connection conn = GetConnection();
+            Connection conn = GetDatabaseConnection();
             Statement stat = conn.createStatement();
             var output = stat.executeQuery("SELECT * FROM interaction.reviews WHERE krasnal_id = '" + krasnalId + "';");
             list = new ArrayList<>();
@@ -80,7 +83,7 @@ public class ReviewFetchPostgres implements ReviewFetchInterface {
     public List<Review> GetReviewsFromUser(int userId) {
         List<Review> list = null;
         try{
-            Connection conn = GetConnection();
+            Connection conn = GetDatabaseConnection();
             Statement stat = conn.createStatement();
             var output = stat.executeQuery("SELECT * FROM interaction.reviews WHERE author_user_id = '" + userId + "';");
             list = new ArrayList<>();
@@ -98,7 +101,7 @@ public class ReviewFetchPostgres implements ReviewFetchInterface {
     public List<Review> GetReviewsFromUserUnderKrasnal(int userId, int krasnalId) {
         List<Review> list = null;
         try{
-            Connection conn = GetConnection();
+            Connection conn = GetDatabaseConnection();
             Statement stat = conn.createStatement();
             var output = stat.executeQuery("SELECT * FROM interaction.reviews WHERE author_user_id = '" + userId +
                     "' AND krasnal_id = '" + krasnalId + "';");
@@ -122,7 +125,7 @@ public class ReviewFetchPostgres implements ReviewFetchInterface {
                 String.format("'%s', ", reviewToAdd.rating()) +
                 String.format("'%s') RETURNING interaction.reviews.id;", reviewToAdd.content());
         try {
-            Connection conn = GetConnection();
+            Connection conn = GetDatabaseConnection();
             Statement stat = conn.createStatement();
             var outcome = stat.executeQuery(sql);
             while(outcome.next()) {
@@ -144,7 +147,7 @@ public class ReviewFetchPostgres implements ReviewFetchInterface {
                 String.format("'%s', ", reviewToUpdate.rating()) +
                 String.format("'%s')", reviewToUpdate.content()) + " WHERE id = '" + reviewId + "';";
         try {
-            Connection conn = GetConnection();
+            Connection conn = GetDatabaseConnection();
             Statement stat = conn.createStatement();
             stat.execute(sql);
             conn.close();
@@ -160,7 +163,7 @@ public class ReviewFetchPostgres implements ReviewFetchInterface {
         boolean check = false;
         String sql = "DELETE FROM interaction.reviews WHERE id = " + reviewId + ";";
         try {
-            Connection conn = GetConnection();
+            Connection conn = GetDatabaseConnection();
             Statement stat = conn.createStatement();
             stat.execute(sql);
             check = true;

@@ -1,5 +1,6 @@
 package pl.krasmap.iam.infrastructure.out;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.krasmap.iam.application.domain.UserWeb;
 import pl.krasmap.iam.application.domain.user.User;
@@ -14,21 +15,24 @@ import java.util.List;
 @Service
 public class UserFetchPostgres implements UserFetchInterface {
 
-    private final String postgresAddr = "172.30.144.1:5432";
-    private final String postgresString = "jdbc:postgresql://%s/krasnal_db";
-    private final String postgresUser = "krasnal_admin";
-    private final String postgresPassword = "krasnal";
+    @Value("${db.url}")
+    private String postgresString;
 
-    private Connection GetConnection() throws Exception {
-        String targetString = String.format(postgresString, postgresAddr);
-        return DriverManager.getConnection(targetString, postgresUser, postgresPassword);
+    @Value("${db.user}")
+    private String postgresUser;
+
+    @Value("${db.password}")
+    private String postgresPassword;
+
+    private Connection GetDatabaseConnection() throws Exception {
+        // Teraz używasz zmiennych bez słowa localhost w kodzie!
+        return DriverManager.getConnection(postgresString, postgresUser, postgresPassword);
     }
 
     @Override
     public void CheckDBConnection() {
         try {
-            String targetString = String.format(postgresString, postgresAddr);
-            Connection connection = DriverManager.getConnection(targetString, postgresUser, postgresPassword);
+            Connection connection = GetDatabaseConnection();
             System.out.println("Connected to PostgreSQL database!");
             Statement statement = connection.createStatement();
             var output = statement.executeQuery("SELECT * FROM iam.users;");
@@ -37,7 +41,7 @@ public class UserFetchPostgres implements UserFetchInterface {
             }
             connection.close();
         }
-        catch (SQLException e) {
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -56,7 +60,7 @@ public class UserFetchPostgres implements UserFetchInterface {
     public User GetUser(int userId) {
         User user = null;
         try {
-            Connection connection = GetConnection();
+            Connection connection = GetDatabaseConnection();
             Statement statement = connection.createStatement();
             var output = statement.executeQuery(String.format("SELECT * FROM iam.users WHERE iam.users.id = %d;", userId));
             while (output.next()) {
@@ -73,7 +77,7 @@ public class UserFetchPostgres implements UserFetchInterface {
     public List<User> GetAllUsers() {
         List<User> list = null;
         try {
-            Connection connection = GetConnection();
+            Connection connection = GetDatabaseConnection();
             Statement statement = connection.createStatement();
             var output = statement.executeQuery("SELECT * FROM iam.users");
             list = new ArrayList<User>();
@@ -97,7 +101,7 @@ public class UserFetchPostgres implements UserFetchInterface {
                 String.format("'%s', ", user.role().toString()) +
                 String.format("'%s') RETURNING iam.users.id;", user.active());
         try {
-            Connection conn = GetConnection();
+            Connection conn = GetDatabaseConnection();
             Statement stat = conn.createStatement();
             var outcome = stat.executeQuery(sql);
             while(outcome.next()) {
@@ -121,7 +125,7 @@ public class UserFetchPostgres implements UserFetchInterface {
                 String.format("'%s') WHERE id = ", user.active()) + userId + ";";
 
         try {
-            Connection conn = GetConnection();
+            Connection conn = GetDatabaseConnection();
             Statement stat = conn.createStatement();
             stat.execute(sql);
             conn.close();
@@ -137,7 +141,7 @@ public class UserFetchPostgres implements UserFetchInterface {
         boolean check = false;
         String sql = "UPDATE iam.users SET active = 'f' WHERE id = " + userId + ";";
         try {
-            Connection conn = GetConnection();
+            Connection conn = GetDatabaseConnection();
             Statement stat = conn.createStatement();
             stat.execute(sql);
             check = true;
