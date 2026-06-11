@@ -1,5 +1,6 @@
 package pl.krasmap.krasnal.infrastructure.out;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.krasmap.common.data.KrasnalCategory;
 import pl.krasmap.common.data.Position;
@@ -18,14 +19,38 @@ import java.util.List;
 @Service
 public class KrasnalFetchPostgres implements KrasnalFetchInterface {
 
-    private final String postgresAddr = "172.30.144.1:5432";
-    private final String postgresString = "jdbc:postgresql://%s/krasnal_db";
-    private final String postgresUser = "krasnal_admin";
-    private final String postgresPassword = "krasnal";
+    // private final String postgresAddr = "172.30.144.1:5432";
+    // private final String postgresString = "jdbc:postgresql://%s/krasnal_db";
+    // private final String postgresUser = "krasnal_admin";
+    // private final String postgresPassword = "krasnal";
+
+    // // Use local address for Docker port forwarding
+    // private final String postgresAddr = "127.0.0.1:5432";
+    
+    // // Target database name
+    // private final String postgresString = "jdbc:postgresql://%s/krasmap";
+    
+    // // Credentials from the .env file
+    // private final String postgresUser = "krasmap_user";
+    // private final String postgresPassword = "change_me_in_production";
+
+    // private Connection GetDatabaseConnection() throws Exception {
+    //     String targetString = String.format(postgresString, postgresAddr);
+    //     return DriverManager.getConnection(targetString, postgresUser, postgresPassword);
+    // }
+
+    @Value("${db.url}")
+    private String postgresString;
+
+    @Value("${db.user}")
+    private String postgresUser;
+
+    @Value("${db.password}")
+    private String postgresPassword;
 
     private Connection GetDatabaseConnection() throws Exception {
-        String targetString = String.format(postgresString, postgresAddr);
-        return DriverManager.getConnection(targetString, postgresUser, postgresPassword);
+        // Teraz używasz zmiennych bez słowa localhost w kodzie!
+        return DriverManager.getConnection(postgresString, postgresUser, postgresPassword);
     }
 
     private Krasnal GetKrasnalFromStatement(ResultSet statement) throws Exception {
