@@ -13,11 +13,21 @@ import type { Poi } from './features/poi-catalog/models/Poi';
 function App() {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [selectedPoi, setSelectedPoi] = useState<Poi | null>(null);
+  
+  // Adding mode states
+  const [isAddingMode, setIsAddingMode] = useState(false);
+  const [draftPosition, setDraftPosition] = useState<{lat: number, lng: number} | null>(null);
 
   return (
     <div className="relative h-full w-full">
       {/* Base layer — full-screen Leaflet map */}
-      <MapView selectedPoi={selectedPoi} setSelectedPoi={setSelectedPoi} />
+      <MapView 
+        selectedPoi={selectedPoi} 
+        setSelectedPoi={setSelectedPoi}
+        isAddingMode={isAddingMode}
+        setDraftPosition={setDraftPosition}
+        draftPosition={draftPosition}
+      />
 
       {/* Panel layer — POI list drawer */}
       <PoiDrawer
@@ -25,12 +35,23 @@ function App() {
         setActiveCategory={setActiveCategory}
         selectedPoi={selectedPoi}
         setSelectedPoi={setSelectedPoi}
+        draftPosition={draftPosition}
+        onCancelDraft={() => {
+          setDraftPosition(null);
+          setIsAddingMode(false);
+        }}
       />
 
       {/* Overlay layer — floating UI elements */}
       <FloatingSearch />
       <FloatingAvatar />
-      <FabAdd />
+      <FabAdd 
+        isAddingMode={isAddingMode} 
+        toggleAddingMode={() => {
+          setIsAddingMode(!isAddingMode);
+          if (isAddingMode) setDraftPosition(null); // Clear draft if cancelling
+        }} 
+      />
     </div>
   );
 }

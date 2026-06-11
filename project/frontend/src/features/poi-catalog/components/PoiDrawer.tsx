@@ -1,5 +1,6 @@
 import PoiList from './PoiList';
 import PoiDetails from './PoiDetails';
+import PoiForm from '../../verification/components/PoiForm';
 import type { Poi } from '../models/Poi';
 import { POI_CATEGORIES } from '../constants/categories';
 
@@ -8,6 +9,8 @@ interface PoiDrawerProps {
   setActiveCategory: (cat: string) => void;
   selectedPoi: Poi | null;
   setSelectedPoi: (poi: Poi | null) => void;
+  draftPosition: { lat: number; lng: number } | null;
+  onCancelDraft: () => void;
 }
 
 /**
@@ -24,6 +27,8 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
   setActiveCategory,
   selectedPoi,
   setSelectedPoi,
+  draftPosition,
+  onCancelDraft,
 }) => {
   return (
     <aside
@@ -48,7 +53,9 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
         <span className="h-1 w-10 rounded-full bg-wroclaw-dark/30" />
       </div>
 
-      {selectedPoi ? (
+      {draftPosition ? (
+        <PoiForm draftPosition={draftPosition} onCancel={onCancelDraft} onSuccess={onCancelDraft} />
+      ) : selectedPoi ? (
         <PoiDetails poi={selectedPoi} onBack={() => setSelectedPoi(null)} />
       ) : (
         <>

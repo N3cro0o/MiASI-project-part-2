@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Poi } from '../models/Poi';
@@ -13,11 +13,13 @@ const DEFAULT_ZOOM = 13;
 interface MapViewProps {
   selectedPoi: Poi | null;
   setSelectedPoi: (poi: Poi | null) => void;
+  isAddingMode: boolean;
+  draftPosition: { lat: number; lng: number } | null;
+  setDraftPosition: (pos: { lat: number; lng: number }) => void;
 }
 
 /**
  * Component to handle map panning when a POI is selected.
- * Must be a child of MapContainer.
  */
 const MapEffectController: React.FC<{ selectedPoi: Poi | null }> = ({ selectedPoi }) => {
   const map = useMap();
@@ -34,10 +36,32 @@ const MapEffectController: React.FC<{ selectedPoi: Poi | null }> = ({ selectedPo
 };
 
 /**
- * Full-screen Leaflet map centered on Wrocław.
- * Zoom controls are hidden — custom UI will be layered on top via App.tsx.
+ * Captures map clicks to drop a pin in adding mode.
  */
-const MapView: React.FC<MapViewProps> = ({ selectedPoi, setSelectedPoi }) => {
+const MapClickHandler: React.FC<{
+  isAddingMode: boolean;
+  setDraftPosition: (pos: { lat: number; lng: number }) => void;
+}> = ({ isAddingMode, setDraftPosition }) => {
+  useMapEvents({
+    click(e) {
+      if (isAddingMode) {
+        setDraftPosition({ lat: e.latlng.lat, lng: e.latlng.lng });
+      }
+    },
+  });
+  return null;
+};
+
+/**
+ * Full-screen Leaflet map centered on Wrocław.
+ */
+const MapView: React.FC<MapViewProps> = ({ 
+  selectedPoi, 
+  setSelectedPoi,
+  isAddingMode,
+  draftPosition,
+  setDraftPosition
+}) => {
   const { data: pois } = usePois();
 
   // Helper to create a custom Tailwind-styled div icon for Leaflet
@@ -55,12 +79,23 @@ const MapView: React.FC<MapViewProps> = ({ selectedPoi, setSelectedPoi }) => {
     });
   };
 
+  const draftIcon = L.divIcon({
+    className: 'bg-transparent border-0',
+    html: `
+      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white text-lg shadow-xl ring-4 ring-red-200 animate-bounce">
+        📍
+      </div>
+    `,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+  });
+
   return (
     <MapContainer
       center={WROCLAW_CENTER}
       zoom={DEFAULT_ZOOM}
       zoomControl={false}
-      className="absolute inset-0 h-full w-full"
+      className={`absolute inset-0 h-full w-full ${isAddingMode ? 'cursor-crosshair' : ''}`}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -68,15 +103,23 @@ const MapView: React.FC<MapViewProps> = ({ selectedPoi, setSelectedPoi }) => {
       />
 
       <MapEffectController selectedPoi={selectedPoi} />
+      <MapClickHandler isAddingMode={isAddingMode} setDraftPosition={setDraftPosition} />
 
-      {/* Render POI markers */}
+      {/* Render draft marker if dropping a pin */}
+      {draftPosition && (
+        <Marker position={[draftPosition.lat, draftPosition.lng]} icon={draftIcon} />
+      )}
+
+      {/* Render existing POI markers */}
       {pois?.map((poi) => (
         <Marker
           key={poi.id}
           position={[poi.position.latitude, poi.position.longitude]}
           icon={createCustomIcon(poi)}
           eventHandlers={{
-            click: () => setSelectedPoi(poi),
+            click: () => {
+              if (!isAddingMode) setSelectedPoi(poi);
+            },
           }}
         />
       ))}
