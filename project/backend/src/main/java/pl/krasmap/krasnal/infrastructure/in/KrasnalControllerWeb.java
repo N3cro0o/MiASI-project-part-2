@@ -1,9 +1,11 @@
 package pl.krasmap.krasnal.infrastructure.in;
 
 import org.springframework.web.bind.annotation.*;
+import pl.krasmap.krasnal.application.domain.KrasnalReview;
 import pl.krasmap.krasnal.application.domain.KrasnalWeb;
 import pl.krasmap.krasnal.application.domain.krasnal.Krasnal;
 import pl.krasmap.krasnal.application.port.in.KrasnalControllerInterface;
+import pl.krasmap.krasnal.application.port.out.GetKrasnalReviewInterface;
 import pl.krasmap.krasnal.application.service.HoldKrasnalRepo;
 
 import java.util.List;
@@ -13,8 +15,10 @@ import java.util.List;
 public class KrasnalControllerWeb implements KrasnalControllerInterface {
 
     private final HoldKrasnalRepo krasnalRepo;
+    private final GetKrasnalReviewInterface krasnalReviews;
 
-    KrasnalControllerWeb(HoldKrasnalRepo repo) {
+    KrasnalControllerWeb(HoldKrasnalRepo repo, GetKrasnalReviewInterface review) {
+        krasnalReviews = review;
         krasnalRepo = repo;
     }
 
@@ -25,6 +29,12 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
     @Override
     public Krasnal GetKrasnal(@PathVariable int krasnalId) {
         return krasnalRepo.GetKrasnal(krasnalId);
+    }
+
+    @Override
+    @GetMapping("/get/{krasnalId}/review")
+    public List<KrasnalReview> GetKrasnalReviews(@PathVariable int krasnalId) {
+        return krasnalReviews.GetAllReviews(krasnalId);
     }
 
     @GetMapping("/get/all")
