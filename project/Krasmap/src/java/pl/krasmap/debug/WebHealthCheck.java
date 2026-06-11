@@ -1,8 +1,6 @@
 package pl.krasmap.debug;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/debug")
@@ -13,5 +11,9 @@ public class WebHealthCheck {
         return "system running";
     }
 
-
+    @PostMapping("/post_test")
+    public String test(@RequestBody String body) {
+        System.out.println("DEBUG BODY: " + body);
+        return body;
+    }
 }

@@ -80,6 +80,10 @@ CREATE TABLE iam.users (
     -- Identity (Value Object: UserId)
     id              BIGSERIAL       PRIMARY KEY,
 
+    -- Login
+    login           VARCHAR(255)    NOT NULL
+			CONSTRAINT uq_users_login UNIQUE,
+
     -- Value Object: Email (RFC-5322, lowercase, unique)
     email           VARCHAR(255)    NOT NULL
                         CONSTRAINT uq_users_email UNIQUE
@@ -313,27 +317,30 @@ ORDER BY submitted_at ASC;
 
 -- Default Admin account
 -- Password: 'admin' hashed with bcrypt (cost=12) — CHANGE IN PRODUCTION
-INSERT INTO iam.users (email, hashed_password, role, active)
+INSERT INTO iam.users (email, login, hashed_password, role, active)
 VALUES (
     'admin@krasmap.pl',
+    'admin',
     '$2a$12$placeholder_bcrypt_hash_replace_in_production_env',
     'ADMIN',
     TRUE
 );
 
 -- Default Editor account
-INSERT INTO iam.users (email, hashed_password, role, active)
+INSERT INTO iam.users (email, login, hashed_password, role, active)
 VALUES (
     'editor@krasmap.pl',
+    'Edytor123',
     '$2a$12$placeholder_bcrypt_hash_replace_in_production_env',
     'EDITOR',
     TRUE
 );
 
 -- Default Wanderer account (for testing)
-INSERT INTO iam.users (email, hashed_password, role, active)
+INSERT INTO iam.users (email, login, hashed_password, role, active)
 VALUES (
     'wanderer@krasmap.pl',
+    'KrasnalFinder',
     '$2a$12$placeholder_bcrypt_hash_replace_in_production_env',
     'WANDERER',
     TRUE

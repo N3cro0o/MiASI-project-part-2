@@ -1,24 +1,48 @@
 package pl.krasmap.interaction.application.service;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import pl.krasmap.interaction.application.domain.Review;
+import pl.krasmap.interaction.application.domain.ReviewWeb;
+import pl.krasmap.interaction.application.port.out.ReviewFetchInterface;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Repository
 public class HoldReviewRepo {
-    private final List<Review> reviewList = new ArrayList<>();
+    private final ReviewFetchInterface reviewFetch;
 
-    public List<Review> getReviewList() {
-        return reviewList;
+    public HoldReviewRepo(ReviewFetchInterface fetch){
+        reviewFetch = fetch;
     }
 
-    public List<Review> getReviewList(int krasnalId) {
-        List<Review> list = new ArrayList<>();
-        for (Review r : reviewList) {
-            if (r.krasnalId() == krasnalId) { list.add(r); }
-        }
-        return list;
+    public List<Review> GetReviewsUnderKrasnal(int krasnalId) {
+        return reviewFetch.GetReviewsUnderKrasnal(krasnalId);
+    }
+
+    public Review GetReviewById(int reviewId) {
+        return reviewFetch.GetReview(reviewId);
+    }
+
+    public List<Review> GetReviewsFromUser(int userId) {
+        return reviewFetch.GetReviewsFromUser(userId);
+    }
+
+    public List<Review> GetReviewsFromUserUnderKrasnal(int userId, int krasnalId) {
+        return reviewFetch.GetReviewsFromUserUnderKrasnal(userId, krasnalId);
+    }
+
+    public Review AddReview(ReviewWeb reviewToAdd) {
+        int id = reviewFetch.AddReview(reviewToAdd);
+        return reviewFetch.GetReview(id);
+    }
+
+    public Review UpdateReview(int reviewId, ReviewWeb reviewToUpdate) {
+        int id = reviewFetch.UpdateReview(reviewId, reviewToUpdate);
+        return reviewFetch.GetReview(id);
+    }
+
+    public boolean RemoveReview(int reviewId) {
+        return reviewFetch.RemoveReview(reviewId);
     }
 }
