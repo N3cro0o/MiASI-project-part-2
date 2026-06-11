@@ -1,4 +1,5 @@
 import MapView from './features/poi-catalog/components/MapView';
+import PoiDrawer from './features/poi-catalog/components/PoiDrawer';
 import FloatingSearch from './shared/components/FloatingSearch';
 import FloatingAvatar from './features/iam/components/FloatingAvatar';
 import FabAdd from './features/verification/components/FabAdd';
@@ -12,6 +13,9 @@ function App() {
     <div className="relative h-full w-full">
       {/* Base layer — full-screen Leaflet map */}
       <MapView />
+
+      {/* Panel layer — POI list drawer */}
+      <PoiDrawer />
 
       {/* Overlay layer — floating UI elements */}
       <FloatingSearch />
