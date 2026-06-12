@@ -42,4 +42,8 @@ public class HoldSubmissionRepo {
         int id = subFetch.UpdateSubmission(subId, submission);
         return subFetch.GetSubmission(id);
     }
+
+    public List<Submission> GetAllSubmissions() {
+        return subFetch.GetAllSubmissions();
+    }
 }

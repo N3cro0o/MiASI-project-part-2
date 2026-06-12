@@ -164,4 +164,23 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     public Submission UpdateSubmission(int subId, NewSubmission submission) {
         return subRepo.UpdateSubmission(subId, submission);
     }
+
+    @GetMapping("/subs")
+    public ResponseEntity<List<Submission>> GetAllSubmissionsWrapper( @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Editor);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            List<Submission> p = GetAllSubmissions();
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public List<Submission> GetAllSubmissions() {
+        return subRepo.GetAllSubmissions();
+    }
 }

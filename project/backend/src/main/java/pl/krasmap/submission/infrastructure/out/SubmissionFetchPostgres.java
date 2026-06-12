@@ -178,4 +178,22 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
         }
         return subId;
     }
+
+    @Override
+    public List<Submission> GetAllSubmissions() {
+        List<Submission> list = null;
+        try {
+            Connection conn = GetDatabaseConnection();
+            Statement stat = conn.createStatement();
+            var outcome = stat.executeQuery("SELECT * FROM verification.submissions WHERE status = 'PENDING';");
+            list = new ArrayList<>();
+            while (outcome.next()){
+                list.add(GetSubFromStatement(outcome));
+            }
+            conn.close();
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return list;
+    }
 }
