@@ -51,7 +51,7 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
     private Connection GetDatabaseConnection() throws Exception {
         System.out.printf("%s, %s, %s\n", postgresString, postgresUser, postgresPassword);
         var s = String.format("jdbc:postgresql://%s/krasnal_db", "172.30.144.1:5432");
-        return DriverManager.getConnection(s, postgresUser, postgresPassword);
+        return DriverManager.getConnection(postgresString, postgresUser, postgresPassword);
     }
 
     private Krasnal GetKrasnalFromStatement(ResultSet statement) throws Exception {

@@ -1,7 +1,12 @@
 package pl.krasmap.iam.infrastructure.in;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import pl.krasmap.common.auth.data.UserAuthService;
+import pl.krasmap.common.auth.template.UserAuthInterface;
 import pl.krasmap.iam.application.domain.UserWeb;
 import pl.krasmap.iam.application.domain.user.User;
 import pl.krasmap.iam.application.port.in.UserControllerInterface;
@@ -15,17 +20,21 @@ import java.util.List;
 public class UserControllerWeb implements UserControllerInterface {
 
     private final HoldUserRepo userRepo;
+    private final UserAuthInterface auth;
 
     private BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder(12);
 
-    public UserControllerWeb(HoldUserRepo repo) {
+    public UserControllerWeb(HoldUserRepo repo, @Lazy UserAuthInterface authServ) { /*Dzięki temu małemu skurwysynowi @Lazy cała autoryzacja zaczyna nie niszczyć aplikacji. JAK NIE WIEM*/
         userRepo = repo;
+        auth = authServ;
     }
 
     @Override
     @GetMapping("/get/{userId}")
-    public User GetUser(@PathVariable int userId) {
-        return userRepo.GetUser(userId);
+    public Pair<User, String> GetUser(@PathVariable int userId) {
+        User u = userRepo.GetUser(userId);
+
+        return Pair.of(u, auth.GenerateJwt(userId));
     }
 
     @Override
@@ -42,7 +51,7 @@ public class UserControllerWeb implements UserControllerInterface {
     }
 
     @Override
-    @PostMapping("/register")
+    @PostMapping("/add")
     public User AddUser(UserWeb userToAdd) {
         userToAdd = UserWeb.from(userToAdd, bcrypt.encode(userToAdd.password()));
         System.out.println(userToAdd);

@@ -1,11 +1,15 @@
 package pl.krasmap.iam.application.domain.user;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum UserRole {
     Guest,
     Wanderer,
     Editor,
     Admin;
 
+    @JsonCreator
     public static UserRole FromString(String role) {
         return switch (role.toLowerCase()) {
             case "wanderer" -> UserRole.Wanderer;
@@ -17,6 +21,7 @@ public enum UserRole {
 
 
     @Override
+    @JsonValue
     public String toString() {
         return switch (this) {
             case Guest -> "GUEST";

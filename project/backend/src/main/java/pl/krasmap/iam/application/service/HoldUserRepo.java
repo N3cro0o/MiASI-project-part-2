@@ -19,6 +19,14 @@ public class HoldUserRepo {
         return userFetch.GetUser(id);
     }
 
+    public User GetUser(String login) {
+        return userFetch.GetUser(login);
+    }
+
+    public String GetUserPass(String login) {
+        return userFetch.CheckUserPassword(login);
+    }
+
     public List<User> GetUserList() {
         return userFetch.GetAllUsers();
     }
