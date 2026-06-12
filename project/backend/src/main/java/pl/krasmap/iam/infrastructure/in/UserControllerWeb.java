@@ -2,6 +2,9 @@ package pl.krasmap.iam.infrastructure.in;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import pl.krasmap.common.auth.template.UserAuthInterface;
@@ -29,21 +32,40 @@ public class UserControllerWeb implements UserControllerInterface {
         auth = authServ;
     }
 
-    @Override
     @GetMapping("/get/{userId}")
-    public Pair<User, String> GetUser(@PathVariable int userId) {
+    public ResponseEntity<Pair<User, String>> GetUserWrapper(@PathVariable int userId, String jwt) {
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        if (o) {
+            Pair<User, String> p = GetUser(userId);
+            if (p.getLeft() == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public Pair<User, String> GetUser(int userId) {
         User u = userRepo.GetUser(userId);
         System.out.println(u.isNull());
         return Pair.of(u, auth.GenerateJwt(userId));
     }
 
-    @Override
     @GetMapping("/get/all")
-    public List<User> GetUserList(String jwt){
+    public ResponseEntity<List<User>> GetUserListWrapper(@PathVariable int userId, String jwt) {
         var o = auth.CheckAccess(jwt, UserRole.Admin);
-        if (o)
-            return userRepo.GetUserList();
-        return new ArrayList<>();
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        if (o) {
+            List<User> p = GetUserList();
+            if (p.isEmpty()) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public List<User> GetUserList(){
+        return userRepo.GetUserList();
     }
 
     @Override
@@ -53,24 +75,71 @@ public class UserControllerWeb implements UserControllerInterface {
         dbConn.CheckDBConnection();
     }
 
+    @PostMapping("/add")
+    public ResponseEntity<User> AddUserWrapper(UserWeb userToAdd, String jwt) {
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        if (o) {
+            User p = AddUser(userToAdd);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
     @Override
     @PostMapping("/add")
     public User AddUser(UserWeb userToAdd) {
         userToAdd = UserWeb.from(userToAdd, bcrypt.encode(userToAdd.password()));
-        System.out.println(userToAdd);
         return userRepo.AddUser(userToAdd);
     }
 
-    @Override
     @PatchMapping("/update/{userId}")
+    public ResponseEntity<User> UpdateUserWrapper(int userId, UserWeb userToUpdate, String jwt) {
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        if (o) {
+            User p = UpdateUser(userId, userToUpdate);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @PatchMapping("/update/{userId}")
+    public ResponseEntity<User> UpdateSelfWrapper(UserWeb userToUpdate, String jwt) {
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            User p = UpdateUser(userId, userToUpdate);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
     public User UpdateUser(int userId, UserWeb userToUpdate) {
         userToUpdate = UserWeb.from(userToUpdate, bcrypt.encode(userToUpdate.password()));
         System.out.println(userToUpdate);
         return userRepo.UpdateUser(userId, userToUpdate);
     }
 
-    @Override
     @DeleteMapping("/delete/{userId}")
+    public ResponseEntity<Boolean> RemoveUserWrapper(UserWeb userToUpdate, String jwt) {
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            boolean p = RemoveUser(userId);
+            if (!p) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
     public boolean RemoveUser(int userId) {
         return userRepo.DeleteUser(userId);
     }

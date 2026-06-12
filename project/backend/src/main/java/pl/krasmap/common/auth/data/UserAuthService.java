@@ -21,7 +21,7 @@ public class UserAuthService implements UserAuthInterface {
 
     private static int TIMETOLIVE = 18_000; // Secs
     private final SecretKey secret_key;
-    private UserGetInterface getUser;
+    private final UserGetInterface getUser;
 
     public UserAuthService(UserGetInterface users) {
         getUser = users;
@@ -29,23 +29,31 @@ public class UserAuthService implements UserAuthInterface {
         this.secret_key = Keys.hmacShaKeyFor(decodedKey);
     }
 
+    @Override
     public String GenerateJwt(int userId){
         return Jwts.builder().claim("id", userId).expiration(Date.from(Instant.now().plusSeconds(TIMETOLIVE)))
                 .signWith(secret_key)
                 .compact();
     }
 
+    @Override
     public int DecodeJwt(String jwt) {
         int id = 0;
         Claims p = Jwts.parser().verifyWith(secret_key).build().parseSignedClaims(jwt).getPayload();
-        System.out.println(p.keySet());
         return p.get("id", Integer.class);
     }
 
-    public boolean CheckAccess(String jwt, UserRole minRole) {
-        int id = DecodeJwt(jwt);
-        UserRole r = getUser.GetUserRole(id);
-        return r.RoleCheck(minRole);
+    @Override
+    public Boolean CheckAccess(String jwt, UserRole minRole) {
+        try {
+            int id = DecodeJwt(jwt);
+            UserRole r = getUser.GetUserRole(id);
+            return r.RoleCheck(minRole);
+        }
+        catch (Exception e) {
+            System.out.println(e.toString());
+            return null;
+        }
     }
 
 }

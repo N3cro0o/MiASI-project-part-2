@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface UserControllerInterface {
     Pair<User, String> GetUser(int userId);
-    List<User> GetUserList(String jwt);
+    List<User> GetUserList();
     void CheckDBConnection();
     User AddUser(UserWeb userToAdd);
     User UpdateUser(int userId, UserWeb userToUpdate);
