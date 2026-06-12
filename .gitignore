@@ -5,3 +5,5 @@
 
 # Global security rules - NEVER commit credentials
 .env
+
+node_modules/
