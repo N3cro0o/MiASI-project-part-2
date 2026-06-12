@@ -40,6 +40,7 @@ public class CheckSubmission {
     public boolean RejectSubmission(int userId, int subId, String reason) {
         SubmissionReview rev = SubmissionReview.newObject(userId, reason, OffsetDateTime.now());
         Submission sub = subRepo.GetSubmission(subId);
+        if (userId == sub.userId()) return false;
         Submission newSub = sub.With(SubmissionStatus.Rejected, rev);
         return subRepo.UpdateSubReview(newSub);
     }
@@ -47,8 +48,14 @@ public class CheckSubmission {
     public Krasnal AcceptSubmission(int userId, int subId) {
         SubmissionReview rev = SubmissionReview.newObject(userId, OffsetDateTime.now());
         Submission sub = subRepo.GetSubmission(subId);
+        if (userId == sub.userId()) return null;
         Submission newSub = sub.With(SubmissionStatus.Accepted, rev);
         subRepo.UpdateSubReview(newSub);
         return GenerateKrasnalFromJson(sub.json());
+    }
+
+    public Boolean Check(int userId, int subId) {
+        Submission sub = subRepo.GetSubmission(subId);
+        return sub.userId() != userId;
     }
 }

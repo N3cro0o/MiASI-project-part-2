@@ -17,4 +17,5 @@ public interface SubmissionControllerInterface {
     Krasnal AcceptSubmission(int userId, int subId);
     Submission UpdateSubmission(int subId, NewSubmission submission);
     List<Submission> GetAllSubmissions();
+    Boolean CanAcceptSubmission(int userId, int subId);
 }

@@ -44,7 +44,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
-        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
-        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
-        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
-        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
             if (p == null || !p) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
-        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);
     }
 
     @Override
@@ -136,7 +136,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
-        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);
     }
 
     @Override
@@ -157,7 +157,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
-        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);
     }
 
     @Override
@@ -166,21 +166,40 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     }
 
     @GetMapping("/subs")
-    public ResponseEntity<List<Submission>> GetAllSubmissionsWrapper( @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<List<Submission>> GetAllSubmissionsWrapper(@RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Editor);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
-        int userId = auth.DecodeJwt(jwt);
         if (o) {
             List<Submission> p = GetAllSubmissions();
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
-        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);
     }
 
     @Override
     public List<Submission> GetAllSubmissions() {
         return subRepo.GetAllSubmissions();
+    }
+
+
+    @GetMapping("/check/{subId}")
+    public ResponseEntity<Boolean> CanAcceptSubmissionWrapper(@PathVariable int subId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Editor);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            Boolean p = CanAcceptSubmission(subId, userId);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);
+    }
+
+    @Override
+    public Boolean CanAcceptSubmission(int userId, int subId) {
+        return subCheck.Check(userId, subId);
     }
 }
