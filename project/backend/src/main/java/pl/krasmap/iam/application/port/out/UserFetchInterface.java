@@ -1,7 +1,7 @@
 package pl.krasmap.iam.application.port.out;
 
 import pl.krasmap.iam.application.domain.UserWeb;
-import pl.krasmap.iam.application.domain.user.User;
+import pl.krasmap.iam.application.domain.User;
 
 import java.util.List;
 

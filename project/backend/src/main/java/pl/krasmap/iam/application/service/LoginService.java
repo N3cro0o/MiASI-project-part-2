@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 import pl.krasmap.common.auth.template.UserAuthInterface;
 import pl.krasmap.iam.application.domain.UserNew;
 import pl.krasmap.iam.application.domain.UserWeb;
-import pl.krasmap.iam.application.domain.user.User;
+import pl.krasmap.iam.application.domain.User;
 
 @Service
 public class LoginService {
     private final HoldUserRepo userRepo;
     private final UserAuthInterface auth;
 
-    private BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder(12);
+    private final BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder(12);
 
     public LoginService(HoldUserRepo repo, @Lazy UserAuthInterface authServ) {
         userRepo = repo;

@@ -1,6 +1,6 @@
-package pl.krasmap.iam.application.domain.user;
+package pl.krasmap.iam.application.domain;
 
-import pl.krasmap.iam.application.domain.UserWeb;
+import pl.krasmap.common.data.UserRole;
 
 import java.time.OffsetDateTime;
 

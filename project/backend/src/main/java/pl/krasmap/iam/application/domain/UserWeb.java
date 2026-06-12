@@ -1,6 +1,6 @@
 package pl.krasmap.iam.application.domain;
 
-import pl.krasmap.iam.application.domain.user.UserRole;
+import pl.krasmap.common.data.UserRole;
 
 public record UserWeb(String login, String email, String password, UserRole role, boolean active) {
 

@@ -1,6 +1,7 @@
 package pl.krasmap.iam.infrastructure.in;
 
 import org.springframework.stereotype.Component;
+import pl.krasmap.common.data.UserRole;
 import pl.krasmap.iam.application.port.in.UserGetInterface;
 import pl.krasmap.iam.application.service.HoldUserRepo;
 
@@ -16,5 +17,10 @@ public class UserGetFromRepo implements UserGetInterface {
     @Override
     public String GetUserUsername(int userId) {
         return userRepo.GetUser(userId).login();
+    }
+
+    @Override
+    public UserRole GetUserRole(int userId) {
+        return userRepo.GetUser(userId).role();
     }
 }

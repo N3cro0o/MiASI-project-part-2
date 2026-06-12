@@ -1,18 +1,18 @@
 package pl.krasmap.iam.infrastructure.in;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import pl.krasmap.common.auth.data.UserAuthService;
 import pl.krasmap.common.auth.template.UserAuthInterface;
+import pl.krasmap.common.data.UserRole;
 import pl.krasmap.iam.application.domain.UserWeb;
-import pl.krasmap.iam.application.domain.user.User;
+import pl.krasmap.iam.application.domain.User;
 import pl.krasmap.iam.application.port.in.UserControllerInterface;
 import pl.krasmap.iam.application.service.HoldUserRepo;
 import pl.krasmap.iam.infrastructure.out.UserFetchPostgres;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -39,8 +39,11 @@ public class UserControllerWeb implements UserControllerInterface {
 
     @Override
     @GetMapping("/get/all")
-    public List<User> GetUserList(){
-        return userRepo.GetUserList();
+    public List<User> GetUserList(String jwt){
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o)
+            return userRepo.GetUserList();
+        return new ArrayList<>();
     }
 
     @Override

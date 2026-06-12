@@ -2,7 +2,7 @@ package pl.krasmap.iam.application.service;
 
 import org.springframework.stereotype.Repository;
 import pl.krasmap.iam.application.domain.UserWeb;
-import pl.krasmap.iam.application.domain.user.User;
+import pl.krasmap.iam.application.domain.User;
 import pl.krasmap.iam.application.port.out.UserFetchInterface;
 
 import java.util.List;
