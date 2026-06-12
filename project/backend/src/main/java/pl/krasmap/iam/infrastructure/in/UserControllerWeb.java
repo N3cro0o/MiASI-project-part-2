@@ -22,7 +22,7 @@ public class UserControllerWeb implements UserControllerInterface {
     private final HoldUserRepo userRepo;
     private final UserAuthInterface auth;
 
-    private BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder(12);
+    private final BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder(12);
 
     public UserControllerWeb(HoldUserRepo repo, @Lazy UserAuthInterface authServ) { /*Dzięki temu małemu skurwysynowi @Lazy cała autoryzacja zaczyna nie niszczyć aplikacji. JAK NIE WIEM*/
         userRepo = repo;
@@ -33,7 +33,7 @@ public class UserControllerWeb implements UserControllerInterface {
     @GetMapping("/get/{userId}")
     public Pair<User, String> GetUser(@PathVariable int userId) {
         User u = userRepo.GetUser(userId);
-
+        System.out.println(u.isNull());
         return Pair.of(u, auth.GenerateJwt(userId));
     }
 

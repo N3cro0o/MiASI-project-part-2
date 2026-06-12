@@ -25,5 +25,7 @@ public record User(int id, String login, String email, UserRole role, boolean ac
         return User.newObject(userId, user.login(), user.email(), user.role(), user.active());
     }
 
-
+    public boolean isNull() {
+        return login().isEmpty() && email().isEmpty() && id <= 0;
+    }
 }

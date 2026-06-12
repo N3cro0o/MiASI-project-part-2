@@ -1,11 +1,13 @@
 package pl.krasmap.iam.application.service;
 
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.krasmap.common.auth.template.UserAuthInterface;
+import pl.krasmap.iam.application.domain.UserNew;
+import pl.krasmap.iam.application.domain.UserWeb;
+import pl.krasmap.iam.application.domain.user.User;
 
 @Service
 public class LoginService {
@@ -27,5 +29,13 @@ public class LoginService {
             jwt = auth.GenerateJwt(userRepo.GetUser(login).id());
         }
         return Pair.of(false, jwt);
+    }
+
+    public Pair<Boolean, String> Register(UserNew newUser) {
+        UserWeb userToAdd = UserWeb.from(newUser, bcrypt.encode(newUser.password()));
+        System.out.println(userToAdd);
+        User u = userRepo.AddUser(userToAdd);
+        System.out.println(u);
+        return Pair.of(!u.isNull(), auth.GenerateJwt(u.id()));
     }
 }

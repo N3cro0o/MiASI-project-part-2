@@ -13,18 +13,15 @@ import pl.krasmap.iam.application.service.LoginService;
 @RequestMapping("/api/auth")
 public class LoginWeb implements LoginInterface {
 
-    private final HoldUserRepo userRepo;
     private final LoginService loginService;
 
-    public LoginWeb(HoldUserRepo repo, LoginService login) {
-        userRepo = repo;
+    public LoginWeb(LoginService login) {
         loginService = login;
     }
 
     @Override
-    @GetMapping("/login/{loginOrEmail}/{password}")
+    @GetMapping("/login")
     public String login(String loginOrEmail, String password) {
-        System.out.println(password);
         var outcome = loginService.CheckLogin(loginOrEmail, password);
         return outcome.getRight();
     }
@@ -32,6 +29,9 @@ public class LoginWeb implements LoginInterface {
     @Override
     @PostMapping("/register")
     public String register(@RequestBody UserNew newUser) {
-        return "not implemented";
+        var outcome = loginService.Register(newUser);
+        if (outcome.getLeft())
+            return outcome.getRight();
+        return "bajo jajo";
     }
 }
