@@ -13,7 +13,7 @@ public interface SubmissionControllerInterface {
     SubmissionStatus CheckSubmission(int subId);
     List<Submission> GetSubmissionsFromUser(int userId);
     Pair<Submission, Krasnal> GetSubmission(int subId);
-    boolean RejectSubmission(int userId, int subId, String reason);
+    Boolean RejectSubmission(int userId, int subId, String reason);
     Krasnal AcceptSubmission(int userId, int subId);
     Submission UpdateSubmission(int subId, NewSubmission submission);
 }

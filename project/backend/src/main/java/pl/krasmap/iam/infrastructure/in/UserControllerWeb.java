@@ -15,7 +15,6 @@ import pl.krasmap.iam.application.port.in.UserControllerInterface;
 import pl.krasmap.iam.application.service.HoldUserRepo;
 import pl.krasmap.iam.infrastructure.out.UserFetchPostgres;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -33,7 +32,8 @@ public class UserControllerWeb implements UserControllerInterface {
     }
 
     @GetMapping("/get/{userId}")
-    public ResponseEntity<Pair<User, String>> GetUserWrapper(@PathVariable int userId, String jwt) {
+    public ResponseEntity<Pair<User, String>> GetUserWrapper(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         if (o) {
@@ -52,7 +52,8 @@ public class UserControllerWeb implements UserControllerInterface {
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<List<User>> GetUserListWrapper(@PathVariable int userId, String jwt) {
+    public ResponseEntity<List<User>> GetUserListWrapper(@RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         if (o) {
@@ -76,7 +77,8 @@ public class UserControllerWeb implements UserControllerInterface {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<User> AddUserWrapper(UserWeb userToAdd, String jwt) {
+    public ResponseEntity<User> AddUserWrapper(@RequestBody UserWeb userToAdd, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         if (o) {
@@ -88,14 +90,14 @@ public class UserControllerWeb implements UserControllerInterface {
     }
 
     @Override
-    @PostMapping("/add")
     public User AddUser(UserWeb userToAdd) {
         userToAdd = UserWeb.from(userToAdd, bcrypt.encode(userToAdd.password()));
         return userRepo.AddUser(userToAdd);
     }
 
     @PatchMapping("/update/{userId}")
-    public ResponseEntity<User> UpdateUserWrapper(int userId, UserWeb userToUpdate, String jwt) {
+    public ResponseEntity<User> UpdateUserWrapper(@PathVariable int userId, @RequestBody UserWeb userToUpdate, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         if (o) {
@@ -106,8 +108,9 @@ public class UserControllerWeb implements UserControllerInterface {
         return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
     }
 
-    @PatchMapping("/update/{userId}")
-    public ResponseEntity<User> UpdateSelfWrapper(UserWeb userToUpdate, String jwt) {
+    @PatchMapping("/update/self")
+    public ResponseEntity<User> UpdateSelfWrapper(@RequestBody UserWeb userToUpdate, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         int userId = auth.DecodeJwt(jwt);
@@ -127,10 +130,10 @@ public class UserControllerWeb implements UserControllerInterface {
     }
 
     @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<Boolean> RemoveUserWrapper(UserWeb userToUpdate, String jwt) {
+    public ResponseEntity<Boolean> RemoveUserWrapper(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
-        int userId = auth.DecodeJwt(jwt);
         if (o) {
             boolean p = RemoveUser(userId);
             if (!p) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
