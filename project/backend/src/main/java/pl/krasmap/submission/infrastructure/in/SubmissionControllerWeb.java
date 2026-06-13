@@ -21,7 +21,7 @@ import pl.krasmap.submission.application.service.HoldSubmissionRepo;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/submission")
+@RequestMapping("/api/submissions")
 public class SubmissionControllerWeb implements SubmissionControllerInterface {
 
     private final HoldSubmissionRepo subRepo;
@@ -34,7 +34,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
         auth = authServ;
     }
 
-    @PostMapping("/new")
+    @PostMapping
     public ResponseEntity<Submission> PostSubmissionWrapper(@RequestBody NewSubmission submission, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Wanderer);
@@ -70,7 +70,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
         return subRepo.CheckSubmission(subId);
     }
 
-    @GetMapping("/get/user/{userId}")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<List<Submission>> GetSubmissionsFromUserWrapper(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Wanderer);
@@ -88,7 +88,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
         return subRepo.GetSubmissionsFromUser(userId);
     }
 
-    @GetMapping("/get/{subId}")
+    @GetMapping("/{subId}")
     public ResponseEntity<Pair<Submission, Krasnal>> GetSubmissionWrapper(@PathVariable int subId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Editor);
@@ -144,7 +144,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
         return subCheck.AcceptSubmission(userId, subId);
     }
 
-    @PatchMapping("/update/{subId}")
+    @PatchMapping("/{subId}")
     public ResponseEntity<Submission> UpdateSubmissionWrapper(@PathVariable int subId,
                                                                              @RequestBody NewSubmission submission,
                                                                              @RequestHeader("Authorization") String jwt)
@@ -165,7 +165,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
         return subRepo.UpdateSubmission(subId, submission);
     }
 
-    @GetMapping("/subs")
+    @GetMapping
     public ResponseEntity<List<Submission>> GetAllSubmissionsWrapper(@RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Editor);
@@ -184,7 +184,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     }
 
 
-    @GetMapping("/check/{subId}")
+    @GetMapping("/editor/check/{subId}")
     public ResponseEntity<Boolean> CanAcceptSubmissionWrapper(@PathVariable int subId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Editor);

@@ -16,7 +16,7 @@ import pl.krasmap.interaction.application.service.HoldReviewRepo;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/review")
+@RequestMapping("/api/reviews")
 public class ReviewControllerWeb implements ReviewControllerInterface {
 
     private final HoldReviewRepo reviewRepo;
@@ -27,7 +27,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
         auth = authServ;
     }
 
-    @GetMapping("/get/{reviewId}")
+    @GetMapping("/{reviewId}")
     public ResponseEntity<Review> GetReviewWrapper(@PathVariable int reviewId) {
         Review p = GetReview(reviewId);
         if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
@@ -39,7 +39,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
         return reviewRepo.GetReviewById(reviewId);
     }
 
-    @GetMapping("/get/krasnal/{krasnalId}")
+    @GetMapping("/krasnal/{krasnalId}")
     public ResponseEntity<List<Review>> GetReviewsUnderKrasnalWrapper(@PathVariable int krasnalId) {
         List<Review> p = GetReviewsUnderKrasnal(krasnalId);
         if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
@@ -51,7 +51,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
         return reviewRepo.GetReviewsUnderKrasnal(krasnalId);
     }
 
-    @GetMapping("/get/user/{userId}")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<List<Review>> GetReviewsFromUserWrapper(@PathVariable int userId) {
         List<Review> p = GetReviewsFromUser(userId);
         if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
@@ -63,7 +63,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
         return reviewRepo.GetReviewsFromUser(userId);
     }
 
-    @GetMapping("/get/user/{userId}/krasnal/{krasnalId}")
+    @GetMapping("/user/{userId}/krasnal/{krasnalId}")
     public ResponseEntity<List<Review>> GetReviewsFromUserUnderKrasnalWrapper(@PathVariable int userId, @PathVariable int krasnalId) {
         List<Review> p = GetReviewsFromUserUnderKrasnal(userId, krasnalId);
         if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
@@ -75,7 +75,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
         return reviewRepo.GetReviewsFromUserUnderKrasnal(userId, krasnalId);
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<Review> AddReviewWrapper(@RequestBody ReviewWeb reviewToAdd, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Wanderer);
@@ -93,7 +93,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
         return reviewRepo.AddReview(reviewToAdd);
     }
 
-    @PatchMapping("/update/{reviewId}")
+    @PatchMapping("/{reviewId}")
     public ResponseEntity<Review> UpdateReviewWrapper(@PathVariable int reviewId, @RequestBody ReviewWeb reviewToUpdate, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Wanderer);
@@ -111,7 +111,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
         return reviewRepo.UpdateReview(reviewId, reviewToUpdate);
     }
 
-    @DeleteMapping("/delete/{reviewId}")
+    @DeleteMapping("/{reviewId}")
     public ResponseEntity<Boolean> RemoveReviewWrapper(@PathVariable int reviewId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Wanderer);

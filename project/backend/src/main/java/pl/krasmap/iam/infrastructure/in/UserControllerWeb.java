@@ -18,7 +18,7 @@ import pl.krasmap.iam.infrastructure.out.UserFetchPostgres;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserControllerWeb implements UserControllerInterface {
 
     private final HoldUserRepo userRepo;
@@ -31,7 +31,7 @@ public class UserControllerWeb implements UserControllerInterface {
         auth = authServ;
     }
 
-    @GetMapping("/get/{userId}")
+    @GetMapping("/{userId}")
     public ResponseEntity<Pair<User, String>> GetUserWrapper(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
@@ -51,7 +51,7 @@ public class UserControllerWeb implements UserControllerInterface {
         return Pair.of(u, auth.GenerateJwt(userId));
     }
 
-    @GetMapping("/get/all")
+    @GetMapping
     public ResponseEntity<List<User>> GetUserListWrapper(@RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
@@ -76,7 +76,7 @@ public class UserControllerWeb implements UserControllerInterface {
         dbConn.CheckDBConnection();
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<User> AddUserWrapper(@RequestBody UserWeb userToAdd, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
@@ -95,7 +95,7 @@ public class UserControllerWeb implements UserControllerInterface {
         return userRepo.AddUser(userToAdd);
     }
 
-    @PatchMapping("/update/{userId}")
+    @PatchMapping("/{userId}")
     public ResponseEntity<User> UpdateUserWrapper(@PathVariable int userId, @RequestBody UserWeb userToUpdate, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
@@ -108,7 +108,7 @@ public class UserControllerWeb implements UserControllerInterface {
         return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
     }
 
-    @PatchMapping("/update/self")
+    @PatchMapping("/self")
     public ResponseEntity<User> UpdateSelfWrapper(@RequestBody UserWeb userToUpdate, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
@@ -129,7 +129,7 @@ public class UserControllerWeb implements UserControllerInterface {
         return userRepo.UpdateUser(userId, userToUpdate);
     }
 
-    @DeleteMapping("/delete/{userId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<Boolean> RemoveUserWrapper(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);

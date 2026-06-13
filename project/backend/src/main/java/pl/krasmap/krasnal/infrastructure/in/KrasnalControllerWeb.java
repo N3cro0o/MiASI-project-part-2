@@ -17,7 +17,7 @@ import pl.krasmap.krasnal.application.service.HoldKrasnalRepo;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/krasnal")
+@RequestMapping("/api/krasnals")
 public class KrasnalControllerWeb implements KrasnalControllerInterface {
 
     private final HoldKrasnalRepo krasnalRepo;
@@ -30,7 +30,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
         auth = authServ;
     }
 
-    @GetMapping("/get/{krasnalId}")
+    @GetMapping("/{krasnalId}")
     public ResponseEntity<Krasnal> GetKrasnalWrapper(@PathVariable int krasnalId) {
 //        var o = auth.CheckAccess(jwt, UserRole.Wanderer);
 //        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
@@ -47,7 +47,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
         return krasnalRepo.GetKrasnal(krasnalId);
     }
 
-    @GetMapping("/get/{krasnalId}/review")
+    @GetMapping("/{krasnalId}/review")
     public ResponseEntity<List<KrasnalReview>> GetKrasnalReviewsWrapper(@PathVariable int krasnalId) {
         List<KrasnalReview> p = GetKrasnalReviews(krasnalId);
         if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
@@ -59,7 +59,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
         return krasnalReviews.GetAllReviews(krasnalId);
     }
 
-    @GetMapping("/get/all")
+    @GetMapping
     public ResponseEntity<List<Krasnal>> GetAllKrasnalWrapper() {
         List<Krasnal> p = GetAllKrasnal();
         if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
@@ -71,7 +71,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
         return krasnalRepo.GetKrasnalList();
     }
 
-    @PostMapping("/new")
+    @PostMapping("")
     public ResponseEntity<Krasnal> SaveNewKrasnalWrapper(@RequestBody KrasnalWeb newKrasnal, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
@@ -90,7 +90,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
         return krasnalRepo.AddNewKrasnal(newKrasnal);
     }
 
-    @DeleteMapping("/delete/{krasnalId}")
+    @DeleteMapping("/{krasnalId}")
     public ResponseEntity<Boolean> DeleteKrasnalWrapper(@PathVariable int krasnalId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Editor);
@@ -108,7 +108,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
         return krasnalRepo.HideKrasnal(krasnalId);
     }
 
-    @PatchMapping("/update/{krasnalId}")
+    @PatchMapping("/{krasnalId}")
     public ResponseEntity<Krasnal> UpdateKrasnalWrapper(@RequestBody KrasnalWeb krasnalToUpdate, @PathVariable int krasnalId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Editor);
