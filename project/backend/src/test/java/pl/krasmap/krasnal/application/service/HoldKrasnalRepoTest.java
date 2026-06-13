@@ -1,4 +1,4 @@
-package pl.krasmap.krasnal.service;
+package pl.krasmap.krasnal.application.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
