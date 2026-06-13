@@ -1,11 +1,10 @@
 package pl.krasmap.interaction.application.service;
 
 import org.springframework.stereotype.Repository;
-import pl.krasmap.interaction.application.domain.Review;
-import pl.krasmap.interaction.application.domain.ReviewWeb;
+import pl.krasmap.interaction.application.domain.review.Review;
+import pl.krasmap.interaction.application.domain.review.ReviewWeb;
 import pl.krasmap.interaction.application.port.out.ReviewFetchInterface;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository

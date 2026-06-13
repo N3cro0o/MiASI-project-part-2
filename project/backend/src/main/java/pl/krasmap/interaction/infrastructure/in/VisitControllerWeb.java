@@ -1,0 +1,174 @@
+package pl.krasmap.interaction.infrastructure.in;
+
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import pl.krasmap.common.auth.template.UserAuthInterface;
+import pl.krasmap.common.data.UserRole;
+import pl.krasmap.interaction.application.domain.fav.NewVisit;
+import pl.krasmap.interaction.application.domain.fav.VisitedKrasnal;
+import pl.krasmap.interaction.application.port.in.VisitControllerInterface;
+import pl.krasmap.interaction.application.service.HoldVisitedRepo;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/visits")
+public class VisitControllerWeb implements VisitControllerInterface {
+
+    private final HoldVisitedRepo visitRepo;
+    private final UserAuthInterface auth;
+
+    public VisitControllerWeb(HoldVisitedRepo visit, @Lazy UserAuthInterface authServ){
+        visitRepo = visit;
+        auth = authServ;
+    }
+
+    @GetMapping("/{visitedId}")
+    public ResponseEntity<VisitedKrasnal> GetVisitAdminWrapper(@PathVariable int visitedId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        if (o) {
+            VisitedKrasnal p = GetVisit(visitedId);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public VisitedKrasnal GetVisit(int visitedId) {
+        return visitRepo.GetVisit(visitedId);
+    }
+
+    @GetMapping("/krasnal/{krasnalId}")
+    public ResponseEntity<VisitedKrasnal> GetVisitWrapper(@PathVariable int krasnalId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Wanderer);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            VisitedKrasnal p = GetVisit(userId, krasnalId);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public VisitedKrasnal GetVisit(int userId, int krasnalId) {
+        return visitRepo.GetVisit(userId, krasnalId);
+    }
+
+    @GetMapping("/krasnal/{krasnalId}/all")
+    public ResponseEntity<List<VisitedKrasnal>> GetVisitsFromKrasnalWrapper(@PathVariable int krasnalId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        if (o) {
+            List<VisitedKrasnal> p = GetVisitsFromKrasnal(krasnalId);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public List<VisitedKrasnal> GetVisitsFromKrasnal(int krasnalId) {
+        return visitRepo.GetVisitsFromKrasnal(krasnalId);
+    }
+
+    @GetMapping("/user/{userId}/all")
+    public ResponseEntity<List<VisitedKrasnal>> GetVisitsFromUserGlobalWrapper(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        if (o) {
+            List<VisitedKrasnal> p = GetVisitsFromUser(userId);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @GetMapping("/me/all")
+    public ResponseEntity<List<VisitedKrasnal>> GetVisitsFromUserGlobalWrapper( @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Wanderer);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            List<VisitedKrasnal> p = GetVisitsFromUser(userId);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+
+    @Override
+    public List<VisitedKrasnal> GetVisitsFromUser(int userId) {
+        return visitRepo.GetVisitsFromUser(userId);
+    }
+
+    @PostMapping
+    public ResponseEntity<VisitedKrasnal> AddVisitWrapper(@PathVariable int krasnalId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Wanderer);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            var v = new NewVisit(userId, krasnalId);
+            VisitedKrasnal p = AddVisit(v);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public VisitedKrasnal AddVisit(NewVisit visit) {
+        return visitRepo.AddVisit(visit);
+    }
+
+    @DeleteMapping("/{visitedId}")
+    public ResponseEntity<Boolean> RemoveVisitGlobalWrapper(@PathVariable int visitedId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            Boolean p = RemoveVisit(visitedId);
+            if (p == null || !p) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public Boolean RemoveVisit(int visitedId) {
+        return visitRepo.RemoveVisit(visitedId);
+    }
+
+    @DeleteMapping("/me/{krasnalId}")
+    public ResponseEntity<Boolean> RemoveVisitWrapper(@PathVariable int krasnalId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Wanderer);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            Boolean p = RemoveVisit(userId, krasnalId);
+            if (p == null || !p) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public Boolean RemoveVisit(int userId, int krasnalId) {
+        return visitRepo.RemoveVisit(userId, krasnalId);
+    }
+}

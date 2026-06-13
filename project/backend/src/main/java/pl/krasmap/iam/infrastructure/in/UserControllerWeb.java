@@ -9,11 +9,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import pl.krasmap.common.auth.template.UserAuthInterface;
 import pl.krasmap.common.data.UserRole;
-import pl.krasmap.iam.application.domain.UserSubmission;
+import pl.krasmap.iam.application.domain.stats.UserStats;
+import pl.krasmap.iam.application.domain.stats.UserSubmission;
 import pl.krasmap.iam.application.domain.UserWeb;
 import pl.krasmap.iam.application.domain.User;
 import pl.krasmap.iam.application.port.in.UserControllerInterface;
 import pl.krasmap.iam.application.service.HoldUserRepo;
+import pl.krasmap.iam.application.service.UserStatsService;
 import pl.krasmap.iam.application.service.UserSubmissionsService;
 import pl.krasmap.iam.infrastructure.out.UserFetchPostgres;
 
@@ -26,13 +28,15 @@ public class UserControllerWeb implements UserControllerInterface {
     private final HoldUserRepo userRepo;
     private final UserAuthInterface auth;
     private final UserSubmissionsService userSubs;
+    private final UserStatsService userStats;
 
     private final BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder(12);
 
-    public UserControllerWeb(HoldUserRepo repo, UserSubmissionsService subs, @Lazy UserAuthInterface authServ) { /*Dzięki temu małemu skurwysynowi @Lazy cała autoryzacja zaczyna nie niszczyć aplikacji. JAK NIE WIEM*/
+    public UserControllerWeb(HoldUserRepo repo, UserSubmissionsService subs, UserStatsService stat, @Lazy UserAuthInterface authServ) { /*Dzięki temu małemu skurwysynowi @Lazy cała autoryzacja zaczyna nie niszczyć aplikacji. JAK NIE WIEM*/
         userRepo = repo;
         auth = authServ;
         userSubs = subs;
+        userStats = stat;
     }
 
     @GetMapping("/{userId}")
@@ -112,7 +116,7 @@ public class UserControllerWeb implements UserControllerInterface {
         return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
     }
 
-    @PatchMapping("/self")
+    @PatchMapping("/me")
     public ResponseEntity<User> UpdateSelfWrapper(@RequestBody UserWeb userToUpdate, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
@@ -168,5 +172,24 @@ public class UserControllerWeb implements UserControllerInterface {
     @Override
     public List<UserSubmission> GetUserSubmissions(int userId) {
         return userSubs.GetUserSubs(userId);
+    }
+
+    @GetMapping("/me/stats")
+    public ResponseEntity<UserStats> GetSelfStatsWrapper(@RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Wanderer);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            UserStats p = GetUserStats(userId);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);
+    }
+
+    @Override
+    public UserStats GetUserStats(int userId) {
+        return userStats.GetUserStats(userId);
     }
 }

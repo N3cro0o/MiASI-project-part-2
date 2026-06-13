@@ -8,6 +8,7 @@ import pl.krasmap.submission.application.domain.ReviewKrasnal;
 import pl.krasmap.submission.application.domain.submission.Submission;
 import pl.krasmap.submission.application.domain.submission.SubmissionReview;
 import pl.krasmap.common.data.SubmissionStatus;
+import pl.krasmap.submission.application.port.out.GetKrasnalInterface;
 
 import java.time.OffsetDateTime;
 
@@ -15,9 +16,11 @@ import java.time.OffsetDateTime;
 public class CheckSubmission {
 
     private final HoldSubmissionRepo subRepo;
+    private final GetKrasnalInterface krasnalServ;
 
-    public CheckSubmission(HoldSubmissionRepo repo) {
+    public CheckSubmission(HoldSubmissionRepo repo, GetKrasnalInterface krasnal) {
         subRepo = repo;
+        krasnalServ = krasnal;
     }
 
     public Pair<Submission, ReviewKrasnal> GetSubmissonPair(int subId){
@@ -51,7 +54,9 @@ public class CheckSubmission {
         if (userId == sub.userId()) return null;
         Submission newSub = sub.With(SubmissionStatus.Accepted, rev);
         subRepo.UpdateSubReview(newSub);
-        return GenerateKrasnalFromJson(sub.json());
+        var k = GenerateKrasnalFromJson(sub.json());
+        krasnalServ.AddNewKrasnal(k);
+        return k;
     }
 
     public Boolean Check(int userId, int subId) {
