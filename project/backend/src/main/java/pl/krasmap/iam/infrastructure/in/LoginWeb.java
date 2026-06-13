@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import pl.krasmap.common.auth.template.UserAuthInterface;
+import pl.krasmap.iam.application.domain.LoginData;
 import pl.krasmap.iam.application.domain.UserNew;
 import pl.krasmap.iam.application.port.in.LoginInterface;
 import pl.krasmap.iam.application.service.HoldUserRepo;
@@ -23,9 +24,9 @@ public class LoginWeb implements LoginInterface {
         loginService = login;
     }
 
-    @GetMapping("/login")
-    public ResponseEntity<String> loginWrapper(String loginOrEmail, String password) {
-        String p = login(loginOrEmail, password);
+    @PostMapping("/login")
+    public ResponseEntity<String> loginWrapper(@RequestBody LoginData loginData) {
+        String p = login(loginData.loginOrEmail(), loginData.password());
         if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(p, HttpStatus.valueOf(200));
     }
