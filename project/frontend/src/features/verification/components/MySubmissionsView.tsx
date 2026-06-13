@@ -1,36 +1,5 @@
 import React from 'react';
-
-type SubmissionStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
-
-interface SubmissionDummy {
-  id: string;
-  name: string;
-  date: string;
-  status: SubmissionStatus;
-  rejectionReason?: string;
-}
-
-const DUMMY_SUBMISSIONS: SubmissionDummy[] = [
-  {
-    id: '1',
-    name: 'Papa Krasnal',
-    date: '2026-06-12',
-    status: 'PENDING',
-  },
-  {
-    id: '2',
-    name: 'Życzliwek',
-    date: '2026-06-10',
-    status: 'ACCEPTED',
-  },
-  {
-    id: '3',
-    name: 'Fake Dwarf',
-    date: '2026-06-08',
-    status: 'REJECTED',
-    rejectionReason: 'Not a real dwarf. Please submit actual dwarf locations.',
-  },
-];
+import { useMySubmissions, type SubmissionStatus } from '../api/useMySubmissions';
 
 const getStatusBadge = (status: SubmissionStatus) => {
   switch (status) {
@@ -58,6 +27,11 @@ const getStatusBadge = (status: SubmissionStatus) => {
 };
 
 const MySubmissionsView: React.FC = () => {
+  const { data, isLoading, isError } = useMySubmissions();
+
+  // Safely ensure submissions is an array to avoid map() errors
+  const submissions = Array.isArray(data) ? data : [];
+
   return (
     <div className="flex h-full flex-col">
       {/* ── Header ──────────────────────────────────────────────────────── */}
@@ -72,33 +46,53 @@ const MySubmissionsView: React.FC = () => {
 
       {/* ── Scrollable List ─────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto px-5 pb-6">
-        <div className="flex flex-col gap-4">
-          {DUMMY_SUBMISSIONS.map((sub) => (
-            <div
-              key={sub.id}
-              className="rounded-xl border border-wroclaw-dark/10 bg-white p-4 shadow-sm"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-sm font-semibold text-wroclaw-dark">
-                    {sub.name}
-                  </h3>
-                  <p className="mt-0.5 text-xs text-wroclaw-dark/50">
-                    {sub.date}
-                  </p>
-                </div>
-                {getStatusBadge(sub.status)}
-              </div>
+        {isLoading && (
+          <div className="p-5 text-center text-wroclaw-dark/50">
+            Loading submissions...
+          </div>
+        )}
 
-              {sub.status === 'REJECTED' && sub.rejectionReason && (
-                <div className="mt-3 rounded-lg bg-red-50 p-3 text-xs text-red-800">
-                  <span className="font-semibold">Reason:</span>{' '}
-                  {sub.rejectionReason}
+        {isError && (
+          <div className="p-5 text-center text-red-600">
+            Failed to load submissions.
+          </div>
+        )}
+
+        {!isLoading && !isError && submissions.length === 0 && (
+          <div className="p-5 text-center text-wroclaw-dark/50">
+            You haven't reported any locations yet.
+          </div>
+        )}
+
+        {!isLoading && !isError && submissions.length > 0 && (
+          <div className="flex flex-col gap-4">
+            {submissions.map((sub: any) => (
+              <div
+                key={sub.id}
+                className="rounded-xl border border-wroclaw-dark/10 bg-white p-4 shadow-sm"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-wroclaw-dark">
+                      {sub.name}
+                    </h3>
+                    <p className="mt-0.5 text-xs text-wroclaw-dark/50">
+                      {new Date(sub.submittedTime).toLocaleDateString()}
+                    </p>
+                  </div>
+                  {getStatusBadge(sub.status)}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+
+                {sub.status === 'REJECTED' && sub.rejectionReason && (
+                  <div className="mt-3 rounded-lg bg-red-50 p-3 text-xs text-red-800">
+                    <span className="font-semibold">Reason:</span>{' '}
+                    {sub.rejectionReason}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

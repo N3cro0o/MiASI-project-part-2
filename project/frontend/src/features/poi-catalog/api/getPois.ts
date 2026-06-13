@@ -1,4 +1,5 @@
 import { apiClient } from '../../../shared/api';
+import { API_ENDPOINTS } from '../../../shared/api/endpoints';
 import type { Poi } from '../models/Poi';
 
 /**
@@ -6,7 +7,6 @@ import type { Poi } from '../models/Poi';
  * Uses the global apiClient for request configuration.
  */
 export const getPois = async (): Promise<Poi[]> => {
-  // const response = await apiClient.get<Poi[]>('/api/pois');
-  const response = await apiClient.get<Poi[]>('/api/krasnal/get/all');
+  const response = await apiClient.get<Poi[]>(API_ENDPOINTS.GET_ALL_KRASNALS);
   return response.data;
 };

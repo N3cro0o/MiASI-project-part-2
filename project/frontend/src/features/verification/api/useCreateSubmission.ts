@@ -1,10 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
+import apiClient from '../../../shared/api/apiClient';
 import { API_ENDPOINTS } from '../../../shared/api/endpoints';
 
-// DTO aligned with the requested changes from backend
 interface CreateSubmissionRequest {
-    // userId: number; // TODO: Uncomment if Stachu still requires it directly in the body
     name: string;
     category: string;
     description: string;
@@ -13,25 +12,35 @@ interface CreateSubmissionRequest {
 }
 
 /**
- * Hook to send a new submission to the backend using Axios.
+ * Hook to send a new submission to the backend using the configured API Client.
  */
 export const useCreateSubmission = () => {
     return useMutation({
         mutationFn: async (payload: CreateSubmissionRequest) => {
-            const response = await axios.post(API_ENDPOINTS.CREATE_SUBMISSION, payload, {
+            // Map the flat frontend payload to the nested backend format (ReviewKrasnal)
+            const backendPayload = {
+                name: payload.name,
+                description: payload.description,
+                category: payload.category,
+                position: {
+                    latitude: payload.latitude,
+                    longitude: payload.longitude,
+                },
+            };
+
+            // Use apiClient - it automatically knows if it should hit localhost:8080 or the production URL
+            const response = await apiClient.post(API_ENDPOINTS.CREATE_SUBMISSION, backendPayload, {
                 headers: {
-                    'Content-Type': 'application/json',
-                    // 'Authorization': `Bearer ${token}` // TODO: Add when IAM Context is ready
+                    // TODO: Usunąć dummy-token, gdy apiClient będzie miał wbudowany interceptor do JWT
+                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NSwiZXhwIjoxNzgxMzc3NjE1fQ.y48oHRLhlTNB7GOC0b8q-y-_CSAe86Bdp1ZJ_cha7uI',
                 },
             });
 
             return response.data;
         },
         onError: (error: AxiosError<{ message?: string }>) => {
-            // Axios automatically throws on 4xx/5xx errors
             const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred';
             console.error('Submission failed:', errorMessage);
-            // The error will be caught and displayed by the PoiForm component
         },
     });
 };

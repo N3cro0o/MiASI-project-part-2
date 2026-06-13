@@ -4,18 +4,22 @@
  * When backend refactors to pure RESTful routes, we only change them here.
  */
 export const API_ENDPOINTS = {
-    // Submissions (Verification Context)
-    CREATE_SUBMISSION: '/api/submission/new',
-    GET_USER_SUBMISSIONS: (userId: number) => `/api/submission/get/user/${userId}`,
+  // Auth
+  LOGIN: '/api/auth/login', // TODO: Backend should change this to POST for security
+  REGISTER: '/api/auth/register',
 
-    // Krasnale (POI Catalog Context)
-    GET_ALL_KRASNALS: '/api/krasnal/get/all',
-    CREATE_KRASNAL_ADMIN: '/api/krasnal/new', // Fast-track for Admins
+  // Submissions (Verification Context)
+  CREATE_SUBMISSION: '/api/submissions',
+  GET_MY_SUBMISSIONS: '/api/users/me/subs',
+  GET_PENDING_SUBMISSIONS: '/api/submissions', // Backend should support ?status=PENDING
+  ACCEPT_SUBMISSION: (id: number | string) => `/api/submissions/accept/${id}`,
+  REJECT_SUBMISSION: (id: number | string) => `/api/submissions/reject/${id}`,
 
-    // Reviews (Interaction Context)
-    CREATE_REVIEW: '/api/review/add',
-    GET_KRASNAL_REVIEWS: (krasnalId: number) => `/api/review/get/krasnal/${krasnalId}`,
+  // Krasnals (Catalog Context)
+  GET_ALL_KRASNALS: '/api/krasnals',
+  GET_KRASNAL_BY_ID: (id: number | string) => `/api/krasnals/${id}`,
 
-    // Auth & Users (IAM Context)
-    REGISTER_USER: '/api/user/register',
+  // Reviews
+  CREATE_REVIEW: '/api/reviews',
+  GET_KRASNAL_REVIEWS: (id: number | string) => `/api/reviews/krasnal/${id}`,
 };
