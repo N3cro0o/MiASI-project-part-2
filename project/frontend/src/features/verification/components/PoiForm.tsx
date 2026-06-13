@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { POI_CATEGORIES } from '../../poi-catalog/constants/categories';
-import { useCreatePoi } from '../../poi-catalog/api/useCreatePoi';
+// Changed import to reflect the Verification Context
+import { useCreateSubmission } from '../../verification/api/useCreateSubmission';
 
 interface PoiFormProps {
   draftPosition: { lat: number; lng: number };
@@ -11,30 +12,34 @@ interface PoiFormProps {
 /**
  * Visual shell for the POI submission form.
  * Rendered when a user drops a pin in adding mode.
+ * Dispatches a Submission (PENDING state) rather than directly creating a POI.
  */
 const PoiForm: React.FC<PoiFormProps> = ({ draftPosition, onCancel, onSuccess }) => {
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
 
-  const { mutate: createPoi, isPending, error } = useCreatePoi();
+  // Replaced useCreatePoi with useCreateSubmission
+  const { mutate: createSubmission, isPending, error } = useCreateSubmission();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !category || !description) return;
 
-    createPoi(
+    createSubmission(
       {
         name,
         category,
         description,
-        position: {
-          latitude: draftPosition.lat,
-          longitude: draftPosition.lng,
-        },
+        // Flattened coordinates to match tactical.md SubmissionPayload VO
+        latitude: draftPosition.lat,
+        longitude: draftPosition.lng,
       },
       {
         onSuccess: () => {
+          // TODO: Mateusz - trigger the success Toast notification here
+          // e.g., toast.success('Submission sent! Waiting for verification.');
+
           if (onSuccess) onSuccess();
         },
       }
@@ -139,7 +144,7 @@ const PoiForm: React.FC<PoiFormProps> = ({ draftPosition, onCancel, onSuccess })
               disabled={isPending}
               className="flex-1 rounded-lg bg-wroclaw-brick py-2.5 text-sm font-semibold text-white shadow-md transition-colors hover:bg-wroclaw-brick/90 disabled:opacity-50"
             >
-              {isPending ? 'Saving...' : 'Submit'}
+              {isPending ? 'Submitting...' : 'Submit'}
             </button>
           </div>
         </form>
