@@ -1,4 +1,4 @@
-package pl.krasmap.iam.application.domain;
+package pl.krasmap.iam.application.domain.stats;
 
 import pl.krasmap.common.data.SubmissionStatus;
 import pl.krasmap.submission.application.domain.submission.Submission;

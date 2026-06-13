@@ -7,9 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.krasmap.common.auth.template.UserAuthInterface;
 import pl.krasmap.common.data.UserRole;
-import pl.krasmap.iam.application.domain.UserWeb;
-import pl.krasmap.interaction.application.domain.Review;
-import pl.krasmap.interaction.application.domain.ReviewWeb;
+import pl.krasmap.interaction.application.domain.review.Review;
+import pl.krasmap.interaction.application.domain.review.ReviewWeb;
 import pl.krasmap.interaction.application.port.in.ReviewControllerInterface;
 import pl.krasmap.interaction.application.service.HoldReviewRepo;
 

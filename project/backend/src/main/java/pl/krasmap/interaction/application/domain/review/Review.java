@@ -1,6 +1,4 @@
-package pl.krasmap.interaction.application.domain;
-
-import pl.krasmap.iam.application.domain.UserReview;
+package pl.krasmap.interaction.application.domain.review;
 
 import java.time.OffsetDateTime;
 

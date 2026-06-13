@@ -2,8 +2,8 @@ package pl.krasmap.interaction.infrastructure.out;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import pl.krasmap.interaction.application.domain.Review;
-import pl.krasmap.interaction.application.domain.ReviewWeb;
+import pl.krasmap.interaction.application.domain.review.Review;
+import pl.krasmap.interaction.application.domain.review.ReviewWeb;
 import pl.krasmap.interaction.application.port.out.ReviewFetchInterface;
 
 import java.sql.Connection;
@@ -29,6 +29,7 @@ public class ReviewFetchPostgres implements ReviewFetchInterface {
     private Connection GetDatabaseConnection() throws Exception {
         return DriverManager.getConnection(postgresString, postgresUser, postgresPassword);
     }
+
     private Review ReviewFromStatement(ResultSet statement) throws Exception {
         int id, krasnalId, userId;
         short rating;

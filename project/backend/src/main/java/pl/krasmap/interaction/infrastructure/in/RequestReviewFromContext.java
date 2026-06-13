@@ -1,7 +1,7 @@
 package pl.krasmap.interaction.infrastructure.in;
 
 import org.springframework.stereotype.Component;
-import pl.krasmap.interaction.application.domain.Review;
+import pl.krasmap.interaction.application.domain.review.Review;
 import pl.krasmap.interaction.application.port.in.RequestReviewInterface;
 import pl.krasmap.interaction.application.service.HoldReviewRepo;
 

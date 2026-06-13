@@ -1,9 +1,7 @@
 package pl.krasmap.iam.application.service;
 
 import org.springframework.stereotype.Service;
-import pl.krasmap.iam.application.domain.UserReview;
-import pl.krasmap.iam.application.domain.UserSubmission;
-import pl.krasmap.iam.application.port.out.GetUserReviewsInterface;
+import pl.krasmap.iam.application.domain.stats.UserSubmission;
 import pl.krasmap.iam.application.port.out.GetUserSubmissionsInterface;
 
 import java.util.List;
