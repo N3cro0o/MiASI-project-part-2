@@ -12,5 +12,5 @@ public interface ReviewControllerInterface {
     List<Review> GetReviewsFromUserUnderKrasnal(int userId, int krasnalId);
     Review AddReview(ReviewWeb reviewToAdd);
     Review UpdateReview(int reviewId, ReviewWeb reviewToUpdate);
-    boolean RemoveReview(int reviewId);
+    Boolean RemoveReview(int reviewId);
 }

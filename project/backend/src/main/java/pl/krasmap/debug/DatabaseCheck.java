@@ -1,12 +1,15 @@
 package pl.krasmap.debug;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
+@Service
 public class DatabaseCheck {
+
     @Value("${db.url}")
     private String postgresString;
 
@@ -17,6 +20,7 @@ public class DatabaseCheck {
     private String postgresPassword;
 
     private Connection GetDatabaseConnection() throws Exception {
+        System.out.printf("%s, %s, %s\n", postgresString, postgresUser, postgresPassword);
         return DriverManager.getConnection(postgresString, postgresUser, postgresPassword);
     }
 

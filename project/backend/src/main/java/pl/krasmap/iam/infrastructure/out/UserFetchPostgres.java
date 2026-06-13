@@ -3,8 +3,8 @@ package pl.krasmap.iam.infrastructure.out;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.krasmap.iam.application.domain.UserWeb;
-import pl.krasmap.iam.application.domain.user.User;
-import pl.krasmap.iam.application.domain.user.UserRole;
+import pl.krasmap.iam.application.domain.User;
+import pl.krasmap.common.data.UserRole;
 import pl.krasmap.iam.application.port.out.UserFetchInterface;
 
 import java.sql.*;
@@ -63,6 +63,24 @@ public class UserFetchPostgres implements UserFetchInterface {
             Connection connection = GetDatabaseConnection();
             Statement statement = connection.createStatement();
             var output = statement.executeQuery(String.format("SELECT * FROM iam.users WHERE iam.users.id = %d;", userId));
+            while (output.next()) {
+                user = GetUserFromStatement(output);
+            }
+            connection.close();
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return user;
+    }
+
+    @Override
+    public User GetUser(String login) {
+        User user = null;
+        String sql = "SELECT * FROM iam.users WHERE login = '" + login + "' OR email = '" + login + "';";
+        try {
+            Connection connection = GetDatabaseConnection();
+            Statement statement = connection.createStatement();
+            var output = statement.executeQuery(sql);
             while (output.next()) {
                 user = GetUserFromStatement(output);
             }
@@ -156,5 +174,23 @@ public class UserFetchPostgres implements UserFetchInterface {
     @Override
     public boolean DeleteUser(int userId) {
         return false;
+    }
+
+    @Override
+    public String CheckUserPassword(String login) {
+        String check = "";
+        String sql = "SELECT hashed_password FROM iam.users WHERE login = '" + login + "' OR email = '" + login + "';";
+        try {
+            Connection conn = GetDatabaseConnection();
+            Statement stat = conn.createStatement();
+            var output = stat.executeQuery(sql);
+            while(output.next())
+                check = output.getString(1);
+            conn.close();
+        }
+        catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return check;
     }
 }

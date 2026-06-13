@@ -6,6 +6,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/debug")
 public class WebHealthCheck {
 
+    private DatabaseCheck db;
+
+    public WebHealthCheck(DatabaseCheck d) {
+        db = d;
+    }
+
     @GetMapping("/health")
     public String health_check() {
         return "system running";
@@ -19,7 +25,6 @@ public class WebHealthCheck {
 
     @GetMapping("/db_conn")
     public String db_check() {
-        var db = new DatabaseCheck();
         return db.CheckDBConnection() ? "db working" : "ded";
     }
 }
