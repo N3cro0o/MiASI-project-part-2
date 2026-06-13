@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import pl.krasmap.submission.application.domain.NewSubmission;
 import pl.krasmap.submission.application.domain.submission.Submission;
 import pl.krasmap.submission.application.domain.submission.SubmissionReview;
-import pl.krasmap.submission.application.domain.submission.SubmissionStatus;
+import pl.krasmap.common.data.SubmissionStatus;
 import pl.krasmap.submission.application.port.out.SubmissionFetchInterface;
 
 import java.sql.Connection;
@@ -185,7 +185,25 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
         try {
             Connection conn = GetDatabaseConnection();
             Statement stat = conn.createStatement();
-            var outcome = stat.executeQuery("SELECT * FROM verification.submissions WHERE status = 'PENDING';");
+            var outcome = stat.executeQuery("SELECT * FROM verification.submissions;");
+            list = new ArrayList<>();
+            while (outcome.next()){
+                list.add(GetSubFromStatement(outcome));
+            }
+            conn.close();
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return list;
+    }
+
+    @Override
+    public List<Submission> GetAllSubmissions(SubmissionStatus status) {
+        List<Submission> list = null;
+        try {
+            Connection conn = GetDatabaseConnection();
+            Statement stat = conn.createStatement();
+            var outcome = stat.executeQuery("SELECT * FROM verification.submissions WHERE status = '" + status.toString() + "';");
             list = new ArrayList<>();
             while (outcome.next()){
                 list.add(GetSubFromStatement(outcome));

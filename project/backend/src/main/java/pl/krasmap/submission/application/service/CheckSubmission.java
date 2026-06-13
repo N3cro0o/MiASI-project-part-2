@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.core.util.Json;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
-import pl.krasmap.submission.application.domain.Krasnal;
+import pl.krasmap.submission.application.domain.ReviewKrasnal;
 import pl.krasmap.submission.application.domain.submission.Submission;
 import pl.krasmap.submission.application.domain.submission.SubmissionReview;
-import pl.krasmap.submission.application.domain.submission.SubmissionStatus;
+import pl.krasmap.common.data.SubmissionStatus;
 
 import java.time.OffsetDateTime;
 
@@ -20,17 +20,17 @@ public class CheckSubmission {
         subRepo = repo;
     }
 
-    public Pair<Submission, Krasnal> GetSubmissonPair(int subId){
+    public Pair<Submission, ReviewKrasnal> GetSubmissonPair(int subId){
         Submission sub = subRepo.GetSubmission(subId);
         System.out.println(sub);
-        Krasnal kr = GenerateKrasnalFromJson(sub.json());
+        ReviewKrasnal kr = GenerateKrasnalFromJson(sub.json());
         return Pair.of(sub, kr);
     }
 
-    public Krasnal GenerateKrasnalFromJson(String json) {
-        Krasnal obj = null;
+    public ReviewKrasnal GenerateKrasnalFromJson(String json) {
+        ReviewKrasnal obj = null;
         try {
-            obj = Json.mapper().readValue(json, Krasnal.class);
+            obj = Json.mapper().readValue(json, ReviewKrasnal.class);
         } catch (JsonProcessingException e) {
             System.err.println(e.toString());
         }
@@ -45,7 +45,7 @@ public class CheckSubmission {
         return subRepo.UpdateSubReview(newSub);
     }
 
-    public Krasnal AcceptSubmission(int userId, int subId) {
+    public ReviewKrasnal AcceptSubmission(int userId, int subId) {
         SubmissionReview rev = SubmissionReview.newObject(userId, OffsetDateTime.now());
         Submission sub = subRepo.GetSubmission(subId);
         if (userId == sub.userId()) return null;

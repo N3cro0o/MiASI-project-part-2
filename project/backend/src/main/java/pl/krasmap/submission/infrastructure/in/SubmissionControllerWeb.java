@@ -9,11 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.krasmap.common.auth.template.UserAuthInterface;
 import pl.krasmap.common.data.UserRole;
-import pl.krasmap.krasnal.application.domain.KrasnalWeb;
-import pl.krasmap.submission.application.domain.Krasnal;
+import pl.krasmap.submission.application.domain.ReviewKrasnal;
 import pl.krasmap.submission.application.domain.NewSubmission;
 import pl.krasmap.submission.application.domain.submission.Submission;
-import pl.krasmap.submission.application.domain.submission.SubmissionStatus;
+import pl.krasmap.common.data.SubmissionStatus;
 import pl.krasmap.submission.application.port.in.SubmissionControllerInterface;
 import pl.krasmap.submission.application.service.CheckSubmission;
 import pl.krasmap.submission.application.service.HoldSubmissionRepo;
@@ -35,12 +34,14 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     }
 
     @PostMapping
-    public ResponseEntity<Submission> PostSubmissionWrapper(@RequestBody NewSubmission submission, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<Submission> PostSubmissionWrapper(@RequestBody ReviewKrasnal submission, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Wanderer);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
         if (o) {
-            Submission p = PostSubmission(submission);
+            var sub = new NewSubmission(userId, submission);
+            Submission p = PostSubmission(sub);
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
@@ -89,12 +90,12 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     }
 
     @GetMapping("/{subId}")
-    public ResponseEntity<Pair<Submission, Krasnal>> GetSubmissionWrapper(@PathVariable int subId, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<Pair<Submission, ReviewKrasnal>> GetSubmissionWrapper(@PathVariable int subId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Editor);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         if (o) {
-            Pair<Submission, Krasnal> p = GetSubmission(subId);
+            Pair<Submission, ReviewKrasnal> p = GetSubmission(subId);
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
@@ -102,7 +103,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     }
 
     @Override
-    public Pair<Submission, Krasnal> GetSubmission(int subId) {
+    public Pair<Submission, ReviewKrasnal> GetSubmission(int subId) {
         return subCheck.GetSubmissonPair(subId);
     }
 
@@ -126,13 +127,13 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     }
 
     @PostMapping("/accept/{subId}")
-    public ResponseEntity<Krasnal> AcceptSubmissionWrapper(@PathVariable int subId, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<ReviewKrasnal> AcceptSubmissionWrapper(@PathVariable int subId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Editor);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         int userId = auth.DecodeJwt(jwt);
         if (o) {
-            Krasnal p = AcceptSubmission(userId, subId);
+            ReviewKrasnal p = AcceptSubmission(userId, subId);
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
@@ -140,7 +141,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     }
 
     @Override
-    public Krasnal AcceptSubmission(int userId, int subId) {
+    public ReviewKrasnal AcceptSubmission(int userId, int subId) {
         return subCheck.AcceptSubmission(userId, subId);
     }
 
@@ -166,12 +167,20 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     }
 
     @GetMapping
-    public ResponseEntity<List<Submission>> GetAllSubmissionsWrapper(@RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<List<Submission>> GetAllSubmissionsWrapper(@RequestParam(required = false) String status,
+                                                                     @RequestHeader("Authorization") String jwt)
+    {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Editor);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         if (o) {
-            List<Submission> p = GetAllSubmissions();
+            List<Submission> p;
+            if (status != null) {
+                p = GetAllSubmissions(SubmissionStatus.FromString(status));
+            }
+            else {
+                p = GetAllSubmissions();
+            }
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
@@ -181,6 +190,11 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     @Override
     public List<Submission> GetAllSubmissions() {
         return subRepo.GetAllSubmissions();
+    }
+
+    @Override
+    public List<Submission> GetAllSubmissions(SubmissionStatus status) {
+        return subRepo.GetAllSubmissions(status);
     }
 
 

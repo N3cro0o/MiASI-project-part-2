@@ -3,8 +3,7 @@ package pl.krasmap.submission.application.service;
 import org.springframework.stereotype.Repository;
 import pl.krasmap.submission.application.domain.NewSubmission;
 import pl.krasmap.submission.application.domain.submission.Submission;
-import pl.krasmap.submission.application.domain.submission.SubmissionReview;
-import pl.krasmap.submission.application.domain.submission.SubmissionStatus;
+import pl.krasmap.common.data.SubmissionStatus;
 import pl.krasmap.submission.application.port.out.SubmissionFetchInterface;
 
 import java.util.List;
@@ -45,5 +44,9 @@ public class HoldSubmissionRepo {
 
     public List<Submission> GetAllSubmissions() {
         return subFetch.GetAllSubmissions();
+    }
+
+    public List<Submission> GetAllSubmissions(SubmissionStatus status) {
+        return subFetch.GetAllSubmissions(status);
     }
 }
