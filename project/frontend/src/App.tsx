@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import MapView from './features/poi-catalog/components/MapView';
 import PoiDrawer from './features/poi-catalog/components/PoiDrawer';
+import type { DrawerView } from './features/poi-catalog/components/PoiDrawer';
 import FloatingAvatar from './features/iam/components/FloatingAvatar';
 import FabAdd from './features/verification/components/FabAdd';
 import type { Poi } from './features/poi-catalog/models/Poi';
@@ -19,6 +20,9 @@ function App() {
 
   // Drawer visibility
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+
+  // Drawer view navigation
+  const [currentView, setCurrentView] = useState<DrawerView>('CATALOG');
 
   return (
     <div className="relative h-full w-full">
@@ -44,6 +48,9 @@ function App() {
         }}
         isOpen={isDrawerOpen}
         onToggle={() => setIsDrawerOpen(!isDrawerOpen)}
+        currentView={currentView}
+        setCurrentView={setCurrentView}
+        isModerator={false}
       />
 
       {/* Overlay layer — floating UI elements */}

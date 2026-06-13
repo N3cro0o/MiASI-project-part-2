@@ -1,9 +1,12 @@
 import PoiList from './PoiList';
 import PoiDetails from './PoiDetails';
 import PoiForm from '../../verification/components/PoiForm';
+import MySubmissionsView from '../../verification/components/MySubmissionsView';
 import FloatingSearch from '../../../shared/components/FloatingSearch';
 import type { Poi } from '../models/Poi';
 import { POI_CATEGORIES } from '../constants/categories';
+
+export type DrawerView = 'CATALOG' | 'MY_SUBMISSIONS' | 'MODERATOR_QUEUE';
 
 interface PoiDrawerProps {
   activeCategory: string;
@@ -14,10 +17,20 @@ interface PoiDrawerProps {
   onCancelDraft: () => void;
   isOpen: boolean;
   onToggle: () => void;
+  currentView: DrawerView;
+  setCurrentView: (view: DrawerView) => void;
+  isModerator?: boolean;
 }
 
+/** Tab definitions for the navigation bar */
+const DRAWER_TABS: { id: DrawerView; label: string; moderatorOnly?: boolean }[] = [
+  { id: 'CATALOG', label: '📍 Catalog' },
+  { id: 'MY_SUBMISSIONS', label: '📝 My Submissions' },
+  { id: 'MODERATOR_QUEUE', label: '🛡️ Moderator', moderatorOnly: true },
+];
+
 /**
- * POI list drawer — displays the catalog of points of interest.
+ * Smart Drawer — multi-view sidebar with tab navigation.
  *
  * Layout behavior:
  *  • Desktop (md+): side drawer sliding in from the left, ~30% viewport width.
@@ -34,6 +47,9 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
   onCancelDraft,
   isOpen,
   onToggle,
+  currentView,
+  setCurrentView,
+  isModerator = false,
 }) => {
   return (
     <div
@@ -57,56 +73,102 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
         <div className="flex justify-center pt-3 pb-1 md:hidden">
           <span className="h-1 w-10 rounded-full bg-wroclaw-dark/30" />
         </div>
-        {/* ── Search bar — always visible at the top ───────────────────── */}
-        <FloatingSearch />
-        {draftPosition ? (
-          <PoiForm draftPosition={draftPosition} onCancel={onCancelDraft} onSuccess={onCancelDraft} />
-        ) : selectedPoi ? (
-          <PoiDetails poi={selectedPoi} onBack={() => setSelectedPoi(null)} />
-        ) : (
+
+        {/* ── Tab Navigation Bar ─────────────────────────────────────── */}
+        <nav className="shrink-0 flex border-b border-wroclaw-dark/10 px-2">
+          {DRAWER_TABS
+            .filter((tab) => !tab.moderatorOnly || isModerator)
+            .map((tab) => {
+              const isActive = currentView === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setCurrentView(tab.id)}
+                  className={[
+                    'flex-1 px-2 py-2.5 text-xs font-medium transition-colors',
+                    'border-b-2 -mb-px',
+                    isActive
+                      ? 'border-wroclaw-brick text-wroclaw-dark'
+                      : 'border-transparent text-wroclaw-dark/50 hover:text-wroclaw-dark/80 hover:border-wroclaw-dark/20',
+                  ].join(' ')}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+        </nav>
+
+        {/* ── View Content ───────────────────────────────────────────── */}
+
+        {currentView === 'CATALOG' && (
           <>
-            {/* ── Header ────────────────────────────────────────────────── */}
-            <header className="shrink-0 px-5 pt-4 pb-2">
-              <div className="flex items-baseline justify-between">
-                <h2 className="text-xl font-semibold text-wroclaw-dark">
-                  Krasnale we Wrocławiu
-                </h2>
-                <span className="text-xs font-medium text-wroclaw-dark/50">
-                  Explore POIs
-                </span>
-              </div>
-              {/* ── Category filter chips (horizontal scroll) ─────────── */}
-              <div className="-mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-2 scrollbar-none">
-                {POI_CATEGORIES.map((cat) => {
-                  const isActive = activeCategory === cat.id;
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setActiveCategory(cat.id)}
-                      className={[
-                        'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5',
-                        'text-xs font-medium transition-colors',
-                        isActive
-                          ? 'bg-wroclaw-brick text-white shadow-sm'
-                          : 'bg-white/60 text-wroclaw-dark/70 hover:bg-white',
-                      ].join(' ')}
-                    >
-                      <span>{cat.emoji}</span>
-                      {cat.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </header>
-            {/* ── Scrollable POI list ───────────────────────────────────── */}
-            <div className="flex-1 overflow-y-auto px-5 pb-6">
-              <PoiList activeCategory={activeCategory} onPoiSelect={setSelectedPoi} />
-            </div>
+            {/* ── Search bar — always visible at the top ─────────────── */}
+            <FloatingSearch />
+
+            {draftPosition ? (
+              <PoiForm draftPosition={draftPosition} onCancel={onCancelDraft} onSuccess={onCancelDraft} />
+            ) : selectedPoi ? (
+              <PoiDetails poi={selectedPoi} onBack={() => setSelectedPoi(null)} />
+            ) : (
+              <>
+                {/* ── Header ──────────────────────────────────────────── */}
+                <header className="shrink-0 px-5 pt-4 pb-2">
+                  <div className="flex items-baseline justify-between">
+                    <h2 className="text-xl font-semibold text-wroclaw-dark">
+                      Krasnale we Wrocławiu
+                    </h2>
+                    <span className="text-xs font-medium text-wroclaw-dark/50">
+                      Explore POIs
+                    </span>
+                  </div>
+                  {/* ── Category filter chips (horizontal scroll) ────── */}
+                  <div className="-mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-2 scrollbar-none">
+                    {POI_CATEGORIES.map((cat) => {
+                      const isActive = activeCategory === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => setActiveCategory(cat.id)}
+                          className={[
+                            'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5',
+                            'text-xs font-medium transition-colors',
+                            isActive
+                              ? 'bg-wroclaw-brick text-white shadow-sm'
+                              : 'bg-white/60 text-wroclaw-dark/70 hover:bg-white',
+                          ].join(' ')}
+                        >
+                          <span>{cat.emoji}</span>
+                          {cat.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </header>
+                {/* ── Scrollable POI list ──────────────────────────────── */}
+                <div className="flex-1 overflow-y-auto px-5 pb-6">
+                  <PoiList activeCategory={activeCategory} onPoiSelect={setSelectedPoi} />
+                </div>
+              </>
+            )}
           </>
         )}
+
+        {currentView === 'MY_SUBMISSIONS' && (
+          <MySubmissionsView />
+        )}
+
+        {currentView === 'MODERATOR_QUEUE' && (
+          <div className="flex-1 overflow-y-auto p-5 text-wroclaw-dark/70">
+            <h2 className="text-lg font-semibold text-wroclaw-dark">Moderator Queue</h2>
+            <p className="mt-2 text-sm">Pending submissions for review will appear here.</p>
+          </div>
+        )}
       </aside>
-      {/* ── Toggle button — absolutely positioned on the wrapper edge ── */}      <button
+
+      {/* ── Toggle button — absolutely positioned on the wrapper edge ── */}
+      <button
         type="button"
         onClick={onToggle}
         aria-label={isOpen ? 'Hide sidebar' : 'Show sidebar'}
