@@ -8,8 +8,8 @@ const FloatingSearch: React.FC = () => {
   const [query, setQuery] = useState('');
 
   return (
-    <div className="absolute top-4 left-1/2 z-[1000] w-full max-w-md -translate-x-1/2 px-4">
-      <div className="flex items-center rounded-full bg-white/90 px-4 py-2 shadow-lg backdrop-blur-sm">
+    <div className="px-5 pt-4 pb-2">
+      <div className="flex items-center rounded-full bg-white/90 px-4 py-2 shadow-sm backdrop-blur-sm">
         {/* Search icon */}
         <svg
           xmlns="http://www.w3.org/2000/svg"

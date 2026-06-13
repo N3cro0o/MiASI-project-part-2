@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import MapView from './features/poi-catalog/components/MapView';
 import PoiDrawer from './features/poi-catalog/components/PoiDrawer';
-import FloatingSearch from './shared/components/FloatingSearch';
 import FloatingAvatar from './features/iam/components/FloatingAvatar';
 import FabAdd from './features/verification/components/FabAdd';
 import type { Poi } from './features/poi-catalog/models/Poi';
@@ -17,6 +16,9 @@ function App() {
   // Adding mode states
   const [isAddingMode, setIsAddingMode] = useState(false);
   const [draftPosition, setDraftPosition] = useState<{lat: number, lng: number} | null>(null);
+
+  // Drawer visibility
+  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
 
   return (
     <div className="relative h-full w-full">
@@ -40,10 +42,11 @@ function App() {
           setDraftPosition(null);
           setIsAddingMode(false);
         }}
+        isOpen={isDrawerOpen}
+        onToggle={() => setIsDrawerOpen(!isDrawerOpen)}
       />
 
       {/* Overlay layer — floating UI elements */}
-      <FloatingSearch />
       <FloatingAvatar />
       <FabAdd 
         isAddingMode={isAddingMode} 
