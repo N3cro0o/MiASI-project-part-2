@@ -1,5 +1,7 @@
 package pl.krasmap.submission.application.domain.submission;
 
+import pl.krasmap.common.data.SubmissionStatus;
+
 import java.time.OffsetDateTime;
 
 public record Submission(int id, int userId, String json, SubmissionStatus status, OffsetDateTime submittedTime, SubmissionReview review) {

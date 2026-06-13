@@ -1,6 +1,6 @@
-package pl.krasmap.iam.application.domain.user;
+package pl.krasmap.iam.application.domain;
 
-import pl.krasmap.iam.application.domain.UserWeb;
+import pl.krasmap.common.data.UserRole;
 
 import java.time.OffsetDateTime;
 
@@ -25,5 +25,7 @@ public record User(int id, String login, String email, UserRole role, boolean ac
         return User.newObject(userId, user.login(), user.email(), user.role(), user.active());
     }
 
-
+    public boolean isNull() {
+        return login().isEmpty() && email().isEmpty() && id <= 0;
+    }
 }
