@@ -20,4 +20,9 @@ public class RequestReviewFromContext implements RequestReviewInterface {
     public List<Review> GetReviewsUnderKrasnal(int krasnalId) {
         return reviewRepo.GetReviewsUnderKrasnal(krasnalId);
     }
+
+    @Override
+    public List<Review> GetReviewsFromUser(int userId) {
+        return reviewRepo.GetReviewsFromUser(userId);
+    }
 }

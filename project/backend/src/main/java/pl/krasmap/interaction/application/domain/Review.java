@@ -1,5 +1,7 @@
 package pl.krasmap.interaction.application.domain;
 
+import pl.krasmap.iam.application.domain.UserReview;
+
 import java.time.OffsetDateTime;
 
 public record Review(int id, int krasnalId, int userId, short rating, String content, OffsetDateTime created) {
@@ -7,4 +9,5 @@ public record Review(int id, int krasnalId, int userId, short rating, String con
     public static Review newObject(int id, int krasnalId, int userId, short rating, String content, OffsetDateTime created) {
         return new Review(id, krasnalId, userId, rating, content, created);
     }
+
 }
