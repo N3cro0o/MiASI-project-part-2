@@ -7,6 +7,7 @@ import AuthModal from './features/iam/components/AuthModal';
 import FabAdd from './features/verification/components/FabAdd';
 import type { Poi } from './features/poi-catalog/models/Poi';
 import { useAuth } from './features/iam/context/AuthContext';
+import { useKrasnals } from './features/poi-catalog/api/useKrasnals';
 
 /**
  * Root application shell.
@@ -14,6 +15,7 @@ import { useAuth } from './features/iam/context/AuthContext';
  */
 function App() {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedPoi, setSelectedPoi] = useState<Poi | null>(null);
 
   // Adding mode states
@@ -23,6 +25,9 @@ function App() {
   // Drawer visibility
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
 
+  // Map Focus State
+  const [mapFocusPoint, setMapFocusPoint] = useState<{ lat: number; lng: number } | null>(null);
+
   // Drawer view navigation
   const [currentView, setCurrentView] = useState<DrawerView>('CATALOG');
 
@@ -30,7 +35,25 @@ function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   // Auth state
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  
+  const isModerator = user?.role === 'EDITOR' || user?.role === 'ADMIN';
+  const isAdmin = user?.role === 'ADMIN';
+
+  // Fetch all pois here to synchronize map and list
+  const { data: krasnals, isLoading, error } = useKrasnals();
+
+  // Filter pois
+  const filteredKrasnals = krasnals?.filter((poi) => {
+    if (activeCategory !== 'ALL' && poi.category !== activeCategory) return false;
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      if (!poi.name.toLowerCase().includes(term) && !poi.description.toLowerCase().includes(term)) {
+        return false;
+      }
+    }
+    return true;
+  }) || [];
 
   return (
     <div className="relative h-full w-full">
@@ -39,14 +62,27 @@ function App() {
         selectedPoi={selectedPoi}
         setSelectedPoi={setSelectedPoi}
         isAddingMode={isAddingMode}
-        setDraftPosition={setDraftPosition}
+        setDraftPosition={(pos) => {
+          setDraftPosition(pos);
+          if (pos) {
+            setCurrentView('MY_SUBMISSIONS');
+            setIsDrawerOpen(true);
+          }
+        }}
         draftPosition={draftPosition}
+        currentView={currentView}
+        mapFocusPoint={mapFocusPoint}
+        activeCategory={activeCategory}
+        searchTerm={searchTerm}
+        filteredPois={filteredKrasnals}
       />
 
       {/* Panel layer — POI list drawer */}
       <PoiDrawer
         activeCategory={activeCategory}
         setActiveCategory={setActiveCategory}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
         selectedPoi={selectedPoi}
         setSelectedPoi={setSelectedPoi}
         draftPosition={draftPosition}
@@ -59,11 +95,22 @@ function App() {
         currentView={currentView}
         setCurrentView={setCurrentView}
         isAuthenticated={isAuthenticated}
+        isModerator={isModerator}
+        isAdmin={isAdmin}
+        setMapFocusPoint={setMapFocusPoint}
+        filteredPois={filteredKrasnals}
+        isLoading={isLoading}
+        error={error}
       />
 
       {/* Overlay layer — floating UI elements */}
       <FloatingAvatar onClick={() => {
-        setIsAuthModalOpen(true); console.log(isAuthModalOpen);
+        if (isAuthenticated) {
+          setCurrentView('PROFILE');
+          setIsDrawerOpen(true);
+        } else {
+          setIsAuthModalOpen(true);
+        }
       }} />
       {isAuthenticated && (
         <FabAdd

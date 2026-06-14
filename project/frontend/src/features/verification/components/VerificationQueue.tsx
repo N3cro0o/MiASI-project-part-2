@@ -1,7 +1,18 @@
 import React from 'react';
 import { usePendingSubmissions, useAcceptSubmission, useRejectSubmission } from '../api/useModeration';
 
-const VerificationQueue: React.FC = () => {
+const safelyFormatDate = (dateString?: string | null) => {
+  if (!dateString) return 'Unknown date';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Invalid date';
+  return new Intl.DateTimeFormat('pl-PL', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+};
+
+interface VerificationQueueProps {
+  setMapFocusPoint?: (pos: { lat: number; lng: number }) => void;
+}
+
+const VerificationQueue: React.FC<VerificationQueueProps> = ({ setMapFocusPoint }) => {
   const { data: submissions, isLoading } = usePendingSubmissions();
   const { mutate: accept, isPending: isAccepting } = useAcceptSubmission();
   const { mutate: reject, isPending: isRejecting } = useRejectSubmission();
@@ -51,17 +62,17 @@ const VerificationQueue: React.FC = () => {
               key={sub.id}
               className="rounded-xl border border-wroclaw-dark/10 bg-white p-4 shadow-sm"
             >
-              <div className="mb-3">
-                <h4 className="font-bold text-wroclaw-dark">{sub.krasnalName}</h4>
-                <p className="mt-0.5 text-xs text-wroclaw-dark/50">
-                  Submitted on {new Intl.DateTimeFormat('en-US', {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                  }).format(new Date(sub.submittedTime))}
-                </p>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="font-bold text-wroclaw-dark">
+                    {sub.krasnalName}
+                  </h4>
+                  <p className="mt-0.5 text-xs text-wroclaw-dark/50">
+                    Submitted: {safelyFormatDate(sub.time)}
+                  </p>
+                </div>
               </div>
-
-              <div className="flex gap-2">
+              <div className="flex gap-2 mt-3">
                 <button
                   type="button"
                   disabled={isAccepting || isRejecting}
@@ -79,6 +90,16 @@ const VerificationQueue: React.FC = () => {
                   Reject
                 </button>
               </div>
+              
+              {sub.krasnalPos && (
+                <button
+                  type="button"
+                  onClick={() => setMapFocusPoint && setMapFocusPoint({ lat: sub.krasnalPos.latitude, lng: sub.krasnalPos.longitude })}
+                  className="mt-3 flex items-center text-xs font-medium text-wroclaw-brick hover:underline focus:outline-none"
+                >
+                  📍 Locate on Map
+                </button>
+              )}
             </div>
           ))}
         </div>

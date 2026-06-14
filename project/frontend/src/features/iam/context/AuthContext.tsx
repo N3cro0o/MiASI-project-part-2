@@ -1,8 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import apiClient from '../../../shared/api/apiClient';
+
+export interface UserProfile {
+  id: number;
+  login: string;
+  email: string;
+  role: 'GUEST' | 'WANDERER' | 'EDITOR' | 'ADMIN';
+}
 
 interface AuthContextValue {
   token: string | null;
   isAuthenticated: boolean;
+  user: UserProfile | null;
+  isLoadingUser: boolean;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -37,6 +47,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return storedToken;
   });
 
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState<boolean>(true);
+
   const login = (newToken: string) => {
     localStorage.setItem('jwt_token', newToken);
     setToken(newToken);
@@ -48,7 +61,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      setUser(null);
+      setIsLoadingUser(false);
+      return;
+    }
 
     const checkExpiration = () => {
       if (isTokenExpired(token)) {
@@ -56,6 +73,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         alert('Your session has expired. Please log in again.');
       }
     };
+
+    const fetchUser = async () => {
+      setIsLoadingUser(true);
+      try {
+        const response = await apiClient.get<UserProfile>('/api/users/me');
+        setUser(response.data);
+      } catch (error) {
+        console.error('Failed to fetch user', error);
+        logout();
+      } finally {
+        setIsLoadingUser(false);
+      }
+    };
+
+    fetchUser();
+    checkExpiration();
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -84,6 +117,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const value: AuthContextValue = {
     token,
     isAuthenticated: !!token,
+    user,
+    isLoadingUser,
     login,
     logout,
   };

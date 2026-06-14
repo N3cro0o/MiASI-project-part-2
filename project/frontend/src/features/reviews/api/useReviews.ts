@@ -6,14 +6,14 @@ export interface Review {
   userId: number;
   krasnalId: number;
   rating: number;
-  comment: string;
-  reviewDate: string;
+  content: string;
+  created: string;
 }
 
 export interface CreateReviewPayload {
   krasnalId: number;
   rating: number;
-  comment: string;
+  content: string;
 }
 
 export const useKrasnalReviews = (krasnalId: number) => {
@@ -32,11 +32,17 @@ export const useCreateReview = () => {
 
   return useMutation({
     mutationFn: async (payload: CreateReviewPayload) => {
-      const response = await apiClient.post<Review>('/api/reviews', payload);
+      const response = await apiClient.post<Review>(`/api/krasnals/${payload.krasnalId}/reviews`, {
+        rating: payload.rating,
+        content: payload.content,
+      });
       return response.data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['reviews', variables.krasnalId] });
+      queryClient.invalidateQueries({ queryKey: ['krasnals'] });
+      queryClient.invalidateQueries({ queryKey: ['pois'] }); // Just in case pois is used anywhere
+      queryClient.invalidateQueries({ queryKey: ['krasnal', variables.krasnalId] });
     },
   });
 };

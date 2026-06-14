@@ -1,5 +1,12 @@
-import React from 'react';
-import { useMySubmissions, type SubmissionStatus, type EnrichedSubmission } from '../api/useMySubmissions';
+import React, { useState } from 'react';
+import { useMySubmissions, type SubmissionStatus, type SubmissionReturn } from '../api/useMySubmissions';
+
+const safelyFormatDate = (dateString?: string | null) => {
+  if (!dateString) return 'Unknown date';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Invalid date';
+  return new Intl.DateTimeFormat('pl-PL', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+};
 
 const getStatusBadge = (status: SubmissionStatus) => {
   switch (status) {
@@ -26,11 +33,18 @@ const getStatusBadge = (status: SubmissionStatus) => {
   }
 };
 
-const MySubmissionsView: React.FC = () => {
-  const { data, isLoading, isError } = useMySubmissions();
+interface MySubmissionsViewProps {
+  setMapFocusPoint?: (pos: { lat: number; lng: number }) => void;
+}
 
-  // Safely ensure submissions is an array to avoid map() errors
-  const submissions = Array.isArray(data) ? data : [];
+const MySubmissionsView: React.FC<MySubmissionsViewProps> = ({ setMapFocusPoint }) => {
+  const { data, isLoading, isError } = useMySubmissions();
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  // Safely ensure submissions is an array and sort descending by time
+  const submissions = Array.isArray(data) 
+    ? [...data].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+    : [];
 
   return (
     <div className="flex h-full flex-col">
@@ -66,34 +80,50 @@ const MySubmissionsView: React.FC = () => {
 
         {!isLoading && !isError && submissions.length > 0 && (
           <div className="flex flex-col gap-4">
-            {submissions.map((sub: EnrichedSubmission) => (
-              <div
-                key={sub.id}
-                className="rounded-xl border border-wroclaw-dark/10 bg-white p-4 shadow-sm"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="font-bold text-wroclaw-dark">
-                      {sub.krasnalName}
-                    </h4>
-                    <p className="mt-0.5 text-xs text-wroclaw-dark/50">
-                      {new Intl.DateTimeFormat('en-US', {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
-                      }).format(new Date(sub.submittedTime))}
-                    </p>
+            {submissions.map((sub: SubmissionReturn) => {
+              const isExpanded = expandedId === sub.id;
+              return (
+                <div
+                  key={sub.id}
+                  onClick={() => {
+                    setExpandedId(isExpanded ? null : sub.id);
+                    if (!isExpanded && sub.krasnalPos && setMapFocusPoint) {
+                      setMapFocusPoint({ lat: sub.krasnalPos.latitude, lng: sub.krasnalPos.longitude });
+                    }
+                  }}
+                  className={`rounded-xl border bg-white p-4 shadow-sm cursor-pointer transition-all ${
+                    isExpanded 
+                      ? 'border-wroclaw-brick ring-1 ring-wroclaw-brick' 
+                      : 'border-wroclaw-dark/10 hover:border-wroclaw-dark/30'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-bold text-wroclaw-dark">
+                        {sub.krasnalName}
+                      </h4>
+                      <p className="mt-0.5 text-xs text-wroclaw-dark/50">
+                        {safelyFormatDate(sub.time)}
+                      </p>
+                    </div>
+                    {getStatusBadge(sub.status)}
                   </div>
-                  {getStatusBadge(sub.status)}
-                </div>
 
-                {sub.status === 'REJECTED' && sub.rejectionReason && (
-                  <div className="mt-3 rounded-lg bg-red-50 p-3 text-xs text-red-800">
-                    <span className="font-semibold">Reason:</span>{' '}
-                    {sub.rejectionReason}
-                  </div>
-                )}
-              </div>
-            ))}
+                  {isExpanded && (
+                    <div className="mt-4 pt-4 border-t border-wroclaw-dark/10">
+                      <p className="text-sm text-wroclaw-dark/80">
+                        <strong>Submission ID:</strong> {sub.id}
+                      </p>
+                      {sub.krasnalPos && (
+                        <p className="text-sm text-wroclaw-dark/80">
+                          <strong>Location:</strong> {sub.krasnalPos.latitude.toFixed(4)}, {sub.krasnalPos.longitude.toFixed(4)}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

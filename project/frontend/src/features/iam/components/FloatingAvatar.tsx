@@ -13,11 +13,7 @@ const FloatingAvatar: React.FC<FloatingAvatarProps> = ({ onClick }) => {
   const { isAuthenticated, logout } = useAuth();
 
   const handleClick = () => {
-    if (isAuthenticated) {
-      logout();
-    } else {
-      if (onClick) onClick();
-    }
+    if (onClick) onClick();
   };
 
   return (

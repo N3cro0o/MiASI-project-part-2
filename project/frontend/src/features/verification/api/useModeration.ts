@@ -1,27 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../../../shared/api/apiClient';
-import { type Submission, type EnrichedSubmission } from './useMySubmissions';
+import { type SubmissionReturn } from './useMySubmissions';
 
-export const usePendingSubmissions = () => {
+export const usePendingSubmissions = (enabled: boolean = true) => {
   return useQuery({
     queryKey: ['pending-submissions'],
-    queryFn: async (): Promise<EnrichedSubmission[]> => {
-      const response = await apiClient.get<Submission[]>('/api/submissions?status=PENDING');
-      return response.data.map((item) => {
-        let name = 'Unknown';
-        if (item.json) {
-          try {
-            const parsed = JSON.parse(item.json);
-            name = parsed?.name || 'Unknown';
-          } catch (error) {
-            console.error('Failed to parse submission JSON', error);
-          }
-        }
-        return {
-          ...item,
-          krasnalName: name,
-        };
-      });
+    enabled,
+    queryFn: async (): Promise<SubmissionReturn[]> => {
+      const response = await apiClient.get<SubmissionReturn[]>('/api/submissions?status=PENDING');
+      return response.data;
     },
   });
 };
@@ -46,11 +33,7 @@ export const useRejectSubmission = () => {
 
   return useMutation({
     mutationFn: async ({ subId, reason }: { subId: number | string; reason: string }) => {
-      const response = await apiClient.patch(`/api/submissions/reject/${subId}`, reason, {
-        headers: {
-          'Content-Type': 'text/plain',
-        },
-      });
+      const response = await apiClient.patch(`/api/submissions/reject/${subId}`, { reason });
       return response.data;
     },
     onSuccess: () => {

@@ -4,6 +4,13 @@ import { useAuth } from '../../iam/context/AuthContext';
 import { useKrasnalReviews } from '../../reviews/api/useReviews';
 import ReviewForm from '../../reviews/components/ReviewForm';
 
+const safelyFormatDate = (dateString?: string | null) => {
+  if (!dateString) return 'Unknown date';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Invalid date';
+  return new Intl.DateTimeFormat('pl-PL', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+};
+
 interface PoiDetailsProps {
   poi: Poi;
   onBack: () => void;
@@ -122,10 +129,10 @@ const PoiDetails: React.FC<PoiDetailsProps> = ({ poi, onBack }) => {
                       {'⭐'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
                     </span>
                     <span className="text-[10px] text-wroclaw-dark/40">
-                      {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(review.reviewDate))}
+                      {safelyFormatDate(review.created)}
                     </span>
                   </div>
-                  <p className="text-sm text-wroclaw-dark/80">{review.comment}</p>
+                  <p className="text-sm text-wroclaw-dark/80">{review.content}</p>
                 </div>
               ))}
             </div>

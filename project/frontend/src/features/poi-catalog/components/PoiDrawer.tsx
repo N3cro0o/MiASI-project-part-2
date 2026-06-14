@@ -4,11 +4,13 @@ import PoiDetails from './PoiDetails';
 import PoiForm from '../../verification/components/PoiForm';
 import MySubmissionsView from '../../verification/components/MySubmissionsView';
 import VerificationQueue from '../../verification/components/VerificationQueue';
+import UserProfile from '../../profile/components/UserProfile';
+import AdminPanel from '../../admin/components/AdminPanel';
 import FloatingSearch from '../../../shared/components/FloatingSearch';
 import type { Poi } from '../models/Poi';
 import { POI_CATEGORIES } from '../constants/categories';
 
-export type DrawerView = 'CATALOG' | 'MY_SUBMISSIONS' | 'MODERATOR_QUEUE';
+export type DrawerView = 'CATALOG' | 'MY_SUBMISSIONS' | 'MODERATOR_QUEUE' | 'PROFILE' | 'ADMIN';
 
 interface PoiDrawerProps {
   activeCategory: string;
@@ -17,19 +19,27 @@ interface PoiDrawerProps {
   setSelectedPoi: (poi: Poi | null) => void;
   draftPosition: { lat: number; lng: number } | null;
   onCancelDraft: () => void;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
   isOpen: boolean;
   onToggle: () => void;
   currentView: DrawerView;
   setCurrentView: (view: DrawerView) => void;
   isAuthenticated?: boolean;
   isModerator?: boolean;
+  isAdmin?: boolean;
+  setMapFocusPoint: (pos: { lat: number; lng: number }) => void;
+  filteredPois: Poi[];
+  isLoading: boolean;
+  error: Error | null;
 }
 
 /** Tab definitions for the navigation bar */
-const DRAWER_TABS: { id: DrawerView; label: string; moderatorOnly?: boolean; authenticatedOnly?: boolean }[] = [
+const DRAWER_TABS: { id: DrawerView; label: string; moderatorOnly?: boolean; authenticatedOnly?: boolean; adminOnly?: boolean }[] = [
   { id: 'CATALOG', label: '📍 Catalog' },
   { id: 'MY_SUBMISSIONS', label: '📝 My Submissions', authenticatedOnly: true },
-  { id: 'MODERATOR_QUEUE', label: '🛡️ Verification Queue', authenticatedOnly: true },
+  { id: 'MODERATOR_QUEUE', label: '🛡️ Verification Queue', moderatorOnly: true },
+  { id: 'ADMIN', label: '⚙️ Manage Users', adminOnly: true },
 ];
 
 /**
@@ -48,21 +58,32 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
   setSelectedPoi,
   draftPosition,
   onCancelDraft,
+  searchTerm,
+  setSearchTerm,
   isOpen,
   onToggle,
   currentView,
   setCurrentView,
   isAuthenticated = false,
   isModerator = false,
+  isAdmin = false,
+  setMapFocusPoint,
+  filteredPois,
+  isLoading,
+  error,
 }) => {
   // Redirect to CATALOG if the user is unauthenticated or unprivileged but sitting on a restricted view
   useEffect(() => {
-    if (!isAuthenticated && currentView === 'MY_SUBMISSIONS') {
+    if (!isAuthenticated && ['MY_SUBMISSIONS', 'PROFILE'].includes(currentView)) {
       setCurrentView('CATALOG');
     }
-  }, [isAuthenticated, currentView, setCurrentView]);
-
-  const [searchTerm, setSearchTerm] = useState('');
+    if (!isModerator && currentView === 'MODERATOR_QUEUE') {
+      setCurrentView('CATALOG');
+    }
+    if (!isAdmin && currentView === 'ADMIN') {
+      setCurrentView('CATALOG');
+    }
+  }, [isAuthenticated, isModerator, isAdmin, currentView, setCurrentView]);
 
   return (
     <div
@@ -91,6 +112,7 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
         <nav className="shrink-0 flex border-b border-wroclaw-dark/10 px-2">
           {DRAWER_TABS
             .filter((tab) => {
+              if (tab.adminOnly && !isAdmin) return false;
               if (tab.moderatorOnly && !isModerator) return false;
               if (tab.authenticatedOnly && !isAuthenticated) return false;
               return true;
@@ -120,15 +142,12 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
 
         {currentView === 'CATALOG' && (
           <>
-            {/* ── Search bar — always visible at the top ─────────────── */}
-            <FloatingSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-
-            {draftPosition ? (
-              <PoiForm draftPosition={draftPosition} onCancel={onCancelDraft} onSuccess={onCancelDraft} />
-            ) : selectedPoi ? (
+            {selectedPoi ? (
               <PoiDetails poi={selectedPoi} onBack={() => setSelectedPoi(null)} />
             ) : (
               <>
+                {/* ── Search bar — always visible at the top ─────────────── */}
+                <FloatingSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
                 {/* ── Header ──────────────────────────────────────────── */}
                 <header className="shrink-0 px-5 pt-4 pb-2">
                   <div className="flex items-baseline justify-between">
@@ -165,7 +184,14 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
                 </header>
                 {/* ── Scrollable POI list ──────────────────────────────── */}
                 <div className="flex-1 overflow-y-auto px-5 pb-6">
-                  <PoiList activeCategory={activeCategory} onPoiSelect={setSelectedPoi} searchTerm={searchTerm} />
+                  <PoiList 
+                    activeCategory={activeCategory} 
+                    onPoiSelect={setSelectedPoi} 
+                    searchTerm={searchTerm} 
+                    filteredPois={filteredPois}
+                    isLoading={isLoading}
+                    error={error}
+                  />
                 </div>
               </>
             )}
@@ -173,11 +199,23 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
         )}
 
         {currentView === 'MY_SUBMISSIONS' && (
-          <MySubmissionsView />
+          draftPosition ? (
+            <PoiForm draftPosition={draftPosition} onCancel={onCancelDraft} onSuccess={onCancelDraft} />
+          ) : (
+            <MySubmissionsView setMapFocusPoint={setMapFocusPoint} />
+          )
         )}
 
         {currentView === 'MODERATOR_QUEUE' && (
-          <VerificationQueue />
+          <VerificationQueue setMapFocusPoint={setMapFocusPoint} />
+        )}
+
+        {currentView === 'PROFILE' && (
+          <UserProfile />
+        )}
+
+        {currentView === 'ADMIN' && (
+          <AdminPanel />
         )}
       </aside>
 

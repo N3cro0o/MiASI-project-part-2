@@ -26,7 +26,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ krasnalId }) => {
     }
 
     createReview(
-      { krasnalId, rating, comment },
+      { krasnalId, rating, content: comment },
       {
         onSuccess: () => {
           setRating(0);

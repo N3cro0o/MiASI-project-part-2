@@ -114,7 +114,7 @@ public class VisitControllerWeb implements VisitControllerInterface {
         return visitRepo.GetVisitsFromUser(userId);
     }
 
-    @PostMapping
+    @PostMapping("/{krasnalId}")
     public ResponseEntity<VisitedKrasnal> AddVisitWrapper(@PathVariable int krasnalId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Wanderer);

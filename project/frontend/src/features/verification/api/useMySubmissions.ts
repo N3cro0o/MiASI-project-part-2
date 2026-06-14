@@ -4,41 +4,25 @@ import { API_ENDPOINTS } from '../../../shared/api/endpoints';
 
 export type SubmissionStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 
-export interface Submission {
-  id: string | number;
-  json: string;
+export interface SubmissionReturn {
+  id: number;
+  userId: number;
   status: SubmissionStatus;
-  rejectionReason?: string;
-  submittedTime: string;
-}
-
-export interface EnrichedSubmission extends Submission {
-  krasnalName?: string;
+  time: string;
+  krasnalName: string;
+  krasnalPos: { latitude: number; longitude: number };
 }
 
 /**
  * Hook to fetch the current user's submissions.
  */
-export const useMySubmissions = () => {
+export const useMySubmissions = (enabled: boolean = true) => {
   return useQuery({
     queryKey: ['my-submissions'],
-    queryFn: async (): Promise<EnrichedSubmission[]> => {
-      const response = await apiClient.get<Submission[]>(API_ENDPOINTS.GET_MY_SUBMISSIONS);
-      return response.data.map((item) => {
-        let name = 'Unknown Krasnal';
-        if (item.json) {
-          try {
-            const parsed = JSON.parse(item.json);
-            name = parsed?.name || 'Unknown Krasnal';
-          } catch (error) {
-            console.error('Failed to parse submission JSON for item', item.id);
-          }
-        }
-        return {
-          ...item,
-          krasnalName: name,
-        };
-      });
+    enabled,
+    queryFn: async (): Promise<SubmissionReturn[]> => {
+      const response = await apiClient.get<SubmissionReturn[]>(API_ENDPOINTS.GET_MY_SUBMISSIONS);
+      return response.data;
     },
   });
 };

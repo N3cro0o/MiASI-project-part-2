@@ -7,14 +7,16 @@ interface PoiListProps {
   activeCategory: string;
   onPoiSelect: (poi: Poi) => void;
   searchTerm: string;
+  filteredPois: Poi[];
+  isLoading: boolean;
+  error: Error | null;
 }
 
 /**
  * Scrollable vertical list of POI cards.
  * Fetches and renders real dwarf data from the backend.
  */
-const PoiList: React.FC<PoiListProps> = ({ activeCategory, onPoiSelect, searchTerm }) => {
-  const { data: krasnals, isLoading, error } = useKrasnals();
+const PoiList: React.FC<PoiListProps> = ({ activeCategory, onPoiSelect, searchTerm, filteredPois, isLoading, error }) => {
 
   if (isLoading) {
     return (
@@ -33,26 +35,7 @@ const PoiList: React.FC<PoiListProps> = ({ activeCategory, onPoiSelect, searchTe
     );
   }
 
-  if (!krasnals || krasnals.length === 0) {
-    return (
-      <div className="flex h-32 items-center justify-center text-sm text-wroclaw-dark/60">
-        No POIs found in this area.
-      </div>
-    );
-  }
-
-  // Filter first by category
-  const categoryFiltered =
-    activeCategory === 'ALL'
-      ? krasnals
-      : krasnals.filter((poi) => poi.category === activeCategory);
-
-  // Then filter by search term
-  const filteredKrasnals = categoryFiltered.filter((poi) =>
-    poi.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (filteredKrasnals.length === 0) {
+  if (filteredPois.length === 0) {
     if (searchTerm !== '') {
       return (
         <div className="flex h-32 items-center justify-center text-center text-sm text-wroclaw-dark/60 px-4">
@@ -70,7 +53,7 @@ const PoiList: React.FC<PoiListProps> = ({ activeCategory, onPoiSelect, searchTe
   // Use type casting to match Poi interface expected by PoiCard if needed
   return (
     <div className="flex flex-col gap-2">
-      {filteredKrasnals.map((poi) => (
+      {filteredPois.map((poi) => (
         <PoiCard key={poi.id} poi={poi as Poi} onClick={onPoiSelect} />
       ))}
     </div>
