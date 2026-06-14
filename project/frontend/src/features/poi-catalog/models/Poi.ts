@@ -28,5 +28,6 @@ export interface Poi {
   status: string;
   // Opcjonalne pola, jeśli chcesz ich używać:
   rating?: number;
+  averageRating?: number;
   imageUrl?: string;
 }

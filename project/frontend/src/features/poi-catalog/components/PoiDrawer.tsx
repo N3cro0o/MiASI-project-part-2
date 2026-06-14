@@ -21,6 +21,8 @@ interface PoiDrawerProps {
   onCancelDraft: () => void;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
+  showVisitedOnly: boolean;
+  setShowVisitedOnly: (visited: boolean) => void;
   isOpen: boolean;
   onToggle: () => void;
   currentView: DrawerView;
@@ -60,6 +62,8 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
   onCancelDraft,
   searchTerm,
   setSearchTerm,
+  showVisitedOnly,
+  setShowVisitedOnly,
   isOpen,
   onToggle,
   currentView,
@@ -154,9 +158,17 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
                     <h2 className="text-xl font-semibold text-wroclaw-dark">
                       Krasnale we Wrocławiu
                     </h2>
-                    <span className="text-xs font-medium text-wroclaw-dark/50">
-                      Explore POIs
-                    </span>
+                    {isAuthenticated && (
+                      <label className="flex items-center gap-2 text-xs font-medium text-wroclaw-dark cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={showVisitedOnly} 
+                          onChange={(e) => setShowVisitedOnly(e.target.checked)}
+                          className="rounded border-wroclaw-dark/20 text-wroclaw-brick focus:ring-wroclaw-brick"
+                        />
+                        👁️ Visited Only
+                      </label>
+                    )}
                   </div>
                   {/* ── Category filter chips (horizontal scroll) ────── */}
                   <div className="-mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-2 scrollbar-none">

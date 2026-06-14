@@ -3,6 +3,7 @@ import { getCategoryMeta } from '../constants/categories';
 import { useAuth } from '../../iam/context/AuthContext';
 import { useKrasnalReviews } from '../../reviews/api/useReviews';
 import ReviewForm from '../../reviews/components/ReviewForm';
+import { useMyVisits, useAddVisit, useRemoveVisit } from '../../visits/api/useVisits';
 
 const safelyFormatDate = (dateString?: string | null) => {
   if (!dateString) return 'Unknown date';
@@ -21,13 +22,20 @@ interface PoiDetailsProps {
  * Rendered inside the PoiDrawer when a user clicks on a PoiCard.
  */
 const PoiDetails: React.FC<PoiDetailsProps> = ({ poi, onBack }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { data: reviews, isLoading: reviewsLoading } = useKrasnalReviews(Number(poi.id));
+
+  const { data: myVisits } = useMyVisits();
+  const { mutate: addVisit, isPending: addingVisit } = useAddVisit();
+  const { mutate: removeVisit, isPending: removingVisit } = useRemoveVisit();
+
+  const isVisited = myVisits?.includes(Number(poi.id)) ?? false;
+  const isVisitLoading = addingVisit || removingVisit;
 
   const reviewCount = reviews ? reviews.length : 0;
   const averageRating = reviewCount > 0
     ? reviews!.reduce((acc, r) => acc + r.rating, 0) / reviewCount
-    : (poi.rating ?? 0);
+    : (poi.averageRating ?? poi.rating ?? 0);
 
   const categoryMeta = getCategoryMeta(poi.category);
 
@@ -85,6 +93,23 @@ const PoiDetails: React.FC<PoiDetailsProps> = ({ poi, onBack }) => {
           </span>
         </div>
 
+        {/* Mark as Visited Button */}
+        {isAuthenticated && (
+          <div className="mb-4">
+            <button
+              onClick={() => isVisited ? removeVisit(poi.id) : addVisit(poi.id)}
+              disabled={isVisitLoading}
+              className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all ${
+                isVisited
+                  ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-200'
+                  : 'bg-wroclaw-brick text-white hover:bg-wroclaw-brick/90 shadow-md hover:shadow-lg'
+              } disabled:opacity-50`}
+            >
+              {isVisited ? '✔️ Visited' : '🎯 Catch this Krasnal'}
+            </button>
+          </div>
+        )}
+
         {/* Rating and Coordinates */}
         <div className="mb-4 flex flex-col gap-1 text-sm text-wroclaw-dark/60">
           <div className="flex items-center gap-1">
@@ -139,7 +164,13 @@ const PoiDetails: React.FC<PoiDetailsProps> = ({ poi, onBack }) => {
           )}
 
           {isAuthenticated ? (
-            <ReviewForm krasnalId={Number(poi.id)} />
+            reviews?.some(r => r.userId === user?.id) ? (
+              <div className="mt-4 rounded-lg bg-green-50 p-4 text-center border border-green-100">
+                <p className="text-sm font-medium text-green-800">You have already reviewed this Krasnal. Thank you!</p>
+              </div>
+            ) : (
+              <ReviewForm krasnalId={Number(poi.id)} />
+            )
           ) : (
             <div className="mt-4 rounded-lg bg-wroclaw-sand p-4 text-center border border-wroclaw-dark/10">
               <p className="text-sm font-medium text-wroclaw-dark/70">Please log in to leave a review.</p>

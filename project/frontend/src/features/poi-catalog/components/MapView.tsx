@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Poi } from '../models/Poi';
@@ -173,13 +173,31 @@ const MapView: React.FC<MapViewProps> = ({
         />
       ))}
 
-      {currentView === 'MY_SUBMISSIONS' && mySubmissions?.filter(s => s.krasnalPos).map((sub) => (
-        <Marker
-          key={sub.id}
-          position={[sub.krasnalPos!.latitude, sub.krasnalPos!.longitude]}
-          icon={blueIcon}
-        />
-      ))}
+      {currentView === 'MY_SUBMISSIONS' &&
+        mySubmissions?.map((sub) => {
+          if (!sub.pos) return null;
+          return (
+            <Marker
+              key={`sub-${sub.id}`}
+              position={[sub.pos.latitude, sub.pos.longitude]}
+              icon={createCustomIcon({
+                id: sub.id,
+                name: sub.name,
+                description: 'Pending submission',
+                position: sub.pos,
+                category: 'submission',
+                status: sub.status,
+              })}
+            >
+              <Popup className="custom-popup">
+                <div className="p-2">
+                  <h3 className="font-bold text-wroclaw-dark">{sub.name}</h3>
+                  <p className="text-xs text-wroclaw-dark/60 mt-1">Status: {sub.status}</p>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
 
       {currentView === 'MODERATOR_QUEUE' && pendingSubmissions?.filter(s => s.krasnalPos).map((sub) => (
         <Marker

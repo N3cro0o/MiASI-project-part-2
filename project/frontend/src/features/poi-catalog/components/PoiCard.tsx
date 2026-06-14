@@ -12,7 +12,7 @@ export interface PoiCardProps {
  * Displays a thumbnail placeholder, name, star rating, and a short description.
  */
 const PoiCard: React.FC<PoiCardProps> = ({ poi, onClick }) => {
-  const rating = poi.rating ?? 0;
+  const rating = poi.averageRating ?? poi.rating ?? 0;
   const reviewCount = 0; // Placeholder until backend provides review counts
   const categoryMeta = getCategoryMeta(poi.category);
 

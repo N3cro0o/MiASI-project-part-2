@@ -8,6 +8,7 @@ import FabAdd from './features/verification/components/FabAdd';
 import type { Poi } from './features/poi-catalog/models/Poi';
 import { useAuth } from './features/iam/context/AuthContext';
 import { useKrasnals } from './features/poi-catalog/api/useKrasnals';
+import { useMyVisits } from './features/visits/api/useVisits';
 
 /**
  * Root application shell.
@@ -16,6 +17,7 @@ import { useKrasnals } from './features/poi-catalog/api/useKrasnals';
 function App() {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [showVisitedOnly, setShowVisitedOnly] = useState<boolean>(false);
   const [selectedPoi, setSelectedPoi] = useState<Poi | null>(null);
 
   // Adding mode states
@@ -42,10 +44,13 @@ function App() {
 
   // Fetch all pois here to synchronize map and list
   const { data: krasnals, isLoading, error } = useKrasnals();
+  
+  const { data: myVisits } = useMyVisits();
 
   // Filter pois
   const filteredKrasnals = krasnals?.filter((poi) => {
     if (activeCategory !== 'ALL' && poi.category !== activeCategory) return false;
+    if (showVisitedOnly && myVisits && !myVisits.includes(Number(poi.id))) return false;
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       if (!poi.name.toLowerCase().includes(term) && !poi.description.toLowerCase().includes(term)) {
@@ -83,6 +88,8 @@ function App() {
         setActiveCategory={setActiveCategory}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
+        showVisitedOnly={showVisitedOnly}
+        setShowVisitedOnly={setShowVisitedOnly}
         selectedPoi={selectedPoi}
         setSelectedPoi={setSelectedPoi}
         draftPosition={draftPosition}
