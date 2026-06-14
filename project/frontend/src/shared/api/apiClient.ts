@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const AUTH_TOKEN_KEY = 'auth_token';
+const AUTH_TOKEN_KEY = 'jwt_token';
 
 /**
  * Pre-configured Axios instance for all API communication.
