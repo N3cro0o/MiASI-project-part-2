@@ -22,7 +22,7 @@ public class GetKrasnalReviewFromInteraction implements GetKrasnalReviewInterfac
         var listToMap = reviewRepo.GetReviewsUnderKrasnal(krasnalId);
         List<KrasnalReview> list = new ArrayList<>();
         for (Review r : listToMap) {
-            list.add(new KrasnalReview(r.id(), r.userId(), r.rating(), r.content(), r.created()));
+            list.add(new KrasnalReview(r.userId(), r.rating(), r.content(), r.created()));
         }
         return list;
     }

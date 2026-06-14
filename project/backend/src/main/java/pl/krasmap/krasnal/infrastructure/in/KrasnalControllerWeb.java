@@ -47,7 +47,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
         return krasnalRepo.GetKrasnal(krasnalId);
     }
 
-    @GetMapping("/{krasnalId}/review")
+    @GetMapping("/{krasnalId}/reviews")
     public ResponseEntity<List<KrasnalReview>> GetKrasnalReviewsWrapper(@PathVariable int krasnalId) {
         List<KrasnalReview> p = GetKrasnalReviews(krasnalId);
         if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
