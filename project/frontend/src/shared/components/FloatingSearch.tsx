@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import React from 'react';
+
+interface FloatingSearchProps {
+  searchTerm: string;
+  onSearchChange: (val: string) => void;
+}
 
 /**
  * Floating search bar overlay positioned at the top of the map.
- * Visual shell only — query handling will be wired to the POI catalog API later.
  */
-const FloatingSearch: React.FC = () => {
-  const [query, setQuery] = useState('');
-
+const FloatingSearch: React.FC<FloatingSearchProps> = ({ searchTerm, onSearchChange }) => {
   return (
     <div className="px-5 pt-4 pb-2">
       <div className="flex items-center rounded-full bg-white/90 px-4 py-2 shadow-sm backdrop-blur-sm">
@@ -29,8 +31,8 @@ const FloatingSearch: React.FC = () => {
         <input
           id="search-input"
           type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search dwarfs & places…"
           className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
         />

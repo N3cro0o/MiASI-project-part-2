@@ -1,7 +1,9 @@
+import React, { useEffect, useState } from 'react';
 import PoiList from './PoiList';
 import PoiDetails from './PoiDetails';
 import PoiForm from '../../verification/components/PoiForm';
 import MySubmissionsView from '../../verification/components/MySubmissionsView';
+import VerificationQueue from '../../verification/components/VerificationQueue';
 import FloatingSearch from '../../../shared/components/FloatingSearch';
 import type { Poi } from '../models/Poi';
 import { POI_CATEGORIES } from '../constants/categories';
@@ -19,14 +21,15 @@ interface PoiDrawerProps {
   onToggle: () => void;
   currentView: DrawerView;
   setCurrentView: (view: DrawerView) => void;
+  isAuthenticated?: boolean;
   isModerator?: boolean;
 }
 
 /** Tab definitions for the navigation bar */
-const DRAWER_TABS: { id: DrawerView; label: string; moderatorOnly?: boolean }[] = [
+const DRAWER_TABS: { id: DrawerView; label: string; moderatorOnly?: boolean; authenticatedOnly?: boolean }[] = [
   { id: 'CATALOG', label: '📍 Catalog' },
-  { id: 'MY_SUBMISSIONS', label: '📝 My Submissions' },
-  { id: 'MODERATOR_QUEUE', label: '🛡️ Moderator', moderatorOnly: true },
+  { id: 'MY_SUBMISSIONS', label: '📝 My Submissions', authenticatedOnly: true },
+  { id: 'MODERATOR_QUEUE', label: '🛡️ Verification Queue', authenticatedOnly: true },
 ];
 
 /**
@@ -49,8 +52,18 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
   onToggle,
   currentView,
   setCurrentView,
+  isAuthenticated = false,
   isModerator = false,
 }) => {
+  // Redirect to CATALOG if the user is unauthenticated or unprivileged but sitting on a restricted view
+  useEffect(() => {
+    if (!isAuthenticated && currentView === 'MY_SUBMISSIONS') {
+      setCurrentView('CATALOG');
+    }
+  }, [isAuthenticated, currentView, setCurrentView]);
+
+  const [searchTerm, setSearchTerm] = useState('');
+
   return (
     <div
       className={[
@@ -77,7 +90,11 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
         {/* ── Tab Navigation Bar ─────────────────────────────────────── */}
         <nav className="shrink-0 flex border-b border-wroclaw-dark/10 px-2">
           {DRAWER_TABS
-            .filter((tab) => !tab.moderatorOnly || isModerator)
+            .filter((tab) => {
+              if (tab.moderatorOnly && !isModerator) return false;
+              if (tab.authenticatedOnly && !isAuthenticated) return false;
+              return true;
+            })
             .map((tab) => {
               const isActive = currentView === tab.id;
               return (
@@ -104,7 +121,7 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
         {currentView === 'CATALOG' && (
           <>
             {/* ── Search bar — always visible at the top ─────────────── */}
-            <FloatingSearch />
+            <FloatingSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
             {draftPosition ? (
               <PoiForm draftPosition={draftPosition} onCancel={onCancelDraft} onSuccess={onCancelDraft} />
@@ -148,7 +165,7 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
                 </header>
                 {/* ── Scrollable POI list ──────────────────────────────── */}
                 <div className="flex-1 overflow-y-auto px-5 pb-6">
-                  <PoiList activeCategory={activeCategory} onPoiSelect={setSelectedPoi} />
+                  <PoiList activeCategory={activeCategory} onPoiSelect={setSelectedPoi} searchTerm={searchTerm} />
                 </div>
               </>
             )}
@@ -160,10 +177,7 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
         )}
 
         {currentView === 'MODERATOR_QUEUE' && (
-          <div className="flex-1 overflow-y-auto p-5 text-wroclaw-dark/70">
-            <h2 className="text-lg font-semibold text-wroclaw-dark">Moderator Queue</h2>
-            <p className="mt-2 text-sm">Pending submissions for review will appear here.</p>
-          </div>
+          <VerificationQueue />
         )}
       </aside>
 

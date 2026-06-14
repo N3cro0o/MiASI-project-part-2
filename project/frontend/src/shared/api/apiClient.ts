@@ -36,7 +36,8 @@ apiClient.interceptors.response.use(
     if (status === 401) {
       // Session expired or invalid token — clear stored credentials
       localStorage.removeItem(AUTH_TOKEN_KEY);
-      window.location.href = '/login';
+      // Forcefully downgrade to guest state by reloading the entire React app
+      window.location.reload();
     }
 
     if (status === 403) {

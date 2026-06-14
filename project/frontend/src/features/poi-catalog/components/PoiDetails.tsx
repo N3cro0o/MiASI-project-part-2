@@ -1,5 +1,8 @@
 import type { Poi } from '../models/Poi';
 import { getCategoryMeta } from '../constants/categories';
+import { useAuth } from '../../iam/context/AuthContext';
+import { useKrasnalReviews } from '../../reviews/api/useReviews';
+import ReviewForm from '../../reviews/components/ReviewForm';
 
 interface PoiDetailsProps {
   poi: Poi;
@@ -11,8 +14,14 @@ interface PoiDetailsProps {
  * Rendered inside the PoiDrawer when a user clicks on a PoiCard.
  */
 const PoiDetails: React.FC<PoiDetailsProps> = ({ poi, onBack }) => {
-  const rating = poi.rating ?? 0;
-  const reviewCount = 0; // Placeholder
+  const { isAuthenticated } = useAuth();
+  const { data: reviews, isLoading: reviewsLoading } = useKrasnalReviews(Number(poi.id));
+
+  const reviewCount = reviews ? reviews.length : 0;
+  const averageRating = reviewCount > 0
+    ? reviews!.reduce((acc, r) => acc + r.rating, 0) / reviewCount
+    : (poi.rating ?? 0);
+
   const categoryMeta = getCategoryMeta(poi.category);
 
   return (
@@ -73,7 +82,7 @@ const PoiDetails: React.FC<PoiDetailsProps> = ({ poi, onBack }) => {
         <div className="mb-4 flex flex-col gap-1 text-sm text-wroclaw-dark/60">
           <div className="flex items-center gap-1">
             <span className="text-amber-500">⭐</span>
-            <span className="font-medium text-wroclaw-dark">{rating.toFixed(1)}</span>
+            <span className="font-medium text-wroclaw-dark">{averageRating.toFixed(1)}</span>
             <span>({reviewCount} reviews)</span>
           </div>
           <div className="font-mono text-xs opacity-70">
@@ -87,6 +96,48 @@ const PoiDetails: React.FC<PoiDetailsProps> = ({ poi, onBack }) => {
           <p className="text-sm leading-relaxed text-wroclaw-dark/80">
             {poi.description}
           </p>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-bold text-wroclaw-dark">Reviews</h3>
+            <div className="flex items-center gap-1 text-sm text-wroclaw-dark/60">
+              <span className="text-amber-500">⭐</span>
+              <span className="font-medium text-wroclaw-dark">{averageRating.toFixed(1)}</span>
+              <span>({reviewCount} reviews)</span>
+            </div>
+          </div>
+
+          {reviewsLoading ? (
+            <div className="text-sm text-wroclaw-dark/50">Loading reviews...</div>
+          ) : reviewCount === 0 ? (
+            <div className="text-sm text-wroclaw-dark/50 italic mb-4">No reviews yet. Be the first!</div>
+          ) : (
+            <div className="flex flex-col gap-3 mb-4">
+              {reviews!.map((review) => (
+                <div key={review.id} className="rounded-xl bg-white p-3 shadow-sm border border-wroclaw-dark/5">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-amber-500 text-xs">
+                      {'⭐'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                    </span>
+                    <span className="text-[10px] text-wroclaw-dark/40">
+                      {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(review.reviewDate))}
+                    </span>
+                  </div>
+                  <p className="text-sm text-wroclaw-dark/80">{review.comment}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {isAuthenticated ? (
+            <ReviewForm krasnalId={Number(poi.id)} />
+          ) : (
+            <div className="mt-4 rounded-lg bg-wroclaw-sand p-4 text-center border border-wroclaw-dark/10">
+              <p className="text-sm font-medium text-wroclaw-dark/70">Please log in to leave a review.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

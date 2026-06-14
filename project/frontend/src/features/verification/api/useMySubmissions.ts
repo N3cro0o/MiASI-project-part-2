@@ -1,15 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import apiClient from '../../../shared/api/apiClient';
 import { API_ENDPOINTS } from '../../../shared/api/endpoints';
 
 export type SubmissionStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 
 export interface Submission {
   id: string | number;
-  name: string;
+  json: string;
   status: SubmissionStatus;
   rejectionReason?: string;
   submittedTime: string;
+}
+
+export interface EnrichedSubmission extends Submission {
+  krasnalName?: string;
 }
 
 /**
@@ -17,10 +21,24 @@ export interface Submission {
  */
 export const useMySubmissions = () => {
   return useQuery({
-    queryKey: ['mySubmissions'],
-    queryFn: async (): Promise<Submission[]> => {
-      const response = await axios.get(API_ENDPOINTS.GET_MY_SUBMISSIONS);
-      return response.data;
+    queryKey: ['my-submissions'],
+    queryFn: async (): Promise<EnrichedSubmission[]> => {
+      const response = await apiClient.get<Submission[]>(API_ENDPOINTS.GET_MY_SUBMISSIONS);
+      return response.data.map((item) => {
+        let name = 'Unknown Krasnal';
+        if (item.json) {
+          try {
+            const parsed = JSON.parse(item.json);
+            name = parsed?.name || 'Unknown Krasnal';
+          } catch (error) {
+            console.error('Failed to parse submission JSON for item', item.id);
+          }
+        }
+        return {
+          ...item,
+          krasnalName: name,
+        };
+      });
     },
   });
 };
