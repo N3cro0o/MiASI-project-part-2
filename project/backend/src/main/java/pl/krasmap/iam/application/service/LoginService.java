@@ -28,7 +28,7 @@ public class LoginService {
         if (ch) {
             jwt = auth.GenerateJwt(userRepo.GetUser(login).id());
         }
-        return Pair.of(false, jwt);
+        return Pair.of(ch, jwt);
     }
 
     public Pair<Boolean, String> Register(UserNew newUser) {
@@ -36,6 +36,9 @@ public class LoginService {
         System.out.println(userToAdd);
         User u = userRepo.AddUser(userToAdd);
         System.out.println(u);
-        return Pair.of(!u.isNull(), auth.GenerateJwt(u.id()));
+        if (u == null) {
+            return Pair.of(false, "");
+        }
+        return Pair.of(true, auth.GenerateJwt(u.id()));
     }
 }

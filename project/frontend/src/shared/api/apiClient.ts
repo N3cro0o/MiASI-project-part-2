@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const AUTH_TOKEN_KEY = 'auth_token';
+const AUTH_TOKEN_KEY = 'jwt_token';
 
 /**
  * Pre-configured Axios instance for all API communication.
@@ -36,7 +36,8 @@ apiClient.interceptors.response.use(
     if (status === 401) {
       // Session expired or invalid token — clear stored credentials
       localStorage.removeItem(AUTH_TOKEN_KEY);
-      window.location.href = '/login';
+      // Forcefully downgrade to guest state by reloading the entire React app
+      window.location.reload();
     }
 
     if (status === 403) {

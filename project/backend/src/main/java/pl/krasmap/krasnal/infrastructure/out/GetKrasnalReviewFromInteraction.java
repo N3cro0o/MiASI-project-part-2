@@ -34,6 +34,9 @@ public class GetKrasnalReviewFromInteraction implements GetKrasnalReviewInterfac
     @Override
     public KrasnalReview AddReview(int krasnalId, int userId, KrasnalReviewWeb review) {
         Review r = reviewRepo.AddReview(krasnalId, userId, review.rating(), review.content());
+        if (r == null) {
+            return null;
+        }
         return KrasnalReview.From(r, userContext.GetLoginFromUser(r.userId()));
     }
 }

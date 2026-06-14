@@ -1,8 +1,16 @@
-import React from 'react';
-import { useMySubmissions, type SubmissionStatus } from '../api/useMySubmissions';
+import React, { useState } from 'react';
+import { useMySubmissions, type SubmissionStatus, type UserSubmission } from '../api/useMySubmissions';
 
-const getStatusBadge = (status: SubmissionStatus) => {
-  switch (status) {
+const safelyFormatDate = (dateString?: string | null) => {
+  if (!dateString) return 'Unknown date';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Invalid date';
+  return new Intl.DateTimeFormat('pl-PL', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+};
+
+const getStatusBadge = (status: SubmissionStatus | string) => {
+  const normalizedStatus = typeof status === 'string' ? status.toUpperCase() : status;
+  switch (normalizedStatus) {
     case 'PENDING':
       return (
         <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
@@ -26,11 +34,18 @@ const getStatusBadge = (status: SubmissionStatus) => {
   }
 };
 
-const MySubmissionsView: React.FC = () => {
-  const { data, isLoading, isError } = useMySubmissions();
+interface MySubmissionsViewProps {
+  setMapFocusPoint?: (pos: { lat: number; lng: number }) => void;
+}
 
-  // Safely ensure submissions is an array to avoid map() errors
-  const submissions = Array.isArray(data) ? data : [];
+const MySubmissionsView: React.FC<MySubmissionsViewProps> = ({ setMapFocusPoint }) => {
+  const { data, isLoading, isError } = useMySubmissions();
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  // Safely ensure submissions is an array and sort descending by time
+  const submissions = Array.isArray(data) 
+    ? [...data].sort((a, b) => new Date(b.submittedTime).getTime() - new Date(a.submittedTime).getTime())
+    : [];
 
   return (
     <div className="flex h-full flex-col">
@@ -66,31 +81,70 @@ const MySubmissionsView: React.FC = () => {
 
         {!isLoading && !isError && submissions.length > 0 && (
           <div className="flex flex-col gap-4">
-            {submissions.map((sub: any) => (
-              <div
-                key={sub.id}
-                className="rounded-xl border border-wroclaw-dark/10 bg-white p-4 shadow-sm"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold text-wroclaw-dark">
-                      {sub.name}
-                    </h3>
-                    <p className="mt-0.5 text-xs text-wroclaw-dark/50">
-                      {new Date(sub.submittedTime).toLocaleDateString()}
-                    </p>
+            {submissions.map((sub: UserSubmission) => {
+              const isExpanded = expandedId === sub.id;
+              return (
+                <div
+                  key={sub.id}
+                  onClick={() => {
+                    setExpandedId(isExpanded ? null : sub.id);
+                    if (!isExpanded && sub.pos && setMapFocusPoint) {
+                      setMapFocusPoint({ lat: sub.pos.latitude, lng: sub.pos.longitude });
+                    }
+                  }}
+                  className={`rounded-xl border bg-white p-4 shadow-sm cursor-pointer transition-all ${
+                    isExpanded 
+                      ? 'border-wroclaw-brick ring-1 ring-wroclaw-brick' 
+                      : 'border-wroclaw-dark/10 hover:border-wroclaw-dark/30'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-bold text-wroclaw-dark">
+                        {sub.name}
+                      </h4>
+                      <p className="mt-0.5 text-xs text-wroclaw-dark/50">
+                        {safelyFormatDate(sub.submittedTime)}
+                      </p>
+                    </div>
+                    {getStatusBadge(sub.status)}
                   </div>
-                  {getStatusBadge(sub.status)}
-                </div>
 
-                {sub.status === 'REJECTED' && sub.rejectionReason && (
-                  <div className="mt-3 rounded-lg bg-red-50 p-3 text-xs text-red-800">
-                    <span className="font-semibold">Reason:</span>{' '}
-                    {sub.rejectionReason}
-                  </div>
-                )}
-              </div>
-            ))}
+                  {isExpanded && (
+                    <div className="mt-4 pt-4 border-t border-wroclaw-dark/10">
+                      <p className="text-sm text-wroclaw-dark/80">
+                        <strong>Submission ID:</strong> {sub.id}
+                      </p>
+                      {sub.pos && (
+                        <p className="text-sm text-wroclaw-dark/80 mt-1">
+                          <strong>Location:</strong> {sub.pos.latitude.toFixed(4)}, {sub.pos.longitude.toFixed(4)}
+                        </p>
+                      )}
+                      {sub.description && (
+                        <div className="mt-3 text-sm text-wroclaw-dark/80">
+                          <strong>Description:</strong>
+                          <p className="mt-1 bg-wroclaw-dark/5 p-2 rounded">{sub.description}</p>
+                        </div>
+                      )}
+                      {sub.comment && typeof sub.status === 'string' && sub.status.toUpperCase() === 'REJECTED' && (
+                        <div className="mt-3 text-sm text-red-800">
+                          <strong className="flex items-center gap-1">
+                            ⚠️ Rejection Reason:
+                          </strong>
+                          <p className="mt-1 bg-red-100 p-2 rounded border border-red-200">{sub.comment}</p>
+                        </div>
+                      )}
+                      {sub.comment && typeof sub.status === 'string' && sub.status.toUpperCase() !== 'REJECTED' && (
+                        <div className="mt-3 text-sm text-wroclaw-dark/80">
+                          <strong>Moderator Comment:</strong>
+                          <p className="mt-1 bg-wroclaw-dark/5 p-2 rounded">{sub.comment}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

@@ -69,7 +69,8 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
         t1 = statement.getObject(8, OffsetDateTime.class);
         t2 = statement.getObject(9, OffsetDateTime.class);
         times = UpdateTime.from(t1, t2);
-        return Krasnal.newObject(id, name, desc, Position.from(lat, lon), cat, stat, times);
+        Double averageRating = statement.getDouble("averageRating");
+        return Krasnal.newObject(id, name, desc, Position.from(lat, lon), cat, stat, times, averageRating);
     }
 
     @Override
@@ -78,7 +79,7 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
         try {
             Connection connection = GetDatabaseConnection();
             Statement statement = connection.createStatement();
-            var output = statement.executeQuery("SELECT * FROM poi_catalog.krasnals;");
+            var output = statement.executeQuery("SELECT k.*, COALESCE(ROUND(AVG(r.rating), 1), 0.0) as averageRating FROM poi_catalog.krasnals k LEFT JOIN interaction.reviews r ON k.id = r.krasnal_id GROUP BY k.id;");
             list = new ArrayList<>();
             while (output.next()) {
                 list.add(GetKrasnalFromStatement(output));
@@ -96,7 +97,7 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
         try {
             Connection conn = GetDatabaseConnection();
             Statement statement = conn.createStatement();
-            var output = statement.executeQuery(String.format("SELECT * FROM poi_catalog.krasnals WHERE poi_catalog.krasnals.id = %d;", krasnalId));
+            var output = statement.executeQuery(String.format("SELECT k.*, COALESCE(ROUND(AVG(r.rating), 1), 0.0) as averageRating FROM poi_catalog.krasnals k LEFT JOIN interaction.reviews r ON k.id = r.krasnal_id WHERE k.id = %d GROUP BY k.id;", krasnalId));
             while (output.next()) {
                 obj = GetKrasnalFromStatement(output);
             }
