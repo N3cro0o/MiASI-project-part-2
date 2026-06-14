@@ -1,8 +1,10 @@
 package pl.krasmap.iam.infrastructure.out;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import pl.krasmap.iam.application.domain.stats.UserSubmission;
 import pl.krasmap.iam.application.port.out.GetUserSubmissionsInterface;
+import pl.krasmap.submission.application.domain.ReviewKrasnal;
 import pl.krasmap.submission.application.domain.submission.Submission;
 import pl.krasmap.submission.application.port.in.RequestSubmissionsInterface;
 
@@ -14,7 +16,7 @@ public class GetUserSubmissionsFromContext implements GetUserSubmissionsInterfac
 
     private final RequestSubmissionsInterface subContext;
 
-    public GetUserSubmissionsFromContext(RequestSubmissionsInterface c){
+    public GetUserSubmissionsFromContext(@Lazy RequestSubmissionsInterface c){
         subContext = c;
     }
 
@@ -22,7 +24,8 @@ public class GetUserSubmissionsFromContext implements GetUserSubmissionsInterfac
     public List<UserSubmission> GetUserSubmissions(int userId) {
         List<UserSubmission> l = new ArrayList<>();
         for (Submission s : subContext.GetUserSubmissions(userId)){
-            l.add(UserSubmission.From(s));
+            ReviewKrasnal k = subContext.ParseKrasnalFromJson(s.json());
+            l.add(UserSubmission.From(s, k));
         }
         return l;
     }

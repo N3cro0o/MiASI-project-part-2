@@ -40,13 +40,41 @@ public class UserControllerWeb implements UserControllerInterface {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<Pair<User, String>> GetUserWrapper(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<User> GetUserWrapper(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         if (o) {
-            Pair<User, String> p = GetUser(userId);
-            if (p.getLeft() == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            User p = GetUser(userId).getLeft();
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<User> GetUserWrapper(@RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Wanderer);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            User p = GetUser(userId).getLeft();
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @GetMapping("/me/restore_token")
+    public ResponseEntity<String> GetUserJwtWrapper(@RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Wanderer);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            String p = GetUser(userId).getRight();
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
         return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
@@ -119,7 +147,7 @@ public class UserControllerWeb implements UserControllerInterface {
     @PatchMapping("/me")
     public ResponseEntity<User> UpdateSelfWrapper(@RequestBody UserWeb userToUpdate, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
-        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        var o = auth.CheckAccess(jwt, UserRole.Wanderer);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         int userId = auth.DecodeJwt(jwt);
         if (o) {

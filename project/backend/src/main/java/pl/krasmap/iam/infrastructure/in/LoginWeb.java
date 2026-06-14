@@ -1,5 +1,6 @@
 package pl.krasmap.iam.infrastructure.in;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,29 +22,25 @@ public class LoginWeb implements LoginInterface {
 
     @PostMapping("/login")
     public ResponseEntity<String> loginWrapper(@RequestBody LoginData loginData) {
-        String p = login(loginData.loginOrEmail(), loginData.password());
-        if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        Pair<Boolean, String> p = login(loginData.loginOrEmail(), loginData.password());
+        if (p == null || !p.getLeft()) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(p.getRight(), HttpStatus.valueOf(200));
     }
 
     @Override
-    public String login(String loginOrEmail, String password) {
-        var outcome = loginService.CheckLogin(loginOrEmail, password);
-        return outcome.getRight();
+    public Pair<Boolean, String> login(String loginOrEmail, String password) {
+        return loginService.CheckLogin(loginOrEmail, password);
     }
 
     @PostMapping("/register")
     public ResponseEntity<String> registerWrapper(@RequestBody UserNew newUser) {
-        String p = register(newUser);
-        if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        Pair<Boolean, String> p = register(newUser);
+        if (p == null || !p.getLeft()) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(p.getRight(), HttpStatus.valueOf(200));
     }
 
     @Override
-    public String register(UserNew newUser) {
-        var outcome = loginService.Register(newUser);
-        if (outcome.getLeft())
-            return outcome.getRight();
-        return "bajo jajo";
+    public Pair<Boolean, String> register(UserNew newUser) {
+        return loginService.Register(newUser);
     }
 }
