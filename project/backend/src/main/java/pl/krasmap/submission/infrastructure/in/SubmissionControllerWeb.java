@@ -8,15 +8,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.krasmap.common.auth.template.UserAuthInterface;
+import pl.krasmap.common.data.RejectReason;
 import pl.krasmap.common.data.UserRole;
 import pl.krasmap.submission.application.domain.ReviewKrasnal;
 import pl.krasmap.submission.application.domain.NewSubmission;
+import pl.krasmap.submission.application.domain.SubmissionReturn;
 import pl.krasmap.submission.application.domain.submission.Submission;
 import pl.krasmap.common.data.SubmissionStatus;
 import pl.krasmap.submission.application.port.in.SubmissionControllerInterface;
 import pl.krasmap.submission.application.service.CheckSubmission;
 import pl.krasmap.submission.application.service.HoldSubmissionRepo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -92,7 +95,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     @GetMapping("/{subId}")
     public ResponseEntity<Pair<Submission, ReviewKrasnal>> GetSubmissionWrapper(@PathVariable int subId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
-        var o = auth.CheckAccess(jwt, UserRole.Editor);
+        var o = auth.CheckAccess(jwt, UserRole.Wanderer);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         if (o) {
             Pair<Submission, ReviewKrasnal> p = GetSubmission(subId);
@@ -108,13 +111,13 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     }
 
     @PatchMapping("/reject/{subId}")
-    public ResponseEntity<Boolean> RejectSubmissionWrapper(@PathVariable int subId, @RequestBody String reason, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<Boolean> RejectSubmissionWrapper(@PathVariable int subId, @RequestBody RejectReason reason, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Editor);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         int userId = auth.DecodeJwt(jwt);
         if (o) {
-            Boolean p = RejectSubmission(userId, subId, reason);
+            Boolean p = RejectSubmission(userId, subId, reason.reason());
             if (p == null || !p) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
@@ -167,14 +170,14 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     }
 
     @GetMapping
-    public ResponseEntity<List<Submission>> GetAllSubmissionsWrapper(@RequestParam(required = false) String status,
+    public ResponseEntity<List<SubmissionReturn>> GetAllSubmissionsWrapper(@RequestParam(required = false) String status,
                                                                      @RequestHeader("Authorization") String jwt)
     {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Editor);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
         if (o) {
-            List<Submission> p;
+            List<SubmissionReturn> p;
             if (status != null) {
                 p = GetAllSubmissions(SubmissionStatus.FromString(status));
             }
@@ -188,13 +191,25 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     }
 
     @Override
-    public List<Submission> GetAllSubmissions() {
-        return subRepo.GetAllSubmissions();
+    public List<SubmissionReturn> GetAllSubmissions() {
+        var l =  subRepo.GetAllSubmissions();
+        List<SubmissionReturn> t = new ArrayList<>();
+        for (Submission s : l) {
+            ReviewKrasnal k = subCheck.GenerateKrasnalFromJson(s.json());
+            t.add(new SubmissionReturn(s.id(), s.userId(),s.status(), s.submittedTime(), k.name(), k.position()));
+        }
+        return t;
     }
 
     @Override
-    public List<Submission> GetAllSubmissions(SubmissionStatus status) {
-        return subRepo.GetAllSubmissions(status);
+    public List<SubmissionReturn> GetAllSubmissions(SubmissionStatus status) {
+        var l =  subRepo.GetAllSubmissions(status);
+        List<SubmissionReturn> t = new ArrayList<>();
+        for (Submission s : l) {
+            ReviewKrasnal k = subCheck.GenerateKrasnalFromJson(s.json());
+            t.add(new SubmissionReturn(s.id(), s.userId(),s.status(), s.submittedTime(), k.name(), k.position()));
+        }
+        return t;
     }
 
 

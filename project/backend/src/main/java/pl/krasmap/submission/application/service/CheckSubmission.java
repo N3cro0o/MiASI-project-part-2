@@ -30,7 +30,7 @@ public class CheckSubmission {
         return Pair.of(sub, kr);
     }
 
-    public ReviewKrasnal GenerateKrasnalFromJson(String json) {
+    public static ReviewKrasnal GenerateKrasnalFromJson(String json) {
         ReviewKrasnal obj = null;
         try {
             obj = Json.mapper().readValue(json, ReviewKrasnal.class);

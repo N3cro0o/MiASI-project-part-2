@@ -1,8 +1,9 @@
 package pl.krasmap.iam.application.port.in;
 
+import org.apache.commons.lang3.tuple.Pair;
 import pl.krasmap.iam.application.domain.UserNew;
 
 public interface LoginInterface {
-    String login(String login, String password);
-    String register(UserNew newUser);
+    Pair<Boolean, String> login(String login, String password);
+    Pair<Boolean, String> register(UserNew newUser);
 }

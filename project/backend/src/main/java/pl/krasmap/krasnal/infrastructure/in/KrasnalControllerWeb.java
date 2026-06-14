@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.krasmap.common.auth.template.UserAuthInterface;
 import pl.krasmap.common.data.UserRole;
 import pl.krasmap.krasnal.application.domain.KrasnalReview;
+import pl.krasmap.krasnal.application.domain.KrasnalReviewWeb;
 import pl.krasmap.krasnal.application.domain.KrasnalWeb;
 import pl.krasmap.krasnal.application.domain.krasnal.Krasnal;
 import pl.krasmap.krasnal.application.port.in.KrasnalControllerInterface;
@@ -47,7 +48,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
         return krasnalRepo.GetKrasnal(krasnalId);
     }
 
-    @GetMapping("/{krasnalId}/review")
+    @GetMapping("/{krasnalId}/reviews")
     public ResponseEntity<List<KrasnalReview>> GetKrasnalReviewsWrapper(@PathVariable int krasnalId) {
         List<KrasnalReview> p = GetKrasnalReviews(krasnalId);
         if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
@@ -57,6 +58,28 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
     @Override
     public List<KrasnalReview> GetKrasnalReviews(int krasnalId) {
         return krasnalReviews.GetAllReviews(krasnalId);
+    }
+
+    @PostMapping("/{krasnalId}/reviews")
+    public ResponseEntity<KrasnalReview> GetKrasnalReviewsWrapper(@PathVariable int krasnalId,
+                                                                        @RequestBody KrasnalReviewWeb review,
+                                                                        @RequestHeader("Authorization") String jwt)
+    {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Wanderer);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        int userId = auth.DecodeJwt(jwt);
+        if (o) {
+            KrasnalReview p = AddKrasnalReview(krasnalId, userId, review);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public KrasnalReview AddKrasnalReview(int krasnalId, int userId, KrasnalReviewWeb review) {
+        return krasnalReviews.AddReview(krasnalId, userId, review);
     }
 
     @GetMapping

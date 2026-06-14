@@ -1,5 +1,6 @@
 package pl.krasmap.iam.infrastructure.out;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import pl.krasmap.iam.application.domain.stats.UserVisits;
 import pl.krasmap.iam.application.port.out.GetUserVisitsInterface;
@@ -14,7 +15,7 @@ public class GetUserVisitsFromContext implements GetUserVisitsInterface {
 
     private final RequestVisitedInterface visitFetch;
 
-    public GetUserVisitsFromContext(RequestVisitedInterface visit){
+    public GetUserVisitsFromContext(@Lazy RequestVisitedInterface visit){
         visitFetch = visit;
     }
 

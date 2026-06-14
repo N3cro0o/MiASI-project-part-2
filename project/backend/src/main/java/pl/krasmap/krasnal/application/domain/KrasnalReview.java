@@ -1,6 +1,12 @@
 package pl.krasmap.krasnal.application.domain;
 
+import pl.krasmap.interaction.application.domain.review.Review;
+
 import java.time.OffsetDateTime;
 
-public record KrasnalReview(int id, int userId, short rating, String content, OffsetDateTime created) {
+public record KrasnalReview(String login, short rating, String content, OffsetDateTime created) {
+
+    public static KrasnalReview From(Review r, String login) {
+        return new KrasnalReview(login, r.rating(), r.content(), r.created());
+    }
 }
