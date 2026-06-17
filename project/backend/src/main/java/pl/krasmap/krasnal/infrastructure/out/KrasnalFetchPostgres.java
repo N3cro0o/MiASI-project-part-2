@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import pl.krasmap.common.data.KrasnalCategory;
 import pl.krasmap.common.data.Position;
 import pl.krasmap.common.data.UpdateTime;
-import pl.krasmap.krasnal.application.domain.krasnal.*;
+import pl.krasmap.krasnal.application.domain.data.krasnal.*;
 import pl.krasmap.krasnal.application.port.out.KrasnalFetchInterface;
 
 import java.sql.Connection;

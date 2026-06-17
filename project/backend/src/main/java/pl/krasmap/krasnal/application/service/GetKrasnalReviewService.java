@@ -1,7 +1,7 @@
 package pl.krasmap.krasnal.application.service;
 
 import org.springframework.stereotype.Service;
-import pl.krasmap.krasnal.application.domain.KrasnalReview;
+import pl.krasmap.krasnal.application.domain.data.KrasnalReview;
 import pl.krasmap.krasnal.application.port.out.GetKrasnalReviewInterface;
 
 import java.util.List;

@@ -2,7 +2,7 @@ package pl.krasmap.iam.infrastructure.out;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import pl.krasmap.iam.application.domain.stats.UserReview;
+import pl.krasmap.iam.application.domain.data.stats.UserReview;
 import pl.krasmap.iam.application.port.out.GetUserReviewsInterface;
 import pl.krasmap.interaction.application.domain.review.Review;
 import pl.krasmap.interaction.application.port.in.RequestReviewInterface;

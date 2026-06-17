@@ -3,11 +3,13 @@ package pl.krasmap.submission.application.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.core.util.Json;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import pl.krasmap.submission.application.domain.ReviewKrasnal;
-import pl.krasmap.submission.application.domain.submission.Submission;
-import pl.krasmap.submission.application.domain.submission.SubmissionReview;
+import pl.krasmap.submission.application.domain.data.ReviewKrasnal;
+import pl.krasmap.submission.application.domain.data.submission.Submission;
+import pl.krasmap.submission.application.domain.data.submission.SubmissionReview;
 import pl.krasmap.common.data.SubmissionStatus;
+import pl.krasmap.submission.application.domain.event.SubmissionAcceptedEvent;
 import pl.krasmap.submission.application.port.out.GetKrasnalInterface;
 
 import java.time.OffsetDateTime;
@@ -17,10 +19,12 @@ public class CheckSubmission {
 
     private final HoldSubmissionRepo subRepo;
     private final GetKrasnalInterface krasnalServ;
+    private final ApplicationEventPublisher events;
 
-    public CheckSubmission(HoldSubmissionRepo repo, GetKrasnalInterface krasnal) {
+    public CheckSubmission(HoldSubmissionRepo repo, GetKrasnalInterface krasnal, ApplicationEventPublisher e) {
         subRepo = repo;
         krasnalServ = krasnal;
+        events = e;
     }
 
     public Pair<Submission, ReviewKrasnal> GetSubmissonPair(int subId){
@@ -55,7 +59,7 @@ public class CheckSubmission {
         Submission newSub = sub.With(SubmissionStatus.Accepted, rev);
         subRepo.UpdateSubReview(newSub);
         var k = GenerateKrasnalFromJson(sub.json());
-        krasnalServ.AddNewKrasnal(k);
+        events.publishEvent(new SubmissionAcceptedEvent(subId, userId, k));
         return k;
     }
 

@@ -1,4 +1,4 @@
-package pl.krasmap.krasnal.application.domain.krasnal;
+package pl.krasmap.krasnal.application.domain.data.krasnal;
 
 public enum KrasnalStatus {
     Active,

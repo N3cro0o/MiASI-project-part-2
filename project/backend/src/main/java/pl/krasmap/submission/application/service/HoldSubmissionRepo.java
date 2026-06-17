@@ -1,8 +1,8 @@
 package pl.krasmap.submission.application.service;
 
 import org.springframework.stereotype.Repository;
-import pl.krasmap.submission.application.domain.NewSubmission;
-import pl.krasmap.submission.application.domain.submission.Submission;
+import pl.krasmap.submission.application.domain.data.NewSubmission;
+import pl.krasmap.submission.application.domain.data.submission.Submission;
 import pl.krasmap.common.data.SubmissionStatus;
 import pl.krasmap.submission.application.port.out.SubmissionFetchInterface;
 

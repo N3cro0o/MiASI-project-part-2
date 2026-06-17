@@ -1,9 +1,9 @@
 package pl.krasmap.krasnal.application.port.in;
 
-import pl.krasmap.krasnal.application.domain.KrasnalReview;
-import pl.krasmap.krasnal.application.domain.KrasnalReviewWeb;
-import pl.krasmap.krasnal.application.domain.KrasnalWeb;
-import pl.krasmap.krasnal.application.domain.krasnal.Krasnal;
+import pl.krasmap.krasnal.application.domain.data.KrasnalReview;
+import pl.krasmap.krasnal.application.domain.data.KrasnalReviewWeb;
+import pl.krasmap.krasnal.application.domain.data.KrasnalWeb;
+import pl.krasmap.krasnal.application.domain.data.krasnal.Krasnal;
 
 import java.util.List;
 

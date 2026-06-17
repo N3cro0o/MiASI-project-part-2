@@ -5,8 +5,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.krasmap.iam.application.domain.LoginData;
-import pl.krasmap.iam.application.domain.UserNew;
+import pl.krasmap.iam.application.domain.data.LoginData;
+import pl.krasmap.iam.application.domain.data.UserNew;
 import pl.krasmap.iam.application.port.in.LoginInterface;
 import pl.krasmap.iam.application.service.LoginService;
 

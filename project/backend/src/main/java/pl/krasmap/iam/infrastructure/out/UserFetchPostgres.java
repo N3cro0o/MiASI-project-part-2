@@ -2,8 +2,8 @@ package pl.krasmap.iam.infrastructure.out;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import pl.krasmap.iam.application.domain.UserWeb;
-import pl.krasmap.iam.application.domain.User;
+import pl.krasmap.iam.application.domain.data.UserWeb;
+import pl.krasmap.iam.application.domain.data.User;
 import pl.krasmap.common.data.UserRole;
 import pl.krasmap.iam.application.port.out.UserFetchInterface;
 

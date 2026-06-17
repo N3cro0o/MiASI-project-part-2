@@ -7,13 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.krasmap.common.auth.template.UserAuthInterface;
 import pl.krasmap.common.data.UserRole;
-import pl.krasmap.krasnal.application.domain.KrasnalReview;
-import pl.krasmap.krasnal.application.domain.KrasnalReviewWeb;
-import pl.krasmap.krasnal.application.domain.KrasnalWeb;
-import pl.krasmap.krasnal.application.domain.krasnal.Krasnal;
+import pl.krasmap.krasnal.application.domain.data.KrasnalReview;
+import pl.krasmap.krasnal.application.domain.data.KrasnalReviewWeb;
+import pl.krasmap.krasnal.application.domain.data.KrasnalWeb;
+import pl.krasmap.krasnal.application.domain.data.krasnal.Krasnal;
 import pl.krasmap.krasnal.application.port.in.KrasnalControllerInterface;
 import pl.krasmap.krasnal.application.port.out.GetKrasnalReviewInterface;
-import pl.krasmap.krasnal.application.service.HoldKrasnalRepo;
+import pl.krasmap.krasnal.application.service.KrasnalHandleService;
 
 import java.util.List;
 
@@ -21,13 +21,13 @@ import java.util.List;
 @RequestMapping("/api/krasnals")
 public class KrasnalControllerWeb implements KrasnalControllerInterface {
 
-    private final HoldKrasnalRepo krasnalRepo;
+    private final KrasnalHandleService krasnalHandle;
     private final GetKrasnalReviewInterface krasnalReviews;
     private final UserAuthInterface auth;
 
-    KrasnalControllerWeb(HoldKrasnalRepo repo, GetKrasnalReviewInterface review, @Lazy UserAuthInterface authServ) {
+    KrasnalControllerWeb(KrasnalHandleService handle, GetKrasnalReviewInterface review, @Lazy UserAuthInterface authServ) {
         krasnalReviews = review;
-        krasnalRepo = repo;
+        krasnalHandle = handle;
         auth = authServ;
     }
 
@@ -45,7 +45,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
 
     @Override
     public Krasnal GetKrasnal(int krasnalId) {
-        return krasnalRepo.GetKrasnal(krasnalId);
+        return krasnalHandle.GetKrasnal(krasnalId);
     }
 
     @GetMapping("/{krasnalId}/reviews")
@@ -91,7 +91,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
 
     @Override
     public List<Krasnal> GetAllKrasnal() {
-        return krasnalRepo.GetKrasnalList();
+        return krasnalHandle.GetKrasnalList();
     }
 
     @PostMapping("")
@@ -110,7 +110,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
     @Override
     public Krasnal SaveNewKrasnal(KrasnalWeb newKrasnal) {
         System.out.println(newKrasnal);
-        return krasnalRepo.AddNewKrasnal(newKrasnal);
+        return krasnalHandle.AddNewKrasnal(newKrasnal);
     }
 
     @DeleteMapping("/{krasnalId}")
@@ -128,7 +128,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
 
     @Override
     public Boolean DeleteKrasnal(int krasnalId) {
-        return krasnalRepo.HideKrasnal(krasnalId);
+        return krasnalHandle.HideKrasnal(krasnalId);
     }
 
     @PatchMapping("/{krasnalId}")
@@ -146,6 +146,6 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
 
     @Override
     public Krasnal UpdateKrasnal(KrasnalWeb krasnalToUpdate, int krasnalId) {
-        return krasnalRepo.UpdateKrasnal(krasnalId, krasnalToUpdate);
+        return krasnalHandle.UpdateKrasnal(krasnalId, krasnalToUpdate);
     }
 }

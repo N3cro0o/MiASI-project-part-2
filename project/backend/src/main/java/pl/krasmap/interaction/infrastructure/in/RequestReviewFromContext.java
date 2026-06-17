@@ -5,8 +5,6 @@ import pl.krasmap.interaction.application.domain.review.Review;
 import pl.krasmap.interaction.application.domain.review.ReviewWeb;
 import pl.krasmap.interaction.application.port.in.RequestReviewInterface;
 import pl.krasmap.interaction.application.service.HoldReviewRepo;
-import pl.krasmap.krasnal.application.domain.KrasnalReviewWeb;
-import pl.krasmap.krasnal.application.domain.KrasnalWeb;
 
 import java.util.List;
 

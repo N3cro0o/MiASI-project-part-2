@@ -1,4 +1,4 @@
-package pl.krasmap.iam.application.domain;
+package pl.krasmap.iam.application.domain.data;
 
 import pl.krasmap.common.data.UserRole;
 

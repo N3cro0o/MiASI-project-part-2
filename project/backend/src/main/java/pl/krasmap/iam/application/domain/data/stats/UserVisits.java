@@ -1,4 +1,4 @@
-package pl.krasmap.iam.application.domain.stats;
+package pl.krasmap.iam.application.domain.data.stats;
 
 import pl.krasmap.interaction.application.domain.fav.VisitedKrasnal;
 

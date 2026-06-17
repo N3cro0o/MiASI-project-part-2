@@ -1,4 +1,4 @@
-package pl.krasmap.krasnal.application.domain;
+package pl.krasmap.krasnal.application.domain.data;
 
 import pl.krasmap.interaction.application.domain.review.Review;
 

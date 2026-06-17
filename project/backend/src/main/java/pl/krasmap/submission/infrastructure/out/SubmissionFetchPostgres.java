@@ -3,9 +3,9 @@ package pl.krasmap.submission.infrastructure.out;
 import io.swagger.v3.core.util.Json;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import pl.krasmap.submission.application.domain.NewSubmission;
-import pl.krasmap.submission.application.domain.submission.Submission;
-import pl.krasmap.submission.application.domain.submission.SubmissionReview;
+import pl.krasmap.submission.application.domain.data.NewSubmission;
+import pl.krasmap.submission.application.domain.data.submission.Submission;
+import pl.krasmap.submission.application.domain.data.submission.SubmissionReview;
 import pl.krasmap.common.data.SubmissionStatus;
 import pl.krasmap.submission.application.port.out.SubmissionFetchInterface;
 

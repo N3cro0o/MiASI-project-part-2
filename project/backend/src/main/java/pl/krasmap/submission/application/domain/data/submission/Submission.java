@@ -1,4 +1,4 @@
-package pl.krasmap.submission.application.domain.submission;
+package pl.krasmap.submission.application.domain.data.submission;
 
 import pl.krasmap.common.data.SubmissionStatus;
 
