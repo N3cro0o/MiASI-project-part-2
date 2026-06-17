@@ -2,10 +2,10 @@ package pl.krasmap.iam.infrastructure.out;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import pl.krasmap.iam.application.domain.stats.UserSubmission;
+import pl.krasmap.iam.application.domain.data.stats.UserSubmission;
 import pl.krasmap.iam.application.port.out.GetUserSubmissionsInterface;
-import pl.krasmap.submission.application.domain.ReviewKrasnal;
-import pl.krasmap.submission.application.domain.submission.Submission;
+import pl.krasmap.submission.application.domain.data.ReviewKrasnal;
+import pl.krasmap.submission.application.domain.data.submission.Submission;
 import pl.krasmap.submission.application.port.in.RequestSubmissionsInterface;
 
 import java.util.ArrayList;

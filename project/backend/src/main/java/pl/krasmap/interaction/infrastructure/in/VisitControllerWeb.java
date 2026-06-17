@@ -7,9 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.krasmap.common.auth.template.UserAuthInterface;
 import pl.krasmap.common.data.UserRole;
-import pl.krasmap.interaction.application.domain.fav.NewVisit;
-import pl.krasmap.interaction.application.domain.fav.VisitedKrasnal;
+import pl.krasmap.interaction.application.domain.data.fav.NewVisit;
+import pl.krasmap.interaction.application.domain.data.fav.VisitedKrasnal;
 import pl.krasmap.interaction.application.port.in.VisitControllerInterface;
+import pl.krasmap.interaction.application.service.HandleVisitedService;
 import pl.krasmap.interaction.application.service.HoldVisitedRepo;
 
 import java.util.List;
@@ -18,11 +19,11 @@ import java.util.List;
 @RequestMapping("/api/visits")
 public class VisitControllerWeb implements VisitControllerInterface {
 
-    private final HoldVisitedRepo visitRepo;
+    private final HandleVisitedService visitHandle;
     private final UserAuthInterface auth;
 
-    public VisitControllerWeb(HoldVisitedRepo visit, @Lazy UserAuthInterface authServ){
-        visitRepo = visit;
+    public VisitControllerWeb(HandleVisitedService visit, @Lazy UserAuthInterface authServ){
+        visitHandle = visit;
         auth = authServ;
     }
 
@@ -41,7 +42,7 @@ public class VisitControllerWeb implements VisitControllerInterface {
 
     @Override
     public VisitedKrasnal GetVisit(int visitedId) {
-        return visitRepo.GetVisit(visitedId);
+        return visitHandle.GetVisit(visitedId);
     }
 
     @GetMapping("/krasnal/{krasnalId}")
@@ -60,7 +61,7 @@ public class VisitControllerWeb implements VisitControllerInterface {
 
     @Override
     public VisitedKrasnal GetVisit(int userId, int krasnalId) {
-        return visitRepo.GetVisit(userId, krasnalId);
+        return visitHandle.GetVisit(userId, krasnalId);
     }
 
     @GetMapping("/krasnal/{krasnalId}/all")
@@ -78,7 +79,7 @@ public class VisitControllerWeb implements VisitControllerInterface {
 
     @Override
     public List<VisitedKrasnal> GetVisitsFromKrasnal(int krasnalId) {
-        return visitRepo.GetVisitsFromKrasnal(krasnalId);
+        return visitHandle.GetVisitsFromKrasnal(krasnalId);
     }
 
     @GetMapping("/user/{userId}/all")
@@ -112,7 +113,7 @@ public class VisitControllerWeb implements VisitControllerInterface {
 
     @Override
     public List<VisitedKrasnal> GetVisitsFromUser(int userId) {
-        return visitRepo.GetVisitsFromUser(userId);
+        return visitHandle.GetVisitsFromUser(userId);
     }
 
     @PostMapping("/{krasnalId}")
@@ -132,7 +133,7 @@ public class VisitControllerWeb implements VisitControllerInterface {
 
     @Override
     public VisitedKrasnal AddVisit(NewVisit visit) {
-        return visitRepo.AddVisit(visit);
+        return visitHandle.AddVisit(visit);
     }
 
     @DeleteMapping("/admin/{visitedId}")
@@ -151,7 +152,7 @@ public class VisitControllerWeb implements VisitControllerInterface {
 
     @Override
     public Boolean RemoveVisit(int visitedId) {
-        return visitRepo.RemoveVisit(visitedId);
+        return visitHandle.RemoveVisit(visitedId);
     }
 
     @DeleteMapping("/{krasnalId}")
@@ -170,6 +171,6 @@ public class VisitControllerWeb implements VisitControllerInterface {
 
     @Override
     public Boolean RemoveVisit(int userId, int krasnalId) {
-        return visitRepo.RemoveVisit(userId, krasnalId);
+        return visitHandle.RemoveVisit(userId, krasnalId);
     }
 }

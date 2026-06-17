@@ -1,8 +1,8 @@
 package pl.krasmap.interaction.application.service;
 
 import org.springframework.stereotype.Repository;
-import pl.krasmap.interaction.application.domain.fav.NewVisit;
-import pl.krasmap.interaction.application.domain.fav.VisitedKrasnal;
+import pl.krasmap.interaction.application.domain.data.fav.NewVisit;
+import pl.krasmap.interaction.application.domain.data.fav.VisitedKrasnal;
 import pl.krasmap.interaction.application.port.out.VisitedFetchInterface;
 
 import java.util.List;
@@ -32,9 +32,8 @@ public class HoldVisitedRepo {
         return visitFetch.GetVisitsFromUser(userId);
     }
 
-    public VisitedKrasnal AddVisit(NewVisit visit){
-        int id = visitFetch.AddVisit(visit);
-        return visitFetch.GetVisit(id);
+    public int AddVisit(NewVisit visit){
+        return visitFetch.AddVisit(visit);
     }
 
     public Boolean RemoveVisit(int visitedId){

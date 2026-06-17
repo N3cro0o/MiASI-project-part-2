@@ -1,6 +1,6 @@
 package pl.krasmap.interaction.application.port.in;
 
-import pl.krasmap.interaction.application.domain.review.Review;
+import pl.krasmap.interaction.application.domain.data.review.Review;
 
 import java.util.List;
 

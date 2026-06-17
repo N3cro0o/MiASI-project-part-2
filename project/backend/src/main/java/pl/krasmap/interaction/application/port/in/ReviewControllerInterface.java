@@ -1,7 +1,7 @@
 package pl.krasmap.interaction.application.port.in;
 
-import pl.krasmap.interaction.application.domain.review.Review;
-import pl.krasmap.interaction.application.domain.review.ReviewWeb;
+import pl.krasmap.interaction.application.domain.data.review.Review;
+import pl.krasmap.interaction.application.domain.data.review.ReviewWeb;
 
 import java.util.List;
 

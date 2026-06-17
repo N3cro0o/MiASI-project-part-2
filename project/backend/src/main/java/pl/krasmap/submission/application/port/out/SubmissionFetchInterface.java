@@ -1,7 +1,7 @@
 package pl.krasmap.submission.application.port.out;
 
-import pl.krasmap.submission.application.domain.NewSubmission;
-import pl.krasmap.submission.application.domain.submission.Submission;
+import pl.krasmap.submission.application.domain.data.NewSubmission;
+import pl.krasmap.submission.application.domain.data.submission.Submission;
 import pl.krasmap.common.data.SubmissionStatus;
 
 import java.util.List;

@@ -1,10 +1,10 @@
 package pl.krasmap.submission.application.port.in;
 
 import org.apache.commons.lang3.tuple.Pair;
-import pl.krasmap.submission.application.domain.ReviewKrasnal;
-import pl.krasmap.submission.application.domain.NewSubmission;
-import pl.krasmap.submission.application.domain.SubmissionReturn;
-import pl.krasmap.submission.application.domain.submission.Submission;
+import pl.krasmap.submission.application.domain.data.ReviewKrasnal;
+import pl.krasmap.submission.application.domain.data.NewSubmission;
+import pl.krasmap.submission.application.domain.data.SubmissionReturn;
+import pl.krasmap.submission.application.domain.data.submission.Submission;
 import pl.krasmap.common.data.SubmissionStatus;
 
 import java.util.List;

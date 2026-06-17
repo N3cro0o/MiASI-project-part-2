@@ -1,20 +1,18 @@
 package pl.krasmap.interaction.infrastructure.out;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import pl.krasmap.interaction.application.domain.fav.NewVisit;
-import pl.krasmap.interaction.application.domain.fav.VisitedKrasnal;
+import pl.krasmap.interaction.application.domain.data.fav.NewVisit;
+import pl.krasmap.interaction.application.domain.data.fav.VisitedKrasnal;
 import pl.krasmap.interaction.application.port.out.VisitedFetchInterface;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Component
 public class VisitedFetchPostgres implements VisitedFetchInterface {
 
     @Value("${db.url}")
@@ -43,11 +41,12 @@ public class VisitedFetchPostgres implements VisitedFetchInterface {
     @Override
     public VisitedKrasnal GetVisit(int visitedId) {
         VisitedKrasnal obj = null;
-        String sql = "SELECT * FROM interaction.visited_entries WHERE id = '" + visitedId + "';";
+        String sql = "SELECT * FROM interaction.visited_entries WHERE id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var output = stat.executeQuery(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setInt(1, visitedId);
+            var output = stat.executeQuery();
             while(output.next()){
                 obj = VisitFromStatement(output);
             }
@@ -61,12 +60,13 @@ public class VisitedFetchPostgres implements VisitedFetchInterface {
     @Override
     public VisitedKrasnal GetVisit(int userId, int krasnalId) {
         VisitedKrasnal obj = null;
-        String sql = "SELECT * FROM interaction.visited_entries WHERE " +
-                "krasnal_id = '" + krasnalId + "' AND user_id = '" + userId + "';";
+        String sql = "SELECT * FROM interaction.visited_entries WHERE krasnal_id = ? AND user_id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var output = stat.executeQuery(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setInt(1, krasnalId);
+            stat.setInt(2, userId);
+            var output = stat.executeQuery();
             while(output.next()){
                 obj = VisitFromStatement(output);
             }
@@ -80,11 +80,12 @@ public class VisitedFetchPostgres implements VisitedFetchInterface {
     @Override
     public List<VisitedKrasnal> GetVisitsFromKrasnal(int krasnalId) {
         List<VisitedKrasnal> list = null;
-        String sql = "SELECT * FROM interaction.visited_entries WHERE krasnal_id = '" + krasnalId + "';";
+        String sql = "SELECT * FROM interaction.visited_entries WHERE krasnal_id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var output = stat.executeQuery(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setInt(1, krasnalId);
+            var output = stat.executeQuery();
             list = new ArrayList<>();
             while(output.next()){
                 list.add(VisitFromStatement(output));
@@ -99,11 +100,12 @@ public class VisitedFetchPostgres implements VisitedFetchInterface {
     @Override
     public List<VisitedKrasnal> GetVisitsFromUser(int userId) {
         List<VisitedKrasnal> list = null;
-        String sql = "SELECT * FROM interaction.visited_entries WHERE user_id = '" + userId + "';";
+        String sql = "SELECT * FROM interaction.visited_entries WHERE user_id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var output = stat.executeQuery(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setInt(1, userId);
+            var output = stat.executeQuery();
             list = new ArrayList<>();
             while(output.next()){
                 list.add(VisitFromStatement(output));
@@ -118,14 +120,15 @@ public class VisitedFetchPostgres implements VisitedFetchInterface {
     @Override
     public int AddVisit(NewVisit visit) {
         int id = -1;
-        String sql = "INSERT INTO interaction.visited_entries (krasnal_id, user_id, visited_at) VALUES ("+
-                String.format("'%s', ", visit.krasnalId()) +
-                String.format("'%s', ", visit.userId()) +
-                String.format("'%s') RETURNING id;", OffsetDateTime.now());
+        String sql = "INSERT INTO interaction.visited_entries (krasnal_id, user_id, visited_at) VALUES (?, ?, ?) " +
+                "RETURNING id;";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var output = stat.executeQuery(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setInt(1, visit.krasnalId());
+            stat.setInt(2, visit.userId());
+            stat.setObject(3, OffsetDateTime.now());
+            var output = stat.executeQuery();
             while(output.next()){
                 id = output.getInt(1);
             }
@@ -139,11 +142,12 @@ public class VisitedFetchPostgres implements VisitedFetchInterface {
     @Override
     public boolean RemoveVisit(int visitedId) {
         boolean check = false;
-        String sql = "DELETE FROM interaction.visited_entries WHERE id = '" + visitedId + "';";
+        String sql = "DELETE FROM interaction.visited_entries WHERE id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            stat.execute(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setInt(1, visitedId);
+            stat.execute();
             check = true;
             conn.close();
         } catch (Exception e) {
@@ -155,12 +159,13 @@ public class VisitedFetchPostgres implements VisitedFetchInterface {
     @Override
     public boolean RemoveVisit(int userId, int krasnalId) {
         boolean check = false;
-        String sql = "SELECT * FROM interaction.visited_entries WHERE " +
-                "krasnal_id = '" + krasnalId + "' AND user_id = '" + userId + "';";
+        String sql = "DELETE FROM interaction.visited_entries WHERE krasnal_id = ? AND user_id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            stat.execute(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setInt(1, krasnalId);
+            stat.setInt(2, userId);
+            stat.execute();
             check = true;
             conn.close();
         } catch (Exception e) {

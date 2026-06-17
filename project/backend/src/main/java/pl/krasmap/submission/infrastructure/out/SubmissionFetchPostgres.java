@@ -2,22 +2,20 @@ package pl.krasmap.submission.infrastructure.out;
 
 import io.swagger.v3.core.util.Json;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import pl.krasmap.submission.application.domain.NewSubmission;
-import pl.krasmap.submission.application.domain.submission.Submission;
-import pl.krasmap.submission.application.domain.submission.SubmissionReview;
+import pl.krasmap.submission.application.domain.data.NewSubmission;
+import pl.krasmap.submission.application.domain.data.submission.Submission;
+import pl.krasmap.submission.application.domain.data.submission.SubmissionReview;
 import pl.krasmap.common.data.SubmissionStatus;
 import pl.krasmap.submission.application.port.out.SubmissionFetchInterface;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Component
 public class SubmissionFetchPostgres implements SubmissionFetchInterface {
     @Value("${db.url}")
     private String postgresString;
@@ -72,14 +70,14 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
     @Override
     public int AddSubmission(NewSubmission sub) {
         String json = GetJsonFromSub(sub);
-        String sql = "INSERT INTO verification.submissions (submitted_by_user_id, payload_json) VALUES (" +
-                String.format("'%s', ", sub.userId()) +
-                String.format("'%s') RETURNING verification.submissions.id;", json);
+        String sql = "INSERT INTO verification.submissions (submitted_by_user_id, payload_json) VALUES (?, ?) RETURNING verification.submissions.id;";
         int id = -1;
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var outcome = stat.executeQuery(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setInt(1, sub.userId());
+            stat.setString(2, json);
+            var outcome = stat.executeQuery();
             while (outcome.next()){
                 id = outcome.getInt(1);
             }
@@ -95,8 +93,9 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
         Submission obj = null;
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var outcome = stat.executeQuery("SELECT * FROM verification.submissions WHERE id = '" + subId + "';");
+            PreparedStatement stat = conn.prepareStatement("SELECT * FROM verification.submissions WHERE id = ?;");
+            stat.setInt(1, subId);
+            var outcome = stat.executeQuery();
             while (outcome.next()){
                 obj = GetSubFromStatement(outcome);
             }
@@ -112,8 +111,9 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
         SubmissionStatus obj = null;
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var outcome = stat.executeQuery("SELECT status FROM verification.submissions WHERE id = '" + subId + "';");
+            PreparedStatement stat = conn.prepareStatement("SELECT status FROM verification.submissions WHERE id = ?;");
+            stat.setInt(1, subId);
+            var outcome = stat.executeQuery();
             while (outcome.next()){
                 obj = SubmissionStatus.FromString(outcome.getString(1));
             }
@@ -129,8 +129,9 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
         List<Submission> list = null;
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var outcome = stat.executeQuery("SELECT * FROM verification.submissions WHERE submitted_by_user_id = '" + userId + "';");
+            PreparedStatement stat = conn.prepareStatement("SELECT * FROM verification.submissions WHERE submitted_by_user_id = ?;");
+            stat.setInt(1, userId);
+            var outcome = stat.executeQuery();
             list = new ArrayList<>();
             while (outcome.next()){
                 list.add(GetSubFromStatement(outcome));
@@ -145,16 +146,17 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
     @Override
     public boolean UpdateSubReview(Submission newSub) {
         boolean check = false;
-        String sql = "UPDATE verification.submissions SET (status, rejection_reason, reviewed_by_user_id, reviewed_at) = (" +
-                String.format("'%s', ", newSub.status()) +
-                String.format("'%s', ", newSub.review().rejectionReason()) +
-                String.format("'%s', ", newSub.review().reviewerId()) +
-                String.format("'%s')", newSub.review().reviewTime()) +
-                "WHERE id = " + newSub.id() + ";";
+        String sql = "UPDATE verification.submissions SET (status, rejection_reason, reviewed_by_user_id, reviewed_at) = (?, ?, ?, ?) " +
+                "WHERE id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            stat.execute(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setString(1, newSub.status().toString());
+            stat.setString(2, newSub.review().rejectionReason());
+            stat.setInt(3, newSub.review().reviewerId());
+            stat.setObject(4, newSub.review().reviewTime());
+            stat.setInt(5, newSub.id());
+            stat.execute();
             conn.close();
         } catch (Exception e) {
             System.err.println(e.toString());
@@ -164,14 +166,14 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
 
     @Override
     public int UpdateSubmission(int subId, NewSubmission submission) {
-        String sql = "UPDATE verification.submissions SET (submitted_by_user_id, payload_json) = (" +
-                String.format("'%s', ", submission.userId()) +
-                String.format("'%s')", GetJsonFromSub(submission)) +
-                "WHERE id = " + subId + ";";
+        String sql = "UPDATE verification.submissions SET (submitted_by_user_id, payload_json) = (?, ?) WHERE id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            stat.execute(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setInt(1, submission.userId());
+            stat.setString(2, GetJsonFromSub(submission));
+            stat.setInt(3, subId);
+            stat.execute();
             conn.close();
         } catch (Exception e) {
             System.err.println(e.toString());
@@ -184,8 +186,8 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
         List<Submission> list = null;
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var outcome = stat.executeQuery("SELECT * FROM verification.submissions;");
+            PreparedStatement stat = conn.prepareStatement("SELECT * FROM verification.submissions;");
+            var outcome = stat.executeQuery();
             list = new ArrayList<>();
             while (outcome.next()){
                 list.add(GetSubFromStatement(outcome));
@@ -202,8 +204,9 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
         List<Submission> list = null;
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var outcome = stat.executeQuery("SELECT * FROM verification.submissions WHERE status = '" + status.toString() + "';");
+            PreparedStatement stat = conn.prepareStatement("SELECT * FROM verification.submissions WHERE status = ?;");
+            stat.setString(1, status.toString());
+            var outcome = stat.executeQuery();
             list = new ArrayList<>();
             while (outcome.next()){
                 list.add(GetSubFromStatement(outcome));

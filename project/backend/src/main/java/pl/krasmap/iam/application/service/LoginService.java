@@ -5,28 +5,28 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.krasmap.common.auth.template.UserAuthInterface;
-import pl.krasmap.iam.application.domain.UserNew;
-import pl.krasmap.iam.application.domain.UserWeb;
-import pl.krasmap.iam.application.domain.User;
+import pl.krasmap.iam.application.domain.data.UserNew;
+import pl.krasmap.iam.application.domain.data.UserWeb;
+import pl.krasmap.iam.application.domain.data.User;
 
 @Service
 public class LoginService {
-    private final HoldUserRepo userRepo;
+    private final HandleUserService userHandle;
     private final UserAuthInterface auth;
 
     private final BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder(12);
 
-    public LoginService(HoldUserRepo repo, @Lazy UserAuthInterface authServ) {
-        userRepo = repo;
+    public LoginService(HandleUserService repo, @Lazy UserAuthInterface authServ) {
+        userHandle = repo;
         auth = authServ;
     }
 
     public Pair<Boolean, String> CheckLogin(String login, String pass){
-        String dbPass = userRepo.GetUserPass(login);
+        String dbPass = userHandle.GetUserPass(login);
         String jwt = "" ;
         boolean ch = bcrypt.matches(pass, dbPass);
         if (ch) {
-            jwt = auth.GenerateJwt(userRepo.GetUser(login).id());
+            jwt = auth.GenerateJwt(userHandle.GetUser(login).id());
         }
         return Pair.of(ch, jwt);
     }
@@ -34,7 +34,7 @@ public class LoginService {
     public Pair<Boolean, String> Register(UserNew newUser) {
         UserWeb userToAdd = UserWeb.from(newUser, bcrypt.encode(newUser.password()));
         System.out.println(userToAdd);
-        User u = userRepo.AddUser(userToAdd);
+        User u = userHandle.AddUser(userToAdd);
         System.out.println(u);
         if (u == null) {
             return Pair.of(false, "");

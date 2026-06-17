@@ -1,8 +1,8 @@
 package pl.krasmap.iam.application.service;
 
 import org.springframework.stereotype.Repository;
-import pl.krasmap.iam.application.domain.UserWeb;
-import pl.krasmap.iam.application.domain.User;
+import pl.krasmap.iam.application.domain.data.UserWeb;
+import pl.krasmap.iam.application.domain.data.User;
 import pl.krasmap.iam.application.port.out.UserFetchInterface;
 
 import java.util.List;
@@ -31,14 +31,12 @@ public class HoldUserRepo {
         return userFetch.GetAllUsers();
     }
 
-    public User AddUser(UserWeb userToAdd) {
-        int id = userFetch.SaveUser(userToAdd);
-        return userFetch.GetUser(id);
+    public int AddUser(UserWeb userToAdd) {
+        return userFetch.SaveUser(userToAdd);
     }
 
-    public User UpdateUser(int userId, UserWeb userToAdd) {
-        int id = userFetch.UpdateUser(userId, userToAdd);
-        return userFetch.GetUser(id);
+    public int UpdateUser(int userId, UserWeb userToAdd) {
+        return userFetch.UpdateUser(userId, userToAdd);
     }
 
     public boolean DeleteUser(int userId) {

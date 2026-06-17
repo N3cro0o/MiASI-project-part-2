@@ -1,6 +1,6 @@
 package pl.krasmap.krasnal.application.port.out;
 
-import pl.krasmap.krasnal.application.domain.krasnal.Krasnal;
+import pl.krasmap.krasnal.application.domain.data.krasnal.Krasnal;
 
 import java.util.List;
 
