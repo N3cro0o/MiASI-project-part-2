@@ -71,7 +71,7 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
         int userId = auth.DecodeJwt(jwt);
         if (o) {
             KrasnalReview p = AddKrasnalReview(krasnalId, userId, review);
-            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.CONFLICT);
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
         return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));

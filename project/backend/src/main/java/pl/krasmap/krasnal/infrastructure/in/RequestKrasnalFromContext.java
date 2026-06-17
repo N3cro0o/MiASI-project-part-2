@@ -19,7 +19,12 @@ public class RequestKrasnalFromContext implements RequestKrasnalInterface {
 
     @Override
     public void AddNewKrasnal(String name, String description, Position position, KrasnalCategory category) {
+<<<<<<< HEAD
         KrasnalWeb k = new KrasnalWeb(name, description, position, category, KrasnalStatus.Active);
         krasnalHandle.AddNewKrasnal(k);
+=======
+        KrasnalWeb k = new KrasnalWeb(name, description, position, category, KrasnalStatus.Active, 0.0);
+        krasnalRepo.AddNewKrasnal(k);
+>>>>>>> 3023787c8cbde28c4b20ee3f1d16bc19eba10fd2
     }
 }

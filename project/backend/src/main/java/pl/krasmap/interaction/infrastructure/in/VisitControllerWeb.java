@@ -95,8 +95,8 @@ public class VisitControllerWeb implements VisitControllerInterface {
         return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
     }
 
-    @GetMapping("/me/all")
-    public ResponseEntity<List<VisitedKrasnal>> GetVisitsFromUserGlobalWrapper( @RequestHeader("Authorization") String jwt) {
+    @GetMapping("/me")
+    public ResponseEntity<List<Integer>> GetVisitsFromUserGlobalWrapper( @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Wanderer);
         if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
@@ -104,7 +104,8 @@ public class VisitControllerWeb implements VisitControllerInterface {
         if (o) {
             List<VisitedKrasnal> p = GetVisitsFromUser(userId);
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
-            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+            List<Integer> krasnalIds = p.stream().map(VisitedKrasnal::krasnalId).toList();
+            return new ResponseEntity<>(krasnalIds, HttpStatus.valueOf(200));
         }
         return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
     }
@@ -115,7 +116,7 @@ public class VisitControllerWeb implements VisitControllerInterface {
         return visitHandle.GetVisitsFromUser(userId);
     }
 
-    @PostMapping
+    @PostMapping("/{krasnalId}")
     public ResponseEntity<VisitedKrasnal> AddVisitWrapper(@PathVariable int krasnalId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Wanderer);
@@ -135,7 +136,7 @@ public class VisitControllerWeb implements VisitControllerInterface {
         return visitHandle.AddVisit(visit);
     }
 
-    @DeleteMapping("/{visitedId}")
+    @DeleteMapping("/admin/{visitedId}")
     public ResponseEntity<Boolean> RemoveVisitGlobalWrapper(@PathVariable int visitedId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
@@ -154,7 +155,7 @@ public class VisitControllerWeb implements VisitControllerInterface {
         return visitHandle.RemoveVisit(visitedId);
     }
 
-    @DeleteMapping("/me/{krasnalId}")
+    @DeleteMapping("/{krasnalId}")
     public ResponseEntity<Boolean> RemoveVisitWrapper(@PathVariable int krasnalId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Wanderer);

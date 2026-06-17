@@ -197,7 +197,8 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
         List<SubmissionReturn> t = new ArrayList<>();
         for (Submission s : l) {
             ReviewKrasnal k = subCheck.GenerateKrasnalFromJson(s.json());
-            t.add(new SubmissionReturn(s.id(), s.userId(),s.status(), s.submittedTime(), k.name(), k.position()));
+            String rejectReason = s.review() != null ? s.review().rejectionReason() : null;
+            t.add(new SubmissionReturn(s.id(), s.userId(),s.status(), s.submittedTime(), k.name(), k.position(), rejectReason, k.description()));
         }
         return t;
     }
@@ -208,7 +209,8 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
         List<SubmissionReturn> t = new ArrayList<>();
         for (Submission s : l) {
             ReviewKrasnal k = subCheck.GenerateKrasnalFromJson(s.json());
-            t.add(new SubmissionReturn(s.id(), s.userId(),s.status(), s.submittedTime(), k.name(), k.position()));
+            String rejectReason = s.review() != null ? s.review().rejectionReason() : null;
+            t.add(new SubmissionReturn(s.id(), s.userId(),s.status(), s.submittedTime(), k.name(), k.position(), rejectReason, k.description()));
         }
         return t;
     }

@@ -1,8 +1,9 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import apiClient from '../../../shared/api/apiClient';
 import { API_ENDPOINTS } from '../../../shared/api/endpoints';
 
+// DTO aligned with the requested changes from backend
 interface CreateSubmissionRequest {
     name: string;
     category: string;
@@ -15,6 +16,8 @@ interface CreateSubmissionRequest {
  * Hook to send a new submission to the backend using the configured API Client.
  */
 export const useCreateSubmission = () => {
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: async (payload: CreateSubmissionRequest) => {
             // Map the flat frontend payload to the nested backend format (ReviewKrasnal)
@@ -28,19 +31,18 @@ export const useCreateSubmission = () => {
                 },
             };
 
-            // Use apiClient - it automatically knows if it should hit localhost:8080 or the production URL
-            const response = await apiClient.post(API_ENDPOINTS.CREATE_SUBMISSION, backendPayload, {
-                headers: {
-                    // TODO: Usunąć dummy-token, gdy apiClient będzie miał wbudowany interceptor do JWT
-                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NSwiZXhwIjoxNzgxMzc3NjE1fQ.y48oHRLhlTNB7GOC0b8q-y-_CSAe86Bdp1ZJ_cha7uI',
-                },
-            });
+            const response = await apiClient.post(API_ENDPOINTS.CREATE_SUBMISSION, backendPayload);
 
             return response.data;
         },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['my-submissions'] });
+        },
         onError: (error: AxiosError<{ message?: string }>) => {
+            // Axios automatically throws on 4xx/5xx errors
             const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred';
             console.error('Submission failed:', errorMessage);
+            // The error will be caught and displayed by the PoiForm component
         },
     });
 };

@@ -1,18 +1,22 @@
+import React from 'react';
 import PoiCard from './PoiCard';
-import { usePois } from '../api/usePois';
+import { useKrasnals } from '../api/useKrasnals';
 import type { Poi } from '../models/Poi';
 
 interface PoiListProps {
   activeCategory: string;
   onPoiSelect: (poi: Poi) => void;
+  searchTerm: string;
+  filteredPois: Poi[];
+  isLoading: boolean;
+  error: Error | null;
 }
 
 /**
  * Scrollable vertical list of POI cards.
- * Fetches and renders real POI data from the backend.
+ * Fetches and renders real dwarf data from the backend.
  */
-const PoiList: React.FC<PoiListProps> = ({ activeCategory, onPoiSelect }) => {
-  const { data: pois, isLoading, error } = usePois();
+const PoiList: React.FC<PoiListProps> = ({ activeCategory, onPoiSelect, searchTerm, filteredPois, isLoading, error }) => {
 
   if (isLoading) {
     return (
@@ -31,31 +35,26 @@ const PoiList: React.FC<PoiListProps> = ({ activeCategory, onPoiSelect }) => {
     );
   }
 
-  if (!pois || pois.length === 0) {
-    return (
-      <div className="flex h-32 items-center justify-center text-sm text-wroclaw-dark/60">
-        No POIs found in this area.
-      </div>
-    );
-  }
-
-  const filteredPois =
-    activeCategory === 'ALL'
-      ? pois
-      : pois.filter((poi) => poi.category === activeCategory);
-
   if (filteredPois.length === 0) {
+    if (searchTerm !== '') {
+      return (
+        <div className="flex h-32 items-center justify-center text-center text-sm text-wroclaw-dark/60 px-4">
+          No dwarfs found matching your search.
+        </div>
+      );
+    }
     return (
-      <div className="flex h-32 items-center justify-center text-sm text-wroclaw-dark/60">
+      <div className="flex h-32 items-center justify-center text-center text-sm text-wroclaw-dark/60 px-4">
         No POIs found for this category.
       </div>
     );
   }
 
+  // Use type casting to match Poi interface expected by PoiCard if needed
   return (
     <div className="flex flex-col gap-2">
       {filteredPois.map((poi) => (
-        <PoiCard key={poi.id} poi={poi} onClick={onPoiSelect} />
+        <PoiCard key={poi.id} poi={poi as Poi} onClick={onPoiSelect} />
       ))}
     </div>
   );
