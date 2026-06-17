@@ -1,7 +1,7 @@
 package pl.krasmap.krasnal.infrastructure.out;
 
 import org.springframework.stereotype.Component;
-import pl.krasmap.interaction.application.domain.review.Review;
+import pl.krasmap.interaction.application.domain.data.review.Review;
 import pl.krasmap.interaction.application.port.in.RequestReviewInterface;
 import pl.krasmap.krasnal.application.domain.data.KrasnalReview;
 import pl.krasmap.krasnal.application.domain.data.KrasnalReviewWeb;

@@ -1,6 +1,6 @@
 package pl.krasmap.interaction.application.port.in;
 
-import pl.krasmap.interaction.application.domain.fav.VisitedKrasnal;
+import pl.krasmap.interaction.application.domain.data.fav.VisitedKrasnal;
 
 import java.util.List;
 

@@ -17,6 +17,7 @@ import pl.krasmap.submission.application.domain.data.submission.Submission;
 import pl.krasmap.common.data.SubmissionStatus;
 import pl.krasmap.submission.application.port.in.SubmissionControllerInterface;
 import pl.krasmap.submission.application.service.CheckSubmission;
+import pl.krasmap.submission.application.service.HandleSubmissionService;
 import pl.krasmap.submission.application.service.HoldSubmissionRepo;
 
 import java.util.ArrayList;
@@ -26,12 +27,12 @@ import java.util.List;
 @RequestMapping("/api/submissions")
 public class SubmissionControllerWeb implements SubmissionControllerInterface {
 
-    private final HoldSubmissionRepo subRepo;
+    private final HandleSubmissionService subHandle;
     private final CheckSubmission subCheck;
     private final UserAuthInterface auth;
 
-    public SubmissionControllerWeb(HoldSubmissionRepo repo, CheckSubmission check, @Lazy UserAuthInterface authServ) {
-        subRepo = repo;
+    public SubmissionControllerWeb(HandleSubmissionService repo, CheckSubmission check, @Lazy UserAuthInterface authServ) {
+        subHandle = repo;
         subCheck = check;
         auth = authServ;
     }
@@ -53,7 +54,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
 
     @Override
     public Submission PostSubmission(NewSubmission submission) {
-        return subRepo.AddSubmission(submission);
+        return subHandle.AddSubmission(submission);
     }
 
     @GetMapping("/check/{subId}")
@@ -71,7 +72,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
 
     @Override
     public SubmissionStatus CheckSubmission(int subId) {
-        return subRepo.CheckSubmission(subId);
+        return subHandle.CheckSubmission(subId);
     }
 
     @GetMapping("/user/{userId}")
@@ -89,7 +90,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
 
     @Override
     public List<Submission> GetSubmissionsFromUser(int userId) {
-        return subRepo.GetSubmissionsFromUser(userId);
+        return subHandle.GetSubmissionsFromUser(userId);
     }
 
     @GetMapping("/{subId}")
@@ -166,7 +167,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
 
     @Override
     public Submission UpdateSubmission(int subId, NewSubmission submission) {
-        return subRepo.UpdateSubmission(subId, submission);
+        return subHandle.UpdateSubmission(subId, submission);
     }
 
     @GetMapping
@@ -192,7 +193,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
 
     @Override
     public List<SubmissionReturn> GetAllSubmissions() {
-        var l =  subRepo.GetAllSubmissions();
+        var l =  subHandle.GetAllSubmissions();
         List<SubmissionReturn> t = new ArrayList<>();
         for (Submission s : l) {
             ReviewKrasnal k = subCheck.GenerateKrasnalFromJson(s.json());
@@ -203,7 +204,7 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
 
     @Override
     public List<SubmissionReturn> GetAllSubmissions(SubmissionStatus status) {
-        var l =  subRepo.GetAllSubmissions(status);
+        var l =  subHandle.GetAllSubmissions(status);
         List<SubmissionReturn> t = new ArrayList<>();
         for (Submission s : l) {
             ReviewKrasnal k = subCheck.GenerateKrasnalFromJson(s.json());

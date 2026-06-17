@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import pl.krasmap.iam.application.domain.data.User;
 import pl.krasmap.iam.application.domain.data.UserWeb;
 import pl.krasmap.iam.application.domain.event.UserCreatedEvent;
+import pl.krasmap.iam.application.domain.event.UserDeletedEvent;
+import pl.krasmap.iam.application.domain.event.UserUpdatedEvent;
 
 import java.util.List;
 
@@ -38,15 +40,20 @@ public class HandleUserService {
     public User AddUser(UserWeb userToAdd) {
         int id = repos.AddUser(userToAdd);
         events.publishEvent(new UserCreatedEvent(id, userToAdd.role(), userToAdd.login()));
-        return repos.GetUser(id);
+        return GetUser(id);
     }
 
     public User UpdateUser(int userId, UserWeb userToAdd) {
         int id = repos.UpdateUser(userId, userToAdd);
-        return repos.GetUser(id);
+        events.publishEvent(new UserUpdatedEvent(id, userToAdd.role(), userToAdd.login()));
+        return GetUser(id);
     }
 
     public boolean DeleteUser(int userId) {
-        return repos.DeleteUser(userId);
+        User u = GetUser(userId);
+        boolean b =  repos.DeleteUser(userId);
+        if (b)
+            events.publishEvent(new UserDeletedEvent(userId, u.role(), u.login()));
+        return b;
     }
 }

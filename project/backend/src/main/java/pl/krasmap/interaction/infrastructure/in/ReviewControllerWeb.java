@@ -7,9 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.krasmap.common.auth.template.UserAuthInterface;
 import pl.krasmap.common.data.UserRole;
-import pl.krasmap.interaction.application.domain.review.Review;
-import pl.krasmap.interaction.application.domain.review.ReviewWeb;
+import pl.krasmap.interaction.application.domain.data.review.Review;
+import pl.krasmap.interaction.application.domain.data.review.ReviewWeb;
 import pl.krasmap.interaction.application.port.in.ReviewControllerInterface;
+import pl.krasmap.interaction.application.service.HandleReviewService;
 import pl.krasmap.interaction.application.service.HoldReviewRepo;
 
 import java.util.List;
@@ -18,11 +19,11 @@ import java.util.List;
 @RequestMapping("/api/reviews")
 public class ReviewControllerWeb implements ReviewControllerInterface {
 
-    private final HoldReviewRepo reviewRepo;
+    private final HandleReviewService reviewHandle;
     private final UserAuthInterface auth;
 
-    public ReviewControllerWeb(HoldReviewRepo repo, @Lazy UserAuthInterface authServ){
-        reviewRepo = repo;
+    public ReviewControllerWeb(HandleReviewService repo, @Lazy UserAuthInterface authServ){
+        reviewHandle = repo;
         auth = authServ;
     }
 
@@ -35,7 +36,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
 
     @Override
     public Review GetReview(int reviewId) {
-        return reviewRepo.GetReviewById(reviewId);
+        return reviewHandle.GetReviewById(reviewId);
     }
 
     @GetMapping("/krasnal/{krasnalId}")
@@ -47,7 +48,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
 
     @Override
     public List<Review> GetReviewsUnderKrasnal(int krasnalId) {
-        return reviewRepo.GetReviewsUnderKrasnal(krasnalId);
+        return reviewHandle.GetReviewsUnderKrasnal(krasnalId);
     }
 
     @GetMapping("/user/{userId}")
@@ -59,7 +60,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
 
     @Override
     public List<Review> GetReviewsFromUser(int userId) {
-        return reviewRepo.GetReviewsFromUser(userId);
+        return reviewHandle.GetReviewsFromUser(userId);
     }
 
     @GetMapping("/user/{userId}/krasnal/{krasnalId}")
@@ -71,7 +72,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
 
     @Override
     public List<Review> GetReviewsFromUserUnderKrasnal(int userId, int krasnalId) {
-        return reviewRepo.GetReviewsFromUserUnderKrasnal(userId, krasnalId);
+        return reviewHandle.GetReviewsFromUserUnderKrasnal(userId, krasnalId);
     }
 
     @PostMapping
@@ -89,7 +90,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
 
     @Override
     public Review AddReview(ReviewWeb reviewToAdd) {
-        return reviewRepo.AddReview(reviewToAdd);
+        return reviewHandle.AddReview(reviewToAdd);
     }
 
     @PatchMapping("/{reviewId}")
@@ -107,7 +108,7 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
 
     @Override
     public Review UpdateReview(int reviewId, ReviewWeb reviewToUpdate) {
-        return reviewRepo.UpdateReview(reviewId, reviewToUpdate);
+        return reviewHandle.UpdateReview(reviewId, reviewToUpdate);
     }
 
     @DeleteMapping("/{reviewId}")
@@ -125,6 +126,6 @@ public class ReviewControllerWeb implements ReviewControllerInterface {
 
     @Override
     public Boolean RemoveReview(int reviewId) {
-        return reviewRepo.RemoveReview(reviewId);
+        return reviewHandle.RemoveReview(reviewId);
     }
 }

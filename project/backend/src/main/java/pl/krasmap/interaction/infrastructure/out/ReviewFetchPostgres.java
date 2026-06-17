@@ -2,8 +2,8 @@ package pl.krasmap.interaction.infrastructure.out;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import pl.krasmap.interaction.application.domain.review.Review;
-import pl.krasmap.interaction.application.domain.review.ReviewWeb;
+import pl.krasmap.interaction.application.domain.data.review.Review;
+import pl.krasmap.interaction.application.domain.data.review.ReviewWeb;
 import pl.krasmap.interaction.application.port.out.ReviewFetchInterface;
 
 import java.sql.Connection;

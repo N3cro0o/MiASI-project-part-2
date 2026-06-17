@@ -2,8 +2,8 @@ package pl.krasmap.interaction.infrastructure.out;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import pl.krasmap.interaction.application.domain.fav.NewVisit;
-import pl.krasmap.interaction.application.domain.fav.VisitedKrasnal;
+import pl.krasmap.interaction.application.domain.data.fav.NewVisit;
+import pl.krasmap.interaction.application.domain.data.fav.VisitedKrasnal;
 import pl.krasmap.interaction.application.port.out.VisitedFetchInterface;
 
 import java.sql.Connection;

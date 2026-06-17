@@ -1,6 +1,6 @@
 package pl.krasmap.iam.application.domain.data.stats;
 
-import pl.krasmap.interaction.application.domain.fav.VisitedKrasnal;
+import pl.krasmap.interaction.application.domain.data.fav.VisitedKrasnal;
 
 import java.time.OffsetDateTime;
 

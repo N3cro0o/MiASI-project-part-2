@@ -1,4 +1,4 @@
-package pl.krasmap.interaction.application.domain.fav;
+package pl.krasmap.interaction.application.domain.data.fav;
 
 import java.time.OffsetDateTime;
 

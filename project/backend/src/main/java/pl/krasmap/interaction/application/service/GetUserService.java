@@ -4,7 +4,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.stereotype.Service;
 import pl.krasmap.iam.application.domain.data.User;
 import pl.krasmap.iam.application.service.HoldUserRepo;
-import pl.krasmap.interaction.application.domain.review.ReviewUser;
+import pl.krasmap.interaction.application.domain.data.review.ReviewUser;
 
 @Service
 public class GetUserService {
