@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import pl.krasmap.krasnal.application.domain.data.KrasnalWeb;
 import pl.krasmap.krasnal.application.domain.data.krasnal.Krasnal;
 import pl.krasmap.krasnal.application.domain.event.KrasnalAddedEvent;
+import pl.krasmap.krasnal.application.domain.event.KrasnalDestroyedEvent;
 import pl.krasmap.krasnal.application.domain.event.KrasnalHiddenEvent;
 import pl.krasmap.krasnal.application.domain.event.KrasnalUpdatedEvent;
 
@@ -47,6 +48,13 @@ public class KrasnalHandleService {
         Krasnal k = GetKrasnal(krasnalId);
         boolean b = repos.HideKrasnal(krasnalId);
         events.publishEvent(new KrasnalHiddenEvent(krasnalId, k.name()));
+        return b;
+    }
+
+    public boolean DestroyKrasnal(int krasnalId) {
+        Krasnal k = GetKrasnal(krasnalId);
+        boolean b = repos.DestroyKrasnal(krasnalId);
+        events.publishEvent(new KrasnalDestroyedEvent(krasnalId, k.name()));
         return b;
     }
 }

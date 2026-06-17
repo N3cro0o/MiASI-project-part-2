@@ -131,6 +131,24 @@ public class KrasnalControllerWeb implements KrasnalControllerInterface {
         return krasnalHandle.HideKrasnal(krasnalId);
     }
 
+    @DeleteMapping("/{krasnalId}/force")
+    public ResponseEntity<Boolean> DeleteForceKrasnalWrapper(@PathVariable int krasnalId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        if (o) {
+            Boolean p = DeleteForceKrasnal(krasnalId);
+            if (p == null || !p) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public Boolean DeleteForceKrasnal(int krasnalId) {
+        return krasnalHandle.DestroyKrasnal(krasnalId);
+    }
+
     @PatchMapping("/{krasnalId}")
     public ResponseEntity<Krasnal> UpdateKrasnalWrapper(@RequestBody KrasnalWeb krasnalToUpdate, @PathVariable int krasnalId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;

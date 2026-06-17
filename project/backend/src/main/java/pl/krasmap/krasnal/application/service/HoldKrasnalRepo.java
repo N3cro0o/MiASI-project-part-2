@@ -33,4 +33,8 @@ public class HoldKrasnalRepo {
     public boolean HideKrasnal(int krasnalId) {
         return krasnalFetch.HideKrasnal(krasnalId);
     }
+
+    public boolean DestroyKrasnal(int krasnalId) {
+        return krasnalFetch.DeleteKrasnal(krasnalId);
+    }
 }
