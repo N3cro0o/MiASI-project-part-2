@@ -1,7 +1,7 @@
 package pl.krasmap.interaction.application.port.in;
 
-import pl.krasmap.interaction.application.domain.Review;
-import pl.krasmap.interaction.application.domain.ReviewWeb;
+import pl.krasmap.interaction.application.domain.data.review.Review;
+import pl.krasmap.interaction.application.domain.data.review.ReviewWeb;
 
 import java.util.List;
 
@@ -12,5 +12,5 @@ public interface ReviewControllerInterface {
     List<Review> GetReviewsFromUserUnderKrasnal(int userId, int krasnalId);
     Review AddReview(ReviewWeb reviewToAdd);
     Review UpdateReview(int reviewId, ReviewWeb reviewToUpdate);
-    boolean RemoveReview(int reviewId);
+    Boolean RemoveReview(int reviewId);
 }

@@ -1,21 +1,14 @@
 package pl.krasmap.krasnal.application.service;
 
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
-import pl.krasmap.krasnal.application.domain.KrasnalWeb;
-import pl.krasmap.krasnal.application.domain.krasnal.Krasnal;
+import pl.krasmap.krasnal.application.domain.data.krasnal.Krasnal;
 import pl.krasmap.krasnal.application.port.out.KrasnalFetchInterface;
-import pl.krasmap.krasnal.infrastructure.out.KrasnalFetchPostgres;
 
 import java.util.List;
 
 @Repository
 public class HoldKrasnalRepo {
     final private KrasnalFetchInterface krasnalFetch;
-
-    public Krasnal ReturnDummyKrasnal() {
-        return Krasnal.dummy();
-    }
 
     public HoldKrasnalRepo (KrasnalFetchInterface fetch) {
         krasnalFetch = fetch;
@@ -29,19 +22,19 @@ public class HoldKrasnalRepo {
         return krasnalFetch.GetAllKrasnalObjects();
     }
 
-    public Krasnal AddNewKrasnal(KrasnalWeb newKrasnal) {
-        Krasnal toAdd = Krasnal.from(newKrasnal);
-        int id = krasnalFetch.SaveKrasnal(toAdd);
-        return krasnalFetch.GetKrasnal(id);
+    public int AddNewKrasnal(Krasnal toAdd) {
+        return krasnalFetch.SaveKrasnal(toAdd);
     }
 
-    public Krasnal UpdateKrasnal(int krasnalId, KrasnalWeb krasnalToUpdate) {
-        Krasnal toAdd = Krasnal.from(krasnalId, krasnalToUpdate);
-        krasnalFetch.UpdateKrasnal(toAdd);
-        return krasnalFetch.GetKrasnal(krasnalId);
+    public int UpdateKrasnal(Krasnal toAdd) {
+        return krasnalFetch.UpdateKrasnal(toAdd);
     }
 
     public boolean HideKrasnal(int krasnalId) {
         return krasnalFetch.HideKrasnal(krasnalId);
+    }
+
+    public boolean DestroyKrasnal(int krasnalId) {
+        return krasnalFetch.DeleteKrasnal(krasnalId);
     }
 }

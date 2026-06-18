@@ -5,3 +5,7 @@
 
 # Global security rules - NEVER commit credentials
 .env
+
+# Frontend
+node_modules/
+.vite

@@ -1,10 +1,9 @@
 package pl.krasmap.submission.application.service;
 
 import org.springframework.stereotype.Repository;
-import pl.krasmap.submission.application.domain.NewSubmission;
-import pl.krasmap.submission.application.domain.submission.Submission;
-import pl.krasmap.submission.application.domain.submission.SubmissionReview;
-import pl.krasmap.submission.application.domain.submission.SubmissionStatus;
+import pl.krasmap.submission.application.domain.data.NewSubmission;
+import pl.krasmap.submission.application.domain.data.submission.Submission;
+import pl.krasmap.common.data.SubmissionStatus;
 import pl.krasmap.submission.application.port.out.SubmissionFetchInterface;
 
 import java.util.List;
@@ -17,9 +16,8 @@ public class HoldSubmissionRepo {
         subFetch = fetch;
     }
 
-    public Submission AddSubmission(NewSubmission submission) {
-        int id = subFetch.AddSubmission(submission);
-        return subFetch.GetSubmission(id);
+    public int AddSubmission(NewSubmission submission) {
+        return subFetch.AddSubmission(submission);
     }
 
     public SubmissionStatus CheckSubmission(int subId) {
@@ -38,8 +36,15 @@ public class HoldSubmissionRepo {
         return subFetch.UpdateSubReview(newSub);
     }
 
-    public Submission UpdateSubmission(int subId, NewSubmission submission) {
-        int id = subFetch.UpdateSubmission(subId, submission);
-        return subFetch.GetSubmission(id);
+    public int UpdateSubmission(int subId, NewSubmission submission) {
+        return subFetch.UpdateSubmission(subId, submission);
+    }
+
+    public List<Submission> GetAllSubmissions() {
+        return subFetch.GetAllSubmissions();
+    }
+
+    public List<Submission> GetAllSubmissions(SubmissionStatus status) {
+        return subFetch.GetAllSubmissions(status);
     }
 }

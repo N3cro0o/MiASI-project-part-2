@@ -1,43 +1,21 @@
 package pl.krasmap.krasnal.infrastructure.out;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import pl.krasmap.common.data.KrasnalCategory;
 import pl.krasmap.common.data.Position;
 import pl.krasmap.common.data.UpdateTime;
-import pl.krasmap.krasnal.application.domain.krasnal.*;
+import pl.krasmap.krasnal.application.domain.data.krasnal.*;
 import pl.krasmap.krasnal.application.port.out.KrasnalFetchInterface;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Component
 public class KrasnalFetchPostgres implements KrasnalFetchInterface {
-
-    // private final String postgresAddr = "172.30.144.1:5432";
-    // private final String postgresString = "jdbc:postgresql://%s/krasnal_db";
-    // private final String postgresUser = "krasnal_admin";
-    // private final String postgresPassword = "krasnal";
-
-    // // Use local address for Docker port forwarding
-    // private final String postgresAddr = "127.0.0.1:5432";
-    
-    // // Target database name
-    // private final String postgresString = "jdbc:postgresql://%s/krasmap";
-    
-    // // Credentials from the .env file
-    // private final String postgresUser = "krasmap_user";
-    // private final String postgresPassword = "change_me_in_production";
-
-    // private Connection GetDatabaseConnection() throws Exception {
-    //     String targetString = String.format(postgresString, postgresAddr);
-    //     return DriverManager.getConnection(targetString, postgresUser, postgresPassword);
-    // }
 
     @Value("${db.url}")
     private String postgresString;
@@ -49,7 +27,6 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
     private String postgresPassword;
 
     private Connection GetDatabaseConnection() throws Exception {
-        // Teraz używasz zmiennych bez słowa localhost w kodzie!
         return DriverManager.getConnection(postgresString, postgresUser, postgresPassword);
     }
 
@@ -68,7 +45,8 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
         t1 = statement.getObject(8, OffsetDateTime.class);
         t2 = statement.getObject(9, OffsetDateTime.class);
         times = UpdateTime.from(t1, t2);
-        return Krasnal.newObject(id, name, desc, Position.from(lat, lon), cat, stat, times);
+        Double averageRating = statement.getDouble("averageRating");
+        return Krasnal.newObject(id, name, desc, Position.from(lat, lon), cat, stat, times, averageRating);
     }
 
     @Override
@@ -76,8 +54,8 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
         List<Krasnal> list = null;
         try {
             Connection connection = GetDatabaseConnection();
-            Statement statement = connection.createStatement();
-            var output = statement.executeQuery("SELECT * FROM poi_catalog.krasnals;");
+            PreparedStatement statement = connection.prepareStatement("SELECT k.*, COALESCE(ROUND(AVG(r.rating), 1), 0.0) as averageRating FROM poi_catalog.krasnals k LEFT JOIN interaction.reviews r ON k.id = r.krasnal_id GROUP BY k.id;");
+            var output = statement.executeQuery();
             list = new ArrayList<>();
             while (output.next()) {
                 list.add(GetKrasnalFromStatement(output));
@@ -94,8 +72,9 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
         Krasnal obj = null;
         try {
             Connection conn = GetDatabaseConnection();
-            Statement statement = conn.createStatement();
-            var output = statement.executeQuery(String.format("SELECT * FROM poi_catalog.krasnals WHERE poi_catalog.krasnals.id = %d;", krasnalId));
+            PreparedStatement statement = conn.prepareStatement("SELECT k.*, COALESCE(ROUND(AVG(r.rating), 1), 0.0) as averageRating FROM poi_catalog.krasnals k LEFT JOIN interaction.reviews r ON k.id = r.krasnal_id WHERE k.id = ? GROUP BY k.id;");
+            statement.setInt(1, krasnalId);
+            var output = statement.executeQuery();
             while (output.next()) {
                 obj = GetKrasnalFromStatement(output);
             }
@@ -109,17 +88,18 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
     @Override
     public int SaveKrasnal(Krasnal k) {
         int id = -1;
-        String sql = "INSERT INTO poi_catalog.krasnals (name, description, latitude, longitude, category, status) VALUES (" + String.format("'%s', ", k.name()) +
-                String.format("'%s', ", k.description()) +
-                String.format("'%s', ", k.position().latitude()) +
-                String.format("'%s', ", k.position().longitude()) +
-                String.format("'%s', ", k.category().toString()) +
-                String.format("'%s'", k.status().toString()) +
-                ") RETURNING poi_catalog.krasnals.id;";
+        String sql = "INSERT INTO poi_catalog.krasnals (name, description, latitude, longitude, category, status) VALUES (?, ?, ?, ?, ?, ?)" +
+                " RETURNING poi_catalog.krasnals.id;";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var output = stat.executeQuery(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setString(1, k.name());
+            stat.setString(2, k.description());
+            stat.setDouble(3, k.position().latitude());
+            stat.setDouble(4, k.position().longitude());
+            stat.setString(5, k.category().toString());
+            stat.setString(6, k.status().toString());
+            var output = stat.executeQuery();
             while(output.next()) {
                 id = output.getInt(1);
             }
@@ -133,17 +113,19 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
 
     @Override
     public int UpdateKrasnal(Krasnal k) {
-        String sql = "UPDATE poi_catalog.krasnals SET (name, description, latitude, longitude, category, status) = (" + String.format("'%s', ", k.name()) +
-                String.format("'%s', ", k.description()) +
-                String.format("'%s', ", k.position().latitude()) +
-                String.format("'%s', ", k.position().longitude()) +
-                String.format("'%s', ", k.category().toString()) +
-                String.format("'%s'", k.status().toString()) +
-                ") WHERE id = " + k.id() + ";";
+        String sql = "UPDATE poi_catalog.krasnals SET (name, description, latitude, longitude, category, status) = (?, ?, ?, ?, ?, ?) " +
+                "WHERE id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            stat.execute(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setString(1, k.name());
+            stat.setString(2, k.description());
+            stat.setDouble(3, k.position().latitude());
+            stat.setDouble(4, k.position().longitude());
+            stat.setString(5, k.category().toString());
+            stat.setString(6, k.status().toString());
+            stat.setInt(7, k.id());
+            stat.execute();
             conn.close();
         }
         catch (Exception e) {
@@ -155,13 +137,13 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
     @Override
     public boolean HideKrasnal(int krasnalId) {
         boolean check = false;
-        String sql = "UPDATE poi_catalog.krasnals SET status = '" +
-                KrasnalStatus.Inactive.toString() +
-                "' WHERE id = " + krasnalId + ";";
+        String sql = "UPDATE poi_catalog.krasnals SET status = ? WHERE id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            stat.execute(sql);
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setString(1, KrasnalStatus.Inactive.toString());
+            stat.setInt(2, krasnalId);
+            stat.execute();
             check = true;
             conn.close();
         }
@@ -173,6 +155,19 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
 
     @Override
     public boolean DeleteKrasnal(int krasnalId) {
-        return false;
+        boolean check = false;
+        String sql = "DELETE FROM poi_catalog.krasnals WHERE id = ?;";
+        try {
+            Connection conn = GetDatabaseConnection();
+            PreparedStatement stat = conn.prepareStatement(sql);
+            stat.setInt(1, krasnalId);
+            stat.execute();
+            check = true;
+            conn.close();
+        }
+        catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return check;
     }
 }

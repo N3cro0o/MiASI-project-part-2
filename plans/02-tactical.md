@@ -10,10 +10,11 @@
 
 | | |
 |---|---|
+| **Status** | Accepted |
 | **Kontekst** | System musi być testowalny niezależnie od frameworka i bazy danych. Logika domenowa nie może być zanieczyszczona infrastrukturą. |
 | **Decyzja** | Stosujemy Hexagonal Architecture (Ports & Adapters). Rdzeń systemu (pakiet `domain`) to czysta Java — zero adnotacji Springa, zero zależności od JPA. Spring Boot używany wyłącznie w pakiecie `infrastructure` (adaptery). |
 | **Konsekwencje** | (+) Logika domenowa w pełni testowalana przez JUnit bez kontekstu Springa. (+) Wymienność adapterów (np. zamiana PostgreSQL na inną bazę). (-) Więcej interfejsów i klas mapujących. |
-| **Zasada SOLID** | Dependency Inversion Principle — domenowe porty wyjściowe (np. `DwarfRepository`) są interfejsami; adaptery (`JpaDwarfRepository`) implementują je w warstwie infrastruktury. |
+| **Zasada SOLID** | Dependency Inversion Principle — domenowe porty wyjściowe (np. `KrasnalRepository`) są interfejsami; adaptery (`JpaKrasnalRepository`) implementują je w warstwie infrastruktury. |
 
 ---
 
@@ -21,6 +22,7 @@
 
 | | |
 |---|---|
+| **Status** | Accepted |
 | **Kontekst** | Konteksty nie mogą wołać się nawzajem bezpośrednio — to naruszyłoby izolację Bounded Contexts i stworzyło cykliczne zależności. |
 | **Decyzja** | Komunikacja między kontekstami wyłącznie przez Zdarzenia Domenowe. Zdarzenia emituje warstwa aplikacyjna przez `ApplicationEventPublisher` (Spring). Klasy zdarzeń to czyste POJO w warstwie domenowej (bez adnotacji Springa). Listenery to adaptery (`@EventListener` w `infrastructure`). |
 | **Konsekwencje** | (+) Pełna izolacja Bounded Contexts. (+) Łatwe dodawanie nowych konsumentów bez modyfikacji producenta. (-) Przepływ sterowania trudniejszy do śledzenia w kodzie. |
@@ -32,6 +34,7 @@
 
 | | |
 |---|---|
+| **Status** | Accepted |
 | **Kontekst** | Każdy Bounded Context ma własny schemat PostgreSQL. Deklaratywne `FOREIGN KEY` między schematami tworzyłyby ścisłe sprzężenie na poziomie bazy danych — naruszenie izolacji BC. |
 | **Decyzja** | Cross-context referencje realizowane jako `BIGINT` bez deklaratywnego `FOREIGN KEY`. Spójność danych gwarantowana przez Domain Events (EDA), nie przez bazę. |
 | **Konsekwencje** | (+) Schematy niezależne — można migrować BC niezależnie. (-) Brak automatycznej spójności referencyjnej na poziomie DB — wymaga dyscypliny w kodzie. |
@@ -42,8 +45,9 @@
 
 | | |
 |---|---|
+| **Status** | Accepted |
 | **Kontekst** | Zgłoszenie to propozycja Krasnala przed weryfikacją. Struktura danych może się zmieniać (np. dodatkowe pola opcjonalne). Do momentu akceptacji dane nie muszą być znormalizowane. |
-| **Decyzja** | `payload_json JSONB` w tabeli `verification.submissions`. Po akceptacji dane są mapowane na `Dwarf` z walidacją Value Objects. |
+| **Decyzja** | `payload_json JSONB` w tabeli `verification.submissions`. Po akceptacji dane są mapowane na `Krasnal` z walidacją Value Objects. |
 | **Konsekwencje** | (+) Elastyczna struktura payload bez migracji schematu. (+) Walidacja na poziomie domeny przy akceptacji. (-) Brak silnej typizacji na poziomie DB. |
 
 ---
@@ -52,7 +56,8 @@
 
 | | |
 |---|---|
-| **Kontekst** | Twarde usunięcie `SystemUser` powodowałoby osierocone rekordy w `interaction.reviews` i `verification.submissions` (soft FK bez kaskady). |
+| **Status** | Accepted |
+| **Kontekst** | Twarde usunięcie `User` powodowałoby osierocone rekordy w `interaction.reviews` i `verification.submissions` (soft FK bez kaskady). |
 | **Decyzja** | Dezaktywacja konta przez `active = false`. Konto zablokowane (login niemożliwy), dane historyczne (Recenzje, Zgłoszenia) zachowane. |
 | **Konsekwencje** | (+) Integralność danych historycznych. (+) Możliwość reaktywacji konta. (-) Tabela `system_users` rośnie. |
 
@@ -63,26 +68,26 @@
 ```mermaid
 graph TB
     subgraph ADAPTERS_IN["⬅️ Primary Adapters — Driving (Infrastructure)"]
-        WEB["DwarfController\nSubmissionController\nReviewController\nAuthController"]
+        WEB["🌐 KrasnalController\nSubmissionController\nReviewController\nAuthController"]
     end
 
-    subgraph CORE["Application Core (Pure Java — no Spring)"]
+    subgraph CORE["🏛️ Application Core (Pure Java — no Spring)"]
         subgraph APP["Application Layer"]
-            SVC["Input Ports\n(Service Interfaces)\nDwarfService\nSubmissionService\nReviewService\nUserService"]
+            SVC["📋 Input Ports\n(Service Interfaces)\nKrasnalService\nSubmissionService\nReviewService\nUserService"]
         end
         subgraph DOMAIN["Domain Layer"]
-            AGG["Aggregates\nDwarf · Submission\nReview · VisitedEntry\nSystemUser"]
-            VO["Value Objects\nCoordinates · DwarfName\nRating · Email · ..."]
-            EVT["Domain Events\nDwarfCreatedEvent\nSubmissionAcceptedEvent\n..."]
-            REPO_IF["Output Ports\n(Repository Interfaces)\nDwarfRepository\nSubmissionRepository\n..."]
+            AGG["🧩 Aggregates\nKrasnal · Submission\nReview · VisitedEntry\nUser"]
+            VO["💎 Value Objects\nCoordinates · KrasnalName\nRating · Email · ..."]
+            EVT["⚡ Domain Events\nKrasnalCreatedEvent\nSubmissionAcceptedEvent\n..."]
+            REPO_IF["🔌 Output Ports\n(Repository Interfaces)\nKrasnalRepository\nSubmissionRepository\n..."]
         end
     end
 
-    subgraph ADAPTERS_OUT["Secondary Adapters — Driven (Infrastructure)"]
-        JPA["Spring Data JPA\nJpaDwarfRepository\nJpaSubmissionRepository\n..."]
-        PG[("PostgreSQL\nschema: poi_catalog\nschema: verification\nschema: interaction\nschema: iam")]
-        PUB["ApplicationEventPublisher\nSpring Event Bus"]
-        LISTENER["Event Listeners\nSubmissionAcceptedListener\n(infrastructure)"]
+    subgraph ADAPTERS_OUT["➡️ Secondary Adapters — Driven (Infrastructure)"]
+        JPA["🗄️ Spring Data JPA\nJpaKrasnalRepository\nJpaSubmissionRepository\n..."]
+        PG[("🐘 PostgreSQL\nschema: poi_catalog\nschema: verification\nschema: interaction\nschema: iam")]
+        PUB["📢 ApplicationEventPublisher\nSpring Event Bus"]
+        LISTENER["👂 Event Listeners\nSubmissionAcceptedListener\n(infrastructure)"]
     end
 
     WEB -->|calls| SVC
@@ -107,7 +112,7 @@ graph TB
 classDiagram
     direction TB
 
-    class SystemUser {
+    class User {
         <<Aggregate Root>>
         -UserId id
         -Email email
@@ -115,7 +120,7 @@ classDiagram
         -UserRole role
         -boolean active
         -Instant createdAt
-        +register(Email, HashedPassword) SystemUser
+        +register(Email, HashedPassword) User
         +deactivate() void
         +activate() void
         +changeRole(UserRole) void
@@ -148,7 +153,7 @@ classDiagram
     class UserRole {
         <<enumeration>>
         GUEST
-        USER
+        WANDERER
         EDITOR
         ADMIN
     }
@@ -176,30 +181,30 @@ classDiagram
 
     class UserRepository {
         <<Output Port>>
-        +save(SystemUser) SystemUser
-        +findById(UserId) Optional~SystemUser~
-        +findByEmail(Email) Optional~SystemUser~
-        +findAll() List~SystemUser~
+        +save(User) User
+        +findById(UserId) Optional~User~
+        +findByEmail(Email) Optional~User~
+        +findAll() List~User~
     }
 
     class UserService {
         <<Input Port>>
-        +register(String email, String password) SystemUser
-        +login(String email, String password) SystemUser
+        +register(String email, String password) User
+        +login(String email, String password) User
         +changeRole(Long userId, UserRole newRole) void
         +deactivate(Long userId) void
-        +findAll() List~SystemUser~
+        +findAll() List~User~
     }
 
-    SystemUser *-- UserId
-    SystemUser *-- Email
-    SystemUser *-- HashedPassword
-    SystemUser *-- UserRole
-    SystemUser ..> UserRegisteredEvent : emits
-    SystemUser ..> UserRoleChangedEvent : emits
-    SystemUser ..> UserDeactivatedEvent : emits
+    User *-- UserId
+    User *-- Email
+    User *-- HashedPassword
+    User *-- UserRole
+    User ..> UserRegisteredEvent : emits
+    User ..> UserRoleChangedEvent : emits
+    User ..> UserDeactivatedEvent : emits
     UserService ..> UserRepository : uses
-    UserService ..> SystemUser : manages
+    UserService ..> User : manages
 ```
 
 ---
@@ -210,33 +215,33 @@ classDiagram
 classDiagram
     direction TB
 
-    class Dwarf {
+    class Krasnal {
         <<Aggregate Root>>
-        -DwarfId id
-        -DwarfName name
+        -KrasnalId id
+        -KrasnalName name
         -String description
         -Coordinates location
-        -DwarfCategory category
-        -DwarfStatus status
+        -KrasnalCategory category
+        -KrasnalStatus status
         -Instant createdAt
         -Instant updatedAt
-        +create(DwarfName, String, Coordinates, DwarfCategory) Dwarf
-        +update(DwarfName, String, DwarfCategory) void
-        +changeStatus(DwarfStatus) void
+        +create(KrasnalName, String, Coordinates, KrasnalCategory) Krasnal
+        +update(KrasnalName, String, KrasnalCategory) void
+        +changeStatus(KrasnalStatus) void
         +isVisible() boolean
     }
 
-    class DwarfId {
+    class KrasnalId {
         <<Value Object>>
         -Long value
-        +of(Long) DwarfId
+        +of(Long) KrasnalId
         +getValue() Long
     }
 
-    class DwarfName {
+    class KrasnalName {
         <<Value Object>>
         -String value
-        +of(String) DwarfName
+        +of(String) KrasnalName
         +getValue() String
         -validate(String) void
     }
@@ -251,75 +256,75 @@ classDiagram
         -validateRange() void
     }
 
-    class DwarfCategory {
+    class KrasnalCategory {
         <<enumeration>>
         MONUMENT
         BUILDING
-        DWARF_FIGURINE
+        KRASNAL_FIGURINE
         FLORA
         PLACE
     }
 
-    class DwarfStatus {
+    class KrasnalStatus {
         <<enumeration>>
         ACTIVE
         INACTIVE
         ARCHIVED
     }
 
-    class DwarfCreatedEvent {
+    class KrasnalCreatedEvent {
         <<Domain Event>>
-        +Long dwarfId
+        +Long krasnalId
         +String name
         +double latitude
         +double longitude
-        +DwarfCategory category
+        +KrasnalCategory category
         +Instant occurredAt
     }
 
-    class DwarfUpdatedEvent {
+    class KrasnalUpdatedEvent {
         <<Domain Event>>
-        +Long dwarfId
+        +Long krasnalId
         +Instant occurredAt
     }
 
-    class DwarfStatusChangedEvent {
+    class KrasnalStatusChangedEvent {
         <<Domain Event>>
-        +Long dwarfId
-        +DwarfStatus oldStatus
-        +DwarfStatus newStatus
+        +Long krasnalId
+        +KrasnalStatus oldStatus
+        +KrasnalStatus newStatus
         +Instant occurredAt
     }
 
-    class DwarfRepository {
+    class KrasnalRepository {
         <<Output Port>>
-        +save(Dwarf) Dwarf
-        +findById(DwarfId) Optional~Dwarf~
-        +findAll() List~Dwarf~
-        +findByStatus(DwarfStatus) List~Dwarf~
-        +findByCategory(DwarfCategory) List~Dwarf~
+        +save(Krasnal) Krasnal
+        +findById(KrasnalId) Optional~Krasnal~
+        +findAll() List~Krasnal~
+        +findByStatus(KrasnalStatus) List~Krasnal~
+        +findByCategory(KrasnalCategory) List~Krasnal~
     }
 
-    class DwarfService {
+    class KrasnalService {
         <<Input Port>>
-        +createDwarf(String name, String desc, double lat, double lon, DwarfCategory cat) Dwarf
-        +updateDwarf(Long id, String name, String desc, DwarfCategory cat) Dwarf
-        +changeStatus(Long id, DwarfStatus status) void
-        +findById(Long id) Dwarf
-        +findAllActive() List~Dwarf~
-        +findByCategory(DwarfCategory cat) List~Dwarf~
+        +createKrasnal(String name, String desc, double lat, double lon, KrasnalCategory cat) Krasnal
+        +updateKrasnal(Long id, String name, String desc, KrasnalCategory cat) Krasnal
+        +changeStatus(Long id, KrasnalStatus status) void
+        +findById(Long id) Krasnal
+        +findAllActive() List~Krasnal~
+        +findByCategory(KrasnalCategory cat) List~Krasnal~
     }
 
-    Dwarf *-- DwarfId
-    Dwarf *-- DwarfName
-    Dwarf *-- Coordinates
-    Dwarf *-- DwarfCategory
-    Dwarf *-- DwarfStatus
-    Dwarf ..> DwarfCreatedEvent : emits
-    Dwarf ..> DwarfUpdatedEvent : emits
-    Dwarf ..> DwarfStatusChangedEvent : emits
-    DwarfService ..> DwarfRepository : uses
-    DwarfService ..> Dwarf : manages
+    Krasnal *-- KrasnalId
+    Krasnal *-- KrasnalName
+    Krasnal *-- Coordinates
+    Krasnal *-- KrasnalCategory
+    Krasnal *-- KrasnalStatus
+    Krasnal ..> KrasnalCreatedEvent : emits
+    Krasnal ..> KrasnalUpdatedEvent : emits
+    Krasnal ..> KrasnalStatusChangedEvent : emits
+    KrasnalService ..> KrasnalRepository : uses
+    KrasnalService ..> Krasnal : manages
 ```
 
 ---
@@ -433,12 +438,12 @@ classDiagram
     class Review {
         <<Aggregate Root>>
         -ReviewId id
-        -Long dwarfId
+        -Long krasnalId
         -Long authorUserId
         -Rating rating
         -CommentContent content
         -Instant createdAt
-        +create(Long dwarfId, Long authorUserId, int rating, String content) Review
+        +create(Long krasnalId, Long authorUserId, int rating, String content) Review
         +delete() void
         +getRating() int
         +getContent() String
@@ -470,10 +475,10 @@ classDiagram
     class VisitedEntry {
         <<Aggregate Root>>
         -VisitedEntryId id
-        -Long dwarfId
+        -Long krasnalId
         -Long userId
         -Instant visitedAt
-        +create(Long dwarfId, Long userId) VisitedEntry
+        +create(Long krasnalId, Long userId) VisitedEntry
     }
 
     class VisitedEntryId {
@@ -486,15 +491,15 @@ classDiagram
     class ReviewSubmittedEvent {
         <<Domain Event>>
         +Long reviewId
-        +Long dwarfId
+        +Long krasnalId
         +Long authorUserId
         +int rating
         +Instant occurredAt
     }
 
-    class DwarfVisitedEvent {
+    class KrasnalVisitedEvent {
         <<Domain Event>>
-        +Long dwarfId
+        +Long krasnalId
         +Long userId
         +Instant occurredAt
     }
@@ -503,34 +508,34 @@ classDiagram
         <<Output Port>>
         +save(Review) Review
         +findById(ReviewId) Optional~Review~
-        +findByDwarfId(Long dwarfId) List~Review~
+        +findByKrasnalId(Long krasnalId) List~Review~
         +findByAuthorUserId(Long userId) List~Review~
         +deleteById(ReviewId) void
-        +calculateAverageRating(Long dwarfId) double
+        +calculateAverageRating(Long krasnalId) double
     }
 
     class VisitedEntryRepository {
         <<Output Port>>
         +save(VisitedEntry) VisitedEntry
         +findByUserId(Long userId) List~VisitedEntry~
-        +deleteByDwarfIdAndUserId(Long dwarfId, Long userId) void
-        +existsByDwarfIdAndUserId(Long dwarfId, Long userId) boolean
+        +deleteByKrasnalIdAndUserId(Long krasnalId, Long userId) void
+        +existsByKrasnalIdAndUserId(Long krasnalId, Long userId) boolean
     }
 
     class ReviewService {
         <<Input Port>>
-        +addReview(Long dwarfId, Long userId, int rating, String content) Review
+        +addReview(Long krasnalId, Long userId, int rating, String content) Review
         +deleteReview(Long reviewId, Long requestingUserId) void
-        +getReviewsForDwarf(Long dwarfId) List~Review~
-        +getAverageRating(Long dwarfId) double
+        +getReviewsForKrasnal(Long krasnalId) List~Review~
+        +getAverageRating(Long krasnalId) double
     }
 
     class VisitedService {
         <<Input Port>>
-        +markVisited(Long dwarfId, Long userId) VisitedEntry
-        +unmarkVisited(Long dwarfId, Long userId) void
-        +getVisitedDwarfs(Long userId) List~VisitedEntry~
-        +isVisited(Long dwarfId, Long userId) boolean
+        +markVisited(Long krasnalId, Long userId) VisitedEntry
+        +unmarkVisited(Long krasnalId, Long userId) void
+        +getVisitedKrasnals(Long userId) List~VisitedEntry~
+        +isVisited(Long krasnalId, Long userId) boolean
     }
 
     Review *-- ReviewId
@@ -538,7 +543,7 @@ classDiagram
     Review *-- CommentContent
     Review ..> ReviewSubmittedEvent : emits
     VisitedEntry *-- VisitedEntryId
-    VisitedEntry ..> DwarfVisitedEvent : emits
+    VisitedEntry ..> KrasnalVisitedEvent : emits
     ReviewService ..> ReviewRepository : uses
     ReviewService ..> Review : manages
     VisitedService ..> VisitedEntryRepository : uses
@@ -560,9 +565,9 @@ sequenceDiagram
     participant SUB as Submission
     participant PUB as ApplicationEventPublisher
     participant SAL as SubmissionAcceptedListener
-    participant DS as DwarfService
-    participant DR as DwarfRepository
-    participant DW as Dwarf
+    participant DS as KrasnalService
+    participant DR as KrasnalRepository
+    participant DW as Krasnal
 
     Editor->>SC: POST /submissions/{id}/accept
     SC->>SS: accept(submissionId, reviewerId)
@@ -580,47 +585,47 @@ sequenceDiagram
     Note over PUB,SAL: Asynchronous boundary — BC isolation
     PUB-)SAL: SubmissionAcceptedEvent
 
-    SAL->>DS: createDwarf(payload.name, payload.desc,<br/>payload.lat, payload.lon, payload.category)
-    DS->>DW: Dwarf.create(name, desc, coordinates, category)
+    SAL->>DS: createKrasnal(payload.name, payload.desc,<br/>payload.lat, payload.lon, payload.category)
+    DS->>DW: Krasnal.create(name, desc, coordinates, category)
     Note over DW: status = ACTIVE
-    DW-->>DS: DwarfCreatedEvent
-    DS->>DR: save(Dwarf)
-    DS->>PUB: publishEvent(DwarfCreatedEvent)
+    DW-->>DS: KrasnalCreatedEvent
+    DS->>DR: save(Krasnal)
+    DS->>PUB: publishEvent(KrasnalCreatedEvent)
 
     SC-->>Editor: 200 OK
 ```
 
 ---
 
-### 4.2 Dodanie Recenzji przez Użytkownika
+### 4.2 Dodanie Recenzji przez Wędrowca
 
 ```mermaid
 sequenceDiagram
-    actor User
+    actor Wanderer
     participant RC as ReviewController
     participant RS as ReviewService
     participant RR as ReviewRepository
     participant REV as Review
     participant PUB as ApplicationEventPublisher
 
-    User->>RC: POST /dwarfs/{dwarfId}/reviews\n{rating: 4, content: "Świetny krasnal!"}
-    RC->>RS: addReview(dwarfId, userId, 4, "Świetny krasnal!")
+    Wanderer->>RC: POST /krasnals/{krasnalId}/reviews\n{rating: 4, content: "Świetny krasnal!"}
+    RC->>RS: addReview(krasnalId, userId, 4, "Świetny krasnal!")
 
-    RS->>REV: Review.create(dwarfId, userId, Rating.of(4),\nCommentContent.of("Świetny krasnal!"))
+    RS->>REV: Review.create(krasnalId, userId, Rating.of(4),\nCommentContent.of("Świetny krasnal!"))
     Note over REV: Rating validates 1-5 range
     Note over REV: CommentContent validates max 2000 chars
     REV-->>RS: Review + ReviewSubmittedEvent
 
     RS->>RR: save(Review)
-    Note over RR: UNIQUE(dwarf_id, author_user_id)\nenforces BR2
+    Note over RR: UNIQUE(krasnal_id, author_user_id)\nenforces BR2
     RS->>PUB: publishEvent(ReviewSubmittedEvent)
 
-    RC-->>User: 201 Created
+    RC-->>Wanderer: 201 Created
 ```
 
 ---
 
-### 4.3 Rejestracja Użytkownika
+### 4.3 Rejestracja Wędrowca
 
 ```mermaid
 sequenceDiagram
@@ -628,7 +633,7 @@ sequenceDiagram
     participant AC as AuthController
     participant US as UserService
     participant UR as UserRepository
-    participant SU as SystemUser
+    participant SU as User
     participant PUB as ApplicationEventPublisher
 
     Guest->>AC: POST /auth/register\n{email, password}
@@ -637,15 +642,41 @@ sequenceDiagram
     US->>UR: findByEmail(Email.of(email))
     UR-->>US: Optional.empty()
 
-    US->>SU: SystemUser.register(Email.of(email),\nHashedPassword.of(bcrypt(password)))
-    Note over SU: role = USER (default)
+    US->>SU: User.register(Email.of(email),\nHashedPassword.of(bcrypt(password)))
+    Note over SU: role = WANDERER (default)
     Note over SU: active = true
-    SU-->>US: SystemUser + UserRegisteredEvent
+    SU-->>US: User + UserRegisteredEvent
 
-    US->>UR: save(SystemUser)
+    US->>UR: save(User)
     US->>PUB: publishEvent(UserRegisteredEvent)
 
     AC-->>Guest: 201 Created
+```
+
+---
+
+### 4.4 Bezpośrednie dodanie Krasnala przez Admina (Fast-Track)
+
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant DC as DwarfController
+    participant DS as DwarfService
+    participant DR as DwarfRepository
+    participant DW as Dwarf
+    participant PUB as ApplicationEventPublisher
+
+    Admin->>DC: POST /dwarfs\n{name, desc, lat, lon, category}
+    DC->>DS: createDwarf(name, desc, lat, lon, category)
+    
+    DS->>DW: Dwarf.create(name, desc, coordinates, category)
+    Note over DW: status = ACTIVE (Auto-assigned)
+    DW-->>DS: Dwarf + DwarfCreatedEvent
+    
+    DS->>DR: save(Dwarf)
+    DS->>PUB: publishEvent(DwarfCreatedEvent)
+    
+    DC-->>Admin: 201 Created
 ```
 
 ---
@@ -656,7 +687,7 @@ sequenceDiagram
 
 | Element | Typ | Pola | Walidacja |
 |---|---|---|---|
-| `SystemUser` | Aggregate Root | id, email, hashedPassword, role, active, createdAt | — |
+| `User` | Aggregate Root | id, email, hashedPassword, role, active, createdAt | — |
 | `UserId` | Value Object | `Long value` | `value > 0` |
 | `Email` | Value Object | `String value` | format RFC-5322, lowercase |
 | `HashedPassword` | Value Object | `String bcryptHash` | niepuste, nigdy plain-text |
@@ -665,9 +696,9 @@ sequenceDiagram
 
 | Element | Typ | Pola | Walidacja |
 |---|---|---|---|
-| `Dwarf` | Aggregate Root | id, name, description, location, category, status, createdAt, updatedAt | — |
-| `DwarfId` | Value Object | `Long value` | `value > 0` |
-| `DwarfName` | Value Object | `String value` | niepuste, max 255 znaków |
+| `Krasnal` | Aggregate Root | id, name, description, location, category, status, createdAt, updatedAt | — |
+| `KrasnalId` | Value Object | `Long value` | `value > 0` |
+| `KrasnalName` | Value Object | `String value` | niepuste, max 255 znaków |
 | `Coordinates` | Value Object | `double latitude, double longitude` | lat ∈ ⟨-90,90⟩, lon ∈ ⟨-180,180⟩ |
 
 ### Verification Context
@@ -682,11 +713,11 @@ sequenceDiagram
 
 | Element | Typ | Pola | Walidacja |
 |---|---|---|---|
-| `Review` | Aggregate Root | id, dwarfId, authorUserId, rating, content, createdAt | unique(dwarfId, authorUserId) |
+| `Review` | Aggregate Root | id, krasnalId, authorUserId, rating, content, createdAt | unique(krasnalId, authorUserId) |
 | `ReviewId` | Value Object | `Long value` | `value > 0` |
 | `Rating` | Value Object | `int value` | `1 ≤ value ≤ 5` |
 | `CommentContent` | Value Object | `String value` | niepuste, max 2000 znaków |
-| `VisitedEntry` | Aggregate Root | id, dwarfId, userId, visitedAt | unique(dwarfId, userId) |
+| `VisitedEntry` | Aggregate Root | id, krasnalId, userId, visitedAt | unique(krasnalId, userId) |
 | `VisitedEntryId` | Value Object | `Long value` | `value > 0` |
 
 ---
@@ -695,14 +726,14 @@ sequenceDiagram
 
 | Zdarzenie | Kontekst | Payload | Konsumenci |
 |---|---|---|---|
-| `DwarfCreatedEvent` | POI Catalog | dwarfId, name, lat, lon, category, occurredAt | Interaction Context |
-| `DwarfUpdatedEvent` | POI Catalog | dwarfId, occurredAt | — |
-| `DwarfStatusChangedEvent` | POI Catalog | dwarfId, oldStatus, newStatus, occurredAt | Interaction Context |
+| `KrasnalCreatedEvent` | POI Catalog | krasnalId, name, lat, lon, category, occurredAt | Interaction Context |
+| `KrasnalUpdatedEvent` | POI Catalog | krasnalId, occurredAt | — |
+| `KrasnalStatusChangedEvent` | POI Catalog | krasnalId, oldStatus, newStatus, occurredAt | Interaction Context |
 | `SubmissionCreatedEvent` | Verification | submissionId, submittedByUserId, occurredAt | — |
 | `SubmissionAcceptedEvent` | Verification | submissionId, reviewedByUserId, payload, occurredAt | **POI Catalog** |
 | `SubmissionRejectedEvent` | Verification | submissionId, rejectionReason, occurredAt | — |
-| `ReviewSubmittedEvent` | Interaction | reviewId, dwarfId, authorUserId, rating, occurredAt | — |
-| `DwarfVisitedEvent` | Interaction | dwarfId, userId, occurredAt | — |
+| `ReviewSubmittedEvent` | Interaction | reviewId, krasnalId, authorUserId, rating, occurredAt | — |
+| `KrasnalVisitedEvent` | Interaction | krasnalId, userId, occurredAt | — |
 | `UserRegisteredEvent` | IAM | userId, email, occurredAt | — |
 | `UserRoleChangedEvent` | IAM | userId, oldRole, newRole, occurredAt | — |
 | `UserDeactivatedEvent` | IAM | userId, occurredAt | — |
@@ -724,10 +755,10 @@ sequenceDiagram
 
 | Port | Typ | Interfejs | Adapter |
 |---|---|---|---|
-| `DwarfService` | Input Port | `DwarfService` (interface w `domain`) | `DwarfServiceImpl` (application) |
-| `DwarfRepository` | Output Port | `DwarfRepository` (interface w `domain`) | `JpaDwarfRepository` (Spring Data) |
-| `DwarfController` | Primary Adapter | — | `@Controller` Thymeleaf / REST |
-| `SubmissionAcceptedListener` | Secondary Adapter | — | `@EventListener` → wywołuje `DwarfService` |
+| `KrasnalService` | Input Port | `KrasnalService` (interface w `domain`) | `KrasnalServiceImpl` (application) |
+| `KrasnalRepository` | Output Port | `KrasnalRepository` (interface w `domain`) | `JpaKrasnalRepository` (Spring Data) |
+| `KrasnalController` | Primary Adapter | — | `@Controller` Thymeleaf / REST |
+| `SubmissionAcceptedListener` | Secondary Adapter | — | `@EventListener` → wywołuje `KrasnalService` |
 
 ### Verification Context
 
@@ -753,11 +784,11 @@ sequenceDiagram
 ## 8. Struktura pakietów Java (mapowanie na architekturę)
 
 ```
-pl.krasmap/
+com.krasmap/
 │
 ├── iam/
 │   ├── domain/
-│   │   ├── SystemUser.java              ← Aggregate Root (pure Java)
+│   │   ├── User.java              ← Aggregate Root (pure Java)
 │   │   ├── UserId.java                  ← Value Object
 │   │   ├── Email.java                   ← Value Object
 │   │   ├── HashedPassword.java          ← Value Object
@@ -778,25 +809,25 @@ pl.krasmap/
 │
 ├── poicatalog/
 │   ├── domain/
-│   │   ├── Dwarf.java
-│   │   ├── DwarfId.java
-│   │   ├── DwarfName.java
+│   │   ├── Krasnal.java
+│   │   ├── KrasnalId.java
+│   │   ├── KrasnalName.java
 │   │   ├── Coordinates.java
-│   │   ├── DwarfCategory.java
-│   │   ├── DwarfStatus.java
-│   │   ├── DwarfService.java
-│   │   ├── DwarfRepository.java
+│   │   ├── KrasnalCategory.java
+│   │   ├── KrasnalStatus.java
+│   │   ├── KrasnalService.java
+│   │   ├── KrasnalRepository.java
 │   │   └── events/
-│   │       ├── DwarfCreatedEvent.java
-│   │       ├── DwarfUpdatedEvent.java
-│   │       └── DwarfStatusChangedEvent.java
+│   │       ├── KrasnalCreatedEvent.java
+│   │       ├── KrasnalUpdatedEvent.java
+│   │       └── KrasnalStatusChangedEvent.java
 │   ├── application/
-│   │   ├── DwarfServiceImpl.java
+│   │   ├── KrasnalServiceImpl.java
 │   │   └── SubmissionAcceptedListener.java  ← @EventListener (Spring)
 │   └── infrastructure/
-│       ├── JpaDwarfRepository.java
-│       ├── DwarfEntity.java
-│       └── DwarfController.java
+│       ├── JpaKrasnalRepository.java
+│       ├── KrasnalEntity.java
+│       └── KrasnalController.java
 │
 ├── verification/
 │   ├── domain/
@@ -831,7 +862,7 @@ pl.krasmap/
     │   ├── VisitedEntryRepository.java
     │   └── events/
     │       ├── ReviewSubmittedEvent.java
-    │       └── DwarfVisitedEvent.java
+    │       └── KrasnalVisitedEvent.java
     ├── application/
     │   ├── ReviewServiceImpl.java
     │   └── VisitedServiceImpl.java

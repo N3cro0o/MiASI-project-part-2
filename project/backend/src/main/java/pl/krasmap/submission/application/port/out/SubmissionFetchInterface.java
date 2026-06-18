@@ -1,8 +1,8 @@
 package pl.krasmap.submission.application.port.out;
 
-import pl.krasmap.submission.application.domain.NewSubmission;
-import pl.krasmap.submission.application.domain.submission.Submission;
-import pl.krasmap.submission.application.domain.submission.SubmissionStatus;
+import pl.krasmap.submission.application.domain.data.NewSubmission;
+import pl.krasmap.submission.application.domain.data.submission.Submission;
+import pl.krasmap.common.data.SubmissionStatus;
 
 import java.util.List;
 
@@ -13,4 +13,6 @@ public interface SubmissionFetchInterface {
     List<Submission> GetSubmissionsFromUser(int userId);
     boolean UpdateSubReview(Submission newSub);
     int UpdateSubmission(int subId, NewSubmission submission);
+    List<Submission> GetAllSubmissions();
+    List<Submission> GetAllSubmissions(SubmissionStatus status);
 }

@@ -1,10 +1,10 @@
 package pl.krasmap.iam.infrastructure.out;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import pl.krasmap.iam.application.domain.UserWeb;
-import pl.krasmap.iam.application.domain.user.User;
-import pl.krasmap.iam.application.domain.user.UserRole;
+import org.springframework.stereotype.Component;
+import pl.krasmap.iam.application.domain.data.UserWeb;
+import pl.krasmap.iam.application.domain.data.User;
+import pl.krasmap.common.data.UserRole;
 import pl.krasmap.iam.application.port.out.UserFetchInterface;
 
 import java.sql.*;
@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Component
 public class UserFetchPostgres implements UserFetchInterface {
 
     @Value("${db.url}")
@@ -61,8 +61,28 @@ public class UserFetchPostgres implements UserFetchInterface {
         User user = null;
         try {
             Connection connection = GetDatabaseConnection();
-            Statement statement = connection.createStatement();
-            var output = statement.executeQuery(String.format("SELECT * FROM iam.users WHERE iam.users.id = %d;", userId));
+            PreparedStatement stat = connection.prepareStatement("SELECT * FROM iam.users WHERE iam.users.id = ?;");
+            stat.setInt(1, userId);
+            var output = stat.executeQuery();
+            while (output.next()) {
+                user = GetUserFromStatement(output);
+            }
+            connection.close();
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return user;
+    }
+
+    @Override
+    public User GetUser(String login) {
+        User user = null;
+        try {
+            Connection connection = GetDatabaseConnection();
+            PreparedStatement stat = connection.prepareStatement("SELECT * FROM iam.users WHERE login = ? OR email = ?;");
+            stat.setString(1, login);
+            stat.setString(2, login);
+            var output = stat.executeQuery();
             while (output.next()) {
                 user = GetUserFromStatement(output);
             }
@@ -78,8 +98,8 @@ public class UserFetchPostgres implements UserFetchInterface {
         List<User> list = null;
         try {
             Connection connection = GetDatabaseConnection();
-            Statement statement = connection.createStatement();
-            var output = statement.executeQuery("SELECT * FROM iam.users");
+            PreparedStatement stat = connection.prepareStatement("SELECT * FROM iam.users");
+            var output = stat.executeQuery();
             list = new ArrayList<User>();
             while (output.next()) {
                 list.add(GetUserFromStatement(output));
@@ -94,16 +114,16 @@ public class UserFetchPostgres implements UserFetchInterface {
     @Override
     public int SaveUser(UserWeb user) {
         int id = -1;
-        String sql = "INSERT INTO iam.users (login, email, hashed_password, role, active) VALUES (" +
-                String.format("'%s', ", user.login()) +
-                String.format("'%s', ", user.email()) +
-                String.format("'%s', ", user.password()) +
-                String.format("'%s', ", user.role().toString()) +
-                String.format("'%s') RETURNING iam.users.id;", user.active());
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            var outcome = stat.executeQuery(sql);
+            PreparedStatement stat = conn.prepareStatement("INSERT INTO iam.users (login, email, hashed_password, role, active)" +
+                    " VALUES (?, ?, ?, ?, ?) RETURNING iam.users.id;");
+            stat.setString(1, user.login());
+            stat.setString(2, user.email());
+            stat.setString(3, user.password());
+            stat.setString(4, user.role().toString());
+            stat.setBoolean(5, user.active());
+            var outcome = stat.executeQuery();
             while(outcome.next()) {
                 id = outcome.getInt(1);
             }
@@ -117,21 +137,22 @@ public class UserFetchPostgres implements UserFetchInterface {
 
     @Override
     public int UpdateUser(int userId, UserWeb user) {
-        String sql = "UPDATE iam.users SET (login, email, hashed_password, role, active) = (" +
-                String.format("'%s', ", user.login()) +
-                String.format("'%s', ", user.email()) +
-                String.format("'%s', ", user.password()) +
-                String.format("'%s', ", user.role().toString()) +
-                String.format("'%s') WHERE id = ", user.active()) + userId + ";";
-
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            stat.execute(sql);
+            PreparedStatement stat = conn.prepareStatement("UPDATE iam.users SET (login, email, hashed_password, role, active) = " +
+                    "(?, ?, ?, ?, ?) WHERE id = ?;");
+            stat.setString(1, user.login());
+            stat.setString(2, user.email());
+            stat.setString(3, user.password());
+            stat.setString(4, user.role().toString());
+            stat.setBoolean(5, user.active());
+            stat.setInt(6, userId);
+            stat.execute();
             conn.close();
         }
         catch (Exception e) {
             System.err.println(e.toString());
+            userId = -1;
         }
         return userId;
     }
@@ -139,11 +160,11 @@ public class UserFetchPostgres implements UserFetchInterface {
     @Override
     public boolean HideUser(int userId) {
         boolean check = false;
-        String sql = "UPDATE iam.users SET active = 'f' WHERE id = " + userId + ";";
         try {
             Connection conn = GetDatabaseConnection();
-            Statement stat = conn.createStatement();
-            stat.execute(sql);
+            PreparedStatement stat = conn.prepareStatement("UPDATE iam.users SET active = 'f' WHERE id = ?;");
+            stat.setInt(1, userId);
+            stat.execute();
             check = true;
             conn.close();
         }
@@ -156,5 +177,24 @@ public class UserFetchPostgres implements UserFetchInterface {
     @Override
     public boolean DeleteUser(int userId) {
         return false;
+    }
+
+    @Override
+    public String CheckUserPassword(String login) {
+        String check = "";
+        try {
+            Connection conn = GetDatabaseConnection();
+            PreparedStatement stat = conn.prepareStatement("SELECT hashed_password FROM iam.users WHERE login = ? OR email = ?;");
+            stat.setString(1, login);
+            stat.setString(2, login);
+            var output = stat.executeQuery();
+            while(output.next())
+                check = output.getString(1);
+            conn.close();
+        }
+        catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return check;
     }
 }

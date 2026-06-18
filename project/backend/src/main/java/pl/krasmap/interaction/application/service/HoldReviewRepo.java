@@ -1,11 +1,10 @@
 package pl.krasmap.interaction.application.service;
 
 import org.springframework.stereotype.Repository;
-import pl.krasmap.interaction.application.domain.Review;
-import pl.krasmap.interaction.application.domain.ReviewWeb;
+import pl.krasmap.interaction.application.domain.data.review.Review;
+import pl.krasmap.interaction.application.domain.data.review.ReviewWeb;
 import pl.krasmap.interaction.application.port.out.ReviewFetchInterface;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -32,14 +31,12 @@ public class HoldReviewRepo {
         return reviewFetch.GetReviewsFromUserUnderKrasnal(userId, krasnalId);
     }
 
-    public Review AddReview(ReviewWeb reviewToAdd) {
-        int id = reviewFetch.AddReview(reviewToAdd);
-        return reviewFetch.GetReview(id);
+    public int AddReview(ReviewWeb reviewToAdd) {
+        return reviewFetch.AddReview(reviewToAdd);
     }
 
-    public Review UpdateReview(int reviewId, ReviewWeb reviewToUpdate) {
-        int id = reviewFetch.UpdateReview(reviewId, reviewToUpdate);
-        return reviewFetch.GetReview(id);
+    public int UpdateReview(int reviewId, ReviewWeb reviewToUpdate) {
+        return reviewFetch.UpdateReview(reviewId, reviewToUpdate);
     }
 
     public boolean RemoveReview(int reviewId) {

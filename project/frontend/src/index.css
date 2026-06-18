@@ -1,0 +1,20 @@
+/* Tailwind v4 — CSS-first entry point */
+@import "tailwindcss";
+
+/* ── Wrocław-inspired custom color palette ─────────────────────────────────── */
+@theme {
+  --color-wroclaw-brick: #B04A3A;
+  --color-wroclaw-sand: #E8DCC4;
+  --color-wroclaw-green: #5A7D59;
+  --color-wroclaw-dark: #2C2A29;
+}
+
+/* ── Global reset — ensure full-viewport layout ────────────────────────────── */
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}

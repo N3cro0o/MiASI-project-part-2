@@ -82,14 +82,14 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
  
 | Termin PL | Termin EN | Definicja |
 |---|---|---|
-| Użytkownik systemu | *System User* | (Nie mylić z Rolą USER) — każda osoba posiadająca konto w systemie. |
-| Rola | *Role* | Enum określający poziom uprawnień w systemie: `GUEST`, `USER`, `EDITOR`, `ADMIN`. |
-| Rejestracja | *Registration* | Proces założenia konta przez Gościa w celu uzyskania Roli `USER`. |
-| Logowanie | *login* | Proces potwierdzenia tożsamości przez użytkownika systemu w celu uzyskania sesji. |
+| Użytkownik | *User* | Każda osoba posiadająca konto w systemie. |
+| Rola | *Role* | Enum określający poziom uprawnień w systemie: `GUEST`, `WANDERER`, `EDITOR`, `ADMIN`. |
+| Rejestracja | *Registration* | Proces założenia konta przez Gościa w celu uzyskania Roli `WANDERER`. |
+| Logowanie | *Login* | Proces potwierdzenia tożsamości przez użytkownika systemu w celu uzyskania sesji. |
 | Gość | *Guest* | Niezalogowana osoba. Rola `GUEST` — może przeglądać mapę i filtrować Krasnale. |
-| Użytkownik | *User* | Zalogowana osoba z Rolą `USER` — może dodawać Recenzje, oznaczać Krasnale jako odwiedzone i zgłaszać nowe. |
-| Edytor | *Editor* | Zalogowana osoba z Rolą `EDITOR` — może edytować Krasnale i weryfikować Zgłoszenia. |
-| Admin | *Admin* | Najwyższy poziom uprawnień. Posiada wszystkie uprawnienia Edytora, plus zarządzanie kontami i Rolami. |
+| Wędrowiec | *Wanderer* | Zalogowana osoba z Rolą `WANDERER` — może dodawać Recenzje Krasnali, oznaczać Krasnale jako odwiedzone i zgłaszać nowe Krasnale. |
+| Edytor | *Editor* | Zalogowana osoba z Rolą `EDITOR` — może edytować Krasnale i weryfikować Zgłoszenia. Posiada wszystkie uprawnienia Wędrowca. |
+| Admin | *Admin* | Najwyższy poziom uprawnień. Posiada wszystkie uprawnienia Edytora i Wędrowca, plus zarządzanie kontami i Rolami. |
 
 ---
 
@@ -109,36 +109,36 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
     - widoczna jest nazwa i opis *Krasnala*,
     - widoczne są Recenzje wraz z nazwą użytkownika,
     - widoczna jest średnia ocen wszystkich użytkowników.
-* **US4**: Jako gość chcę zarejestrować się do systemu, aby uzyskać Rolę Użytkownika i móc korzystać z funkcji dostępnych tylko dla zalogowanych.
+* **US4**: Jako gość chcę zarejestrować się do systemu, aby uzyskać Rolę Wędrowca i móc korzystać z funkcji dostępnych tylko dla zalogowanych.
   * **Kryteria akceptacyjne:**
-    - po rejestracji mogę się zalogować i uzyskuję dostęp do funkcji Użytkownika.
+    - po rejestracji mogę się zalogować i uzyskuję dostęp do funkcji użytkownika.
 ---
  
-### Użytkownik
+### Wędrowiec
  
-* **US5**: Jako użytkownik chcę logować się do systemu, aby uzyskać dostęp do swoich danych i uprawnień.
+* **US5**: Jako wędrowiec chcę logować się do systemu, aby uzyskać dostęp do swoich danych i uprawnień.
   * **Kryteria akceptacyjne:**
     - moja lista odwiedzonych *Krasnali* nie zmieniła się względem ostatniej sesji,
     - mogę dodawać Recenzje do *Krasnali*,
     - mogę wysłać Zgłoszenie nowego *Krasnala*.
-* **US6**: Jako użytkownik chcę dodawać Recenzje (komentarz + ocena) do *Krasnali*, aby pozostali użytkownicy i goście znali moją opinię.
+* **US6**: Jako wędrowiec chcę dodawać Recenzje (komentarz + ocena) do *Krasnali*, aby pozostali  goście i użytkownicy2 znali moją opinię.
   * **Kryteria akceptacyjne:**
     - widzę swoją ocenę i komentarz w sekcji wystawionych przeze mnie Recenzji,
     - pozostali goście i użytkownicy widzą mój komentarz i ocenę.
-* **US7**: Jako użytkownik chcę usuwać własne Recenzje, aby móc zarządzać swoją aktywnością w systemie.
+* **US7**: Jako wędrowiec chcę usuwać własne Recenzje, aby móc zarządzać swoją aktywnością w systemie.
   * **Kryteria akceptacyjne:**
     - usunięta Recenzja nie jest widoczna dla żadnego użytkownika ani gościa.
-* **US8**: Jako użytkownik chcę dodawać *Krasnale* do swojej listy odwiedzonych, aby śledzić odwiedzone atrakcje.
+* **US8**: Jako wędrowiec chcę dodawać *Krasnale* do swojej listy odwiedzonych, aby śledzić odwiedzone atrakcje.
   * **Kryteria akceptacyjne:**
     - w mojej liście odwiedzonych *Krasnali* znajduje się właśnie dodany *Krasnal*,
     - na mapie mogę filtrować odwiedzone *Krasnale*, aby wyświetlały się tylko te nieodwiedzone.
-* **US9**: Jako użytkownik chcę usuwać *Krasnale* ze swojej listy odwiedzonych, aby korygować swoje wpisy.
+* **US9**: Jako wędrowiec chcę usuwać *Krasnale* ze swojej listy odwiedzonych, aby korygować swoje wpisy.
   * **Kryteria akceptacyjne:**
     - usunięty *Krasnal* nie widnieje na mojej liście odwiedzonych.
-* **US10**: Jako użytkownik chcę zgłaszać nowe *Krasnale*, aby mapa była aktualna i bogatsza w informacje.
+* **US10**: Jako wędrowiec chcę zgłaszać nowe *Krasnale*, aby mapa była aktualna i bogatsza w informacje.
   * **Kryteria akceptacyjne:**
     - Zgłoszenie jest widoczne w mojej sekcji Zgłoszeń ze statusem `PENDING`.
-* **US11**: Jako użytkownik chcę przeglądać status moich Zgłoszeń, aby wiedzieć, czy zostały zaakceptowane lub odrzucone (wraz z powodem odrzucenia).
+* **US11**: Jako wędrowiec chcę przeglądać status moich Zgłoszeń, aby wiedzieć, czy zostały zaakceptowane lub odrzucone (wraz z powodem odrzucenia).
   * **Kryteria akceptacyjne:**
     - widzę aktualny status każdego ze swoich Zgłoszeń (`PENDING`, `ACCEPTED`, `REJECTED`),
     - dla statusu `REJECTED` widoczny jest powód odrzucenia podany przez weryfikującego.
@@ -179,13 +179,17 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
   > stosujemy **miękkie usunięcie** (`active = false`). Twarde usunięcie powodowałoby
   > osierocone rekordy w Interaction Context i Verification Context (naruszenie spójności
   > soft FK w architekturze EDA).
-* **US19**: Jako admin chcę nadawać Role użytkownikom systemu, aby awansować Użytkowników na Edytorów lub Edytorów na Adminów.
+* **US19**: Jako admin chcę nadawać Role użytkownikom systemu, aby awansować Wędrowców na Edytorów lub Edytorów na Adminów.
   * **Kryteria akceptacyjne:**
     - użytkownik otrzymuje dostęp do funkcji przypisanych do nowej Roli.
-* **US20**: Jako admin chcę odbierać Role użytkownikom systemu, aby degradować Adminów do Edytorów lub Edytorów do Użytkowników.
+* **US20**: Jako admin chcę odbierać Role użytkownikom systemu, aby degradować Adminów do Edytorów lub Edytorów do Wędrowców.
   * **Kryteria akceptacyjne:**
     - użytkownik traci dostęp do funkcji przypisanych do poprzedniej Roli.
-
+* **US21**: Jako admin chcę korzystać z bezpośredniego dodawania Krasnali, aby sprawnie aktualizować mapę bez konieczności przechodzenia przez dwuetapowy proces weryfikacji.
+  * **Kryteria akceptacyjne:**
+    - mogę utworzyć nowe Zgłoszenie, które automatycznie otrzymuje status ACCEPTED,
+    - po utworzeniu takiego zgłoszenia Krasnal natychmiast pojawia się na mapie ze statusem ACTIVE,
+    - w systemie (np. w logach lub bazie) akcja ta jest odnotowana z przypisanym ID Admina, jako automatycznie zweryfikowana.
 ---
  
 ## 5. Reguły Biznesowe (Business Rules)
@@ -197,7 +201,7 @@ użytkowników systemu). Stanowi jedyny kontekst, który zna tożsamość użytk
 | BR3 | Jeden użytkownik może mieć dany Krasnal tylko raz na swojej liście odwiedzonych. |
 | BR4 | Zgłoszenie po akceptacji emituje wydarzenie, które tworzy nowego Krasnala w systemie. |
 | BR5 | Odrzucenie Zgłoszenia wymaga podania powodu. |
-| BR6 | Użytkownik może zgłosić nowego Krasnala tylko wtedy, kiedy jest zalogowany. |
+| BR6 | Wędrowiec może zgłosić nowego Krasnala tylko wtedy, kiedy jest zalogowany. |
 | BR7 | Edycja Krasnali i weryfikacja Zgłoszeń wymaga Roli co najmniej `EDITOR`. |
 | BR8 | Zarządzanie kontami i Rolami wymaga Roli `ADMIN`. |
 | BR9 | Usunięcie konta realizowane jest jako wskazanie konta jako nieaktywne. |
