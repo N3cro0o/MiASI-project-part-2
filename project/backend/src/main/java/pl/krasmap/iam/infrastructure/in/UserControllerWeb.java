@@ -33,7 +33,7 @@ public class UserControllerWeb implements UserControllerInterface {
 
     private final BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder(12);
 
-    public UserControllerWeb(HandleUserService repo, UserSubmissionsService subs, UserStatsService stat, @Lazy UserAuthInterface authServ) { /*Dzięki temu małemu skurwysynowi @Lazy cała autoryzacja zaczyna nie niszczyć aplikacji. JAK NIE WIEM*/
+    public UserControllerWeb(HandleUserService repo, UserSubmissionsService subs, UserStatsService stat, @Lazy UserAuthInterface authServ) {
         userHandle = repo;
         auth = authServ;
         userSubs = subs;

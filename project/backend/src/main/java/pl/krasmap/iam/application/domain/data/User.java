@@ -14,7 +14,7 @@ public record User(int id, String login, String email, UserRole role, boolean ac
     }
 
     public static User dummy() {
-        return User.newObject(-1, "debil", "debil@pwr.edu.pl", UserRole.Guest, false);
+        return User.newObject(-1, "example", "example@pwr.edu.pl", UserRole.Guest, false);
     }
 
     public static User from(UserWeb user) {
