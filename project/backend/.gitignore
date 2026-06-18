@@ -38,3 +38,4 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/src/test/java/pl/krasmap/iam/application/service/LoginServiceTest.java

@@ -5,10 +5,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.krasmap.submission.application.domain.Krasnal;
-import pl.krasmap.submission.application.domain.NewSubmission;
-import pl.krasmap.submission.application.domain.submission.Submission;
-import pl.krasmap.submission.application.domain.submission.SubmissionStatus;
+import pl.krasmap.submission.application.domain.data.ReviewKrasnal;
+import pl.krasmap.submission.application.domain.data.NewSubmission;
+import pl.krasmap.submission.application.domain.data.submission.Submission;
+import pl.krasmap.common.data.SubmissionStatus;
 import pl.krasmap.submission.application.port.out.SubmissionFetchInterface;
 
 import java.time.OffsetDateTime;
@@ -60,20 +60,16 @@ public class HoldSubmissionRepoTest {
     }
 
     @Test
-    void testAddSubmission_callsAddAndGetSubmission() {
+    void testAddSubmission_callsAddAndReturnsId() {
         int subId = 32;
-        NewSubmission newSub = new NewSubmission(4, mock(Krasnal.class));
-        Submission submission = Submission.newObject(subId, 31, "{test: \"test\"}", SubmissionStatus.Pending, OffsetDateTime.now());
+        NewSubmission newSub = new NewSubmission(4, mock(ReviewKrasnal.class));
 
         when(fetch.AddSubmission(newSub)).thenReturn(subId);
-        when(fetch.GetSubmission(subId)).thenReturn(submission);
 
-        Submission result = repo.AddSubmission(newSub);
+        int result = repo.AddSubmission(newSub);
 
-        assertNotNull(result);
-        assertSame(submission, result);
+        assertSame(subId, result);
         verify(fetch, times(1)).AddSubmission(newSub);
-        verify(fetch, times(1)).GetSubmission(subId);
         verifyNoMoreInteractions(fetch);
     }
 
@@ -106,20 +102,16 @@ public class HoldSubmissionRepoTest {
     }
 
     @Test
-    void testUpdateSubmission_callsUpdateAndGetSubmission() {
+    void testUpdateSubmission_callsUpdateAndReturnsId() {
         int subId = 75;
-        NewSubmission newSub = mock(NewSubmission.class);
-        Submission submission = Submission.newObject(subId, 23, "{test: \"test\"}", SubmissionStatus.Pending, OffsetDateTime.now());
+        NewSubmission newSub = new NewSubmission(4, mock(ReviewKrasnal.class));
 
         when(fetch.UpdateSubmission(subId, newSub)).thenReturn(subId);
-        when(fetch.GetSubmission(subId)).thenReturn(submission);
 
-        Submission result = repo.UpdateSubmission(subId, newSub);
+        int result = repo.UpdateSubmission(subId, newSub);
 
-        assertNotNull(result);
-        assertSame(submission, result);
+        assertSame(subId, result);
         verify(fetch, times(1)).UpdateSubmission(subId, newSub);
-        verify(fetch, times(1)).GetSubmission(subId);
         verifyNoMoreInteractions(fetch);
     }
 }

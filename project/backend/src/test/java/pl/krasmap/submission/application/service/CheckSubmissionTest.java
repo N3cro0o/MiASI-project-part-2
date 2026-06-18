@@ -10,10 +10,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.krasmap.common.data.KrasnalCategory;
 import pl.krasmap.common.data.Position;
-import pl.krasmap.submission.application.domain.Krasnal;
-import pl.krasmap.submission.application.domain.submission.Submission;
-import pl.krasmap.submission.application.domain.submission.SubmissionReview;
-import pl.krasmap.submission.application.domain.submission.SubmissionStatus;
+//import pl.krasmap.submission.application.domain.Krasnal;
+import pl.krasmap.submission.application.domain.data.ReviewKrasnal;
+import pl.krasmap.submission.application.domain.data.submission.Submission;
+import pl.krasmap.submission.application.domain.data.submission.SubmissionReview;
+import pl.krasmap.common.data.SubmissionStatus;
 
 import java.time.OffsetDateTime;
 
@@ -51,12 +52,12 @@ public class CheckSubmissionTest {
 
         when(repo.GetSubmission(subId)).thenReturn(sub);
 
-        Pair<Submission, Krasnal> pair = check.GetSubmissonPair(subId);
+        Pair<Submission, ReviewKrasnal> pair = check.GetSubmissonPair(subId);
 
         assertNotNull(pair);
         assertSame(sub, pair.getLeft());
 
-        Krasnal k = pair.getRight();
+        ReviewKrasnal k = pair.getRight();
 
         assertNotNull(k);
         assertEquals("krasnal student", k.name());
@@ -68,7 +69,7 @@ public class CheckSubmissionTest {
 
     @Test
     void testGenerateKrasnalFromJson_whenInvalidJson_returnsNull() {
-        Krasnal k = check.GenerateKrasnalFromJson("this is not a valid json");
+        ReviewKrasnal k = check.GenerateKrasnalFromJson("this is not a valid json");
         assertNull(k);
     }
 
@@ -107,7 +108,7 @@ public class CheckSubmissionTest {
         when(repo.GetSubmission(subId)).thenReturn(sub);
         when(repo.UpdateSubReview(any(Submission.class))).thenReturn(false);
 
-        Krasnal returned = check.AcceptSubmission(userId, subId);
+        ReviewKrasnal returned = check.AcceptSubmission(userId, subId);
 
         assertNotNull(returned);
         assertEquals("krasnal student", returned.name());

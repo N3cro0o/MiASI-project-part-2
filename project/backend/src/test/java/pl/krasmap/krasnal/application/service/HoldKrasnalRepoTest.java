@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.krasmap.common.data.KrasnalCategory;
 import pl.krasmap.common.data.Position;
+import pl.krasmap.common.data.UpdateTime;
 import pl.krasmap.krasnal.application.domain.data.KrasnalWeb;
 import pl.krasmap.krasnal.application.domain.data.krasnal.Krasnal;
 import pl.krasmap.krasnal.application.domain.data.krasnal.KrasnalStatus;
@@ -58,39 +59,28 @@ public class HoldKrasnalRepoTest {
     }
 
     @Test
-    void testAddNewKrasnal_callsSaveAndGet() {
-        KrasnalWeb krasnal = new KrasnalWeb("krasnal student", "krasnal student z piwem", Position.from(1.23f, 7.32f), KrasnalCategory.Dwarf, KrasnalStatus.Active, 0.0);
+    void testAddNewKrasnal_callsSaveAndReturnsId() {
+        Krasnal toAdd = Krasnal.newObject(1, "krasnal student", "krasnal student z piwem", Position.from(1.23f, 7.32f), KrasnalCategory.Dwarf, KrasnalStatus.Active, UpdateTime.now());
         int generatedId = 1;
 
-        Krasnal toSave = Krasnal.from(krasnal);
-        Krasnal expectedKrasnal = Krasnal.from(generatedId, krasnal);
+        when(fetch.SaveKrasnal(toAdd)).thenReturn(generatedId);
 
-        when(fetch.SaveKrasnal(toSave)).thenReturn(generatedId);
-        when(fetch.GetKrasnal(generatedId)).thenReturn(expectedKrasnal);
+        int result = repo.AddNewKrasnal(toAdd);
 
-        Krasnal result = repo.AddNewKrasnal(krasnal);
-
-        assertNotNull(result);
-        assertEquals(expectedKrasnal, result);
-        assertEquals(generatedId, result.id());
-        verify(fetch, times(1)).SaveKrasnal(toSave);
-        verify(fetch, times(1)).GetKrasnal(generatedId);
+        assertEquals(generatedId, result);
+        verify(fetch, times(1)).SaveKrasnal(toAdd);
     }
 
     @Test
-    void testUpdateKrasnal_callsUpdateAndGet() {
-        int krasnalId = 1;
-        KrasnalWeb krasnal = new KrasnalWeb("krasnal student", "krasnal student z piwem", Position.from(1.23f, 7.32f), KrasnalCategory.Dwarf, KrasnalStatus.Active, 0.0);
-        Krasnal expectedKrasnal = Krasnal.from(krasnalId, krasnal);
+    void testUpdateKrasnal_callsUpdateAndReturnsId() {
+        Krasnal toAdd = Krasnal.newObject(1, "krasnal student", "krasnal student z piwem", Position.from(1.23f, 7.32f), KrasnalCategory.Dwarf, KrasnalStatus.Active, UpdateTime.now());
+        int returnedId = 1;
 
-        when(fetch.GetKrasnal(krasnalId)).thenReturn(expectedKrasnal);
+        when(fetch.UpdateKrasnal(toAdd)).thenReturn(returnedId);
 
-        Krasnal result = repo.UpdateKrasnal(krasnalId, krasnal);
+        int result = repo.UpdateKrasnal(toAdd);
 
-        assertNotNull(result);
-        assertEquals(expectedKrasnal, result);
-        assertEquals(krasnalId, result.id());
-        verify(fetch, times(1)).UpdateKrasnal(expectedKrasnal);
-        verify(fetch, times(1)).GetKrasnal(krasnalId);
+        assertEquals(returnedId, result);
+        verify(fetch, times(1)).UpdateKrasnal(toAdd);
     }
 }
