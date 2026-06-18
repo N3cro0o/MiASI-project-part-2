@@ -37,7 +37,7 @@ const PoiForm: React.FC<PoiFormProps> = ({ draftPosition, onCancel, onSuccess })
       },
       {
         onSuccess: () => {
-          // TODO: Mateusz - trigger the success Toast notification here
+          // trigger the success Toast notification here
           // e.g., toast.success('Submission sent! Waiting for verification.');
 
           if (onSuccess) onSuccess();

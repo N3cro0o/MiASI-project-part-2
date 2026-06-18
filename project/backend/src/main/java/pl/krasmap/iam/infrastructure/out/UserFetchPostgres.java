@@ -25,7 +25,6 @@ public class UserFetchPostgres implements UserFetchInterface {
     private String postgresPassword;
 
     private Connection GetDatabaseConnection() throws Exception {
-        // Teraz używasz zmiennych bez słowa localhost w kodzie!
         return DriverManager.getConnection(postgresString, postgresUser, postgresPassword);
     }
 
