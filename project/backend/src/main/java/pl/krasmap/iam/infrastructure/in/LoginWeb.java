@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.krasmap.iam.application.domain.data.LoginData;
 import pl.krasmap.iam.application.domain.data.UserNew;
 import pl.krasmap.iam.application.port.in.LoginInterface;
-import pl.krasmap.iam.application.service.LoginService;
+import pl.krasmap.iam.application.domain.service.LoginService;
 
 @RestController
 @RequestMapping("/api/auth")

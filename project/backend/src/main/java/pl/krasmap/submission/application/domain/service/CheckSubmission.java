@@ -1,4 +1,4 @@
-package pl.krasmap.submission.application.service;
+package pl.krasmap.submission.application.domain.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.core.util.Json;
@@ -11,6 +11,7 @@ import pl.krasmap.submission.application.domain.data.submission.SubmissionReview
 import pl.krasmap.common.data.SubmissionStatus;
 import pl.krasmap.submission.application.domain.event.SubmissionAcceptedEvent;
 import pl.krasmap.submission.application.domain.event.SubmissionRejectedEvent;
+import pl.krasmap.submission.application.service.HandleSubmissionService;
 import pl.krasmap.submission.application.port.out.GetKrasnalInterface;
 
 import java.time.OffsetDateTime;

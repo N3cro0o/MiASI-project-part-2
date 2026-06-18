@@ -16,7 +16,7 @@ import pl.krasmap.iam.application.domain.data.User;
 import pl.krasmap.iam.application.port.in.UserControllerInterface;
 import pl.krasmap.iam.application.service.HandleUserService;
 import pl.krasmap.iam.application.service.HoldUserRepo;
-import pl.krasmap.iam.application.service.UserStatsService;
+import pl.krasmap.iam.application.domain.service.UserStatsService;
 import pl.krasmap.iam.application.service.UserSubmissionsService;
 import pl.krasmap.iam.infrastructure.out.UserFetchPostgres;
 
