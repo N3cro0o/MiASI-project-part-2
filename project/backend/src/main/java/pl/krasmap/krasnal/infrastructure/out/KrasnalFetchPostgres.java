@@ -54,13 +54,8 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
         List<Krasnal> list = null;
         try {
             Connection connection = GetDatabaseConnection();
-<<<<<<< HEAD
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM poi_catalog.krasnals;");
+            PreparedStatement statement = connection.prepareStatement("SELECT k.*, COALESCE(ROUND(AVG(r.rating), 1), 0.0) as averageRating FROM poi_catalog.krasnals k LEFT JOIN interaction.reviews r ON k.id = r.krasnal_id GROUP BY k.id;");
             var output = statement.executeQuery();
-=======
-            Statement statement = connection.createStatement();
-            var output = statement.executeQuery("SELECT k.*, COALESCE(ROUND(AVG(r.rating), 1), 0.0) as averageRating FROM poi_catalog.krasnals k LEFT JOIN interaction.reviews r ON k.id = r.krasnal_id GROUP BY k.id;");
->>>>>>> 3023787c8cbde28c4b20ee3f1d16bc19eba10fd2
             list = new ArrayList<>();
             while (output.next()) {
                 list.add(GetKrasnalFromStatement(output));
@@ -77,14 +72,9 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
         Krasnal obj = null;
         try {
             Connection conn = GetDatabaseConnection();
-<<<<<<< HEAD
-            PreparedStatement statement = conn.prepareStatement("SELECT * FROM poi_catalog.krasnals WHERE poi_catalog.krasnals.id = ?;");
+            PreparedStatement statement = conn.prepareStatement("SELECT k.*, COALESCE(ROUND(AVG(r.rating), 1), 0.0) as averageRating FROM poi_catalog.krasnals k LEFT JOIN interaction.reviews r ON k.id = r.krasnal_id WHERE k.id = ? GROUP BY k.id;");
             statement.setInt(1, krasnalId);
             var output = statement.executeQuery();
-=======
-            Statement statement = conn.createStatement();
-            var output = statement.executeQuery(String.format("SELECT k.*, COALESCE(ROUND(AVG(r.rating), 1), 0.0) as averageRating FROM poi_catalog.krasnals k LEFT JOIN interaction.reviews r ON k.id = r.krasnal_id WHERE k.id = %d GROUP BY k.id;", krasnalId));
->>>>>>> 3023787c8cbde28c4b20ee3f1d16bc19eba10fd2
             while (output.next()) {
                 obj = GetKrasnalFromStatement(output);
             }
