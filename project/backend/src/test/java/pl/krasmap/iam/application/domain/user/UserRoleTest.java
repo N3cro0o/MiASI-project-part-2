@@ -1,6 +1,8 @@
 package pl.krasmap.iam.application.domain.user;
 
 import org.junit.jupiter.api.Test;
+import pl.krasmap.common.data.UserRole;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserRoleTest {

@@ -7,11 +7,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.krasmap.common.data.KrasnalCategory;
 import pl.krasmap.common.data.Position;
-import pl.krasmap.krasnal.application.domain.KrasnalWeb;
-import pl.krasmap.krasnal.application.domain.krasnal.KrasnalStatus;
+import pl.krasmap.krasnal.application.domain.data.KrasnalWeb;
+import pl.krasmap.krasnal.application.domain.data.krasnal.Krasnal;
+import pl.krasmap.krasnal.application.domain.data.krasnal.KrasnalStatus;
 import pl.krasmap.krasnal.application.port.out.KrasnalFetchInterface;
 import pl.krasmap.krasnal.application.service.HoldKrasnalRepo;
-import pl.krasmap.krasnal.application.domain.krasnal.Krasnal;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -26,16 +27,6 @@ public class HoldKrasnalRepoTest {
 
     @InjectMocks
     private HoldKrasnalRepo repo;
-
-    @Test
-    void testReturnDummyKrasnal_returnsDummy() {
-        Krasnal dummy = Krasnal.dummy();
-
-        Krasnal result = repo.ReturnDummyKrasnal();
-
-        assertNotNull(result);
-        assertEquals(dummy, result);
-    }
 
     @Test
     void testGetKrasnal_callsInterfaceAndReturnsKrasnal() {
@@ -68,7 +59,7 @@ public class HoldKrasnalRepoTest {
 
     @Test
     void testAddNewKrasnal_callsSaveAndGet() {
-        KrasnalWeb krasnal = new KrasnalWeb("krasnal student", "krasnal student z piwem", Position.from(1.23f, 7.32f), KrasnalCategory.Dwarf, KrasnalStatus.Active);
+        KrasnalWeb krasnal = new KrasnalWeb("krasnal student", "krasnal student z piwem", Position.from(1.23f, 7.32f), KrasnalCategory.Dwarf, KrasnalStatus.Active, 0.0);
         int generatedId = 1;
 
         Krasnal toSave = Krasnal.from(krasnal);
@@ -89,7 +80,7 @@ public class HoldKrasnalRepoTest {
     @Test
     void testUpdateKrasnal_callsUpdateAndGet() {
         int krasnalId = 1;
-        KrasnalWeb krasnal = new KrasnalWeb("krasnal student", "krasnal student z piwem", Position.from(1.23f, 7.32f), KrasnalCategory.Dwarf, KrasnalStatus.Active);
+        KrasnalWeb krasnal = new KrasnalWeb("krasnal student", "krasnal student z piwem", Position.from(1.23f, 7.32f), KrasnalCategory.Dwarf, KrasnalStatus.Active, 0.0);
         Krasnal expectedKrasnal = Krasnal.from(krasnalId, krasnal);
 
         when(fetch.GetKrasnal(krasnalId)).thenReturn(expectedKrasnal);

@@ -4,7 +4,9 @@ import org.junit.jupiter.api.Test;
 import pl.krasmap.common.data.KrasnalCategory;
 import pl.krasmap.common.data.Position;
 import pl.krasmap.common.data.UpdateTime;
-import pl.krasmap.krasnal.application.domain.KrasnalWeb;
+import pl.krasmap.krasnal.application.domain.data.KrasnalWeb;
+import pl.krasmap.krasnal.application.domain.data.krasnal.Krasnal;
+import pl.krasmap.krasnal.application.domain.data.krasnal.KrasnalStatus;
 
 import java.time.OffsetDateTime;
 
@@ -53,7 +55,7 @@ public class KrasnalTest {
 
     @Test
     void testFrom_returnsNewKrasnal() {
-        KrasnalWeb krasnal = new KrasnalWeb("krasnal student", "krasnal student z piwem", new Position(32.45, 65.33), KrasnalCategory.Dwarf, KrasnalStatus.Active);
+        KrasnalWeb krasnal = new KrasnalWeb("krasnal student", "krasnal student z piwem", new Position(32.45, 65.33), KrasnalCategory.Dwarf, KrasnalStatus.Active, 0.0);
 
         Krasnal newKrasnal = Krasnal.from(3, krasnal);
         assertNotNull(newKrasnal);
@@ -63,7 +65,7 @@ public class KrasnalTest {
 
     @Test
     void testFrom_noId_returnsNewKrasnalWithSetId() {
-        KrasnalWeb krasnal = new KrasnalWeb("krasnal student", "krasnal student z piwem", new Position(32.45, 65.33), KrasnalCategory.Dwarf, KrasnalStatus.Active);
+        KrasnalWeb krasnal = new KrasnalWeb("krasnal student", "krasnal student z piwem", new Position(32.45, 65.33), KrasnalCategory.Dwarf, KrasnalStatus.Active, 0.0);
 
         Krasnal newKrasnal = Krasnal.from(krasnal);
         assertNotNull(newKrasnal);

@@ -5,8 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.krasmap.interaction.application.domain.Review;
-import pl.krasmap.interaction.application.domain.ReviewWeb;
+import pl.krasmap.interaction.application.domain.data.review.Review;
+import pl.krasmap.interaction.application.domain.data.review.ReviewWeb;
 import pl.krasmap.interaction.application.port.out.ReviewFetchInterface;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -101,11 +101,8 @@ public class HoldReviewRepoTest {
         when(fetch.AddReview(review)).thenReturn(generatedId);
         when(fetch.GetReview(generatedId)).thenReturn(returnedReview);
 
-        var result = repo.AddReview(review);
-
-        assertNotNull(result);
-        assertEquals(generatedId, result.id());
-        assertEquals(returnedReview, result);
+        int result = repo.AddReview(review);
+        assertEquals(generatedId, result);
         verify(fetch, times(1)).AddReview(review);
         verify(fetch, times(1)).GetReview(generatedId);
     }
@@ -121,9 +118,7 @@ public class HoldReviewRepoTest {
 
         var result = repo.UpdateReview(reviewId, review);
 
-        assertNotNull(result);
-        assertEquals(reviewId, result.id());
-        assertEquals(returnedReview, result);
+        assertEquals(reviewId, result);
         verify(fetch, times(1)).UpdateReview(reviewId, review);
         verify(fetch, times(1)).GetReview(reviewId);
     }

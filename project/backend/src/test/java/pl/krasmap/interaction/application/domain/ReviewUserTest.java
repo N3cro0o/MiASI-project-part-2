@@ -1,6 +1,8 @@
 package pl.krasmap.interaction.application.domain;
 
 import org.junit.jupiter.api.Test;
+import pl.krasmap.interaction.application.domain.data.review.ReviewUser;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ReviewUserTest {

@@ -1,6 +1,9 @@
 package pl.krasmap.iam.application.domain.user;
 
 import org.junit.jupiter.api.Test;
+import pl.krasmap.common.data.UserRole;
+import pl.krasmap.iam.application.domain.data.User;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.OffsetDateTime;
@@ -38,8 +41,8 @@ public class UserTest {
         User dummy = User.dummy();
 
         assertEquals(-1, dummy.id());
-        assertEquals("debil", dummy.login());
-        assertEquals("debil@pwr.edu.pl", dummy.email());
+        assertEquals("lorem", dummy.login());
+        assertEquals("ipsum@pwr.edu.pl", dummy.email());
         assertEquals(UserRole.Guest, dummy.role());
         assertFalse(dummy.active());
         assertNotNull(dummy.created(), "dummy.created should be set");

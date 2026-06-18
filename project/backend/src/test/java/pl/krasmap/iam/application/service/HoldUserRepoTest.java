@@ -5,9 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.krasmap.iam.application.domain.UserWeb;
-import pl.krasmap.iam.application.domain.user.User;
-import pl.krasmap.iam.application.domain.user.UserRole;
+import pl.krasmap.common.data.UserRole;
+import pl.krasmap.iam.application.domain.data.User;
+import pl.krasmap.iam.application.domain.data.UserWeb;
 import pl.krasmap.iam.application.port.out.UserFetchInterface;
 
 import java.time.OffsetDateTime;
@@ -29,7 +29,7 @@ public class HoldUserRepoTest {
     void testGetUser_callsInterfaceAndReturnsUser() {
         int userId = 1;
         OffsetDateTime now = OffsetDateTime.now();
-        User expectedUser = User.newObject(userId, "debil123", "debil@pwr.edu.pl", UserRole.Wanderer, true, now);
+        User expectedUser = User.newObject(userId, "lorem", "ipsum@pwr.edu.pl", UserRole.Wanderer, true, now);
 
         when(fetch.GetUser(userId)).thenReturn(expectedUser);
 
@@ -65,11 +65,9 @@ public class HoldUserRepoTest {
         when(fetch.SaveUser(user)).thenReturn(generatedId);
         when(fetch.GetUser(generatedId)).thenReturn(returnedUser);
 
-        User result = repo.AddUser(user);
+        int result = repo.AddUser(user);
 
-        assertNotNull(result);
-        assertEquals(generatedId, result.id());
-        assertEquals(returnedUser, result);
+        assertEquals(generatedId, result);
         verify(fetch, times(1)).SaveUser(user);
         verify(fetch, times(1)).GetUser(generatedId);
     }
@@ -84,10 +82,10 @@ public class HoldUserRepoTest {
         when(fetch.UpdateUser(userId, user)).thenReturn(returnedId);
         when(fetch.GetUser(returnedId)).thenReturn(returnedUser);
 
-        User result = repo.UpdateUser(userId, user);
+        int result = repo.UpdateUser(userId, user);
 
-        assertNotNull(result);
-        assertEquals(returnedUser, result);
+
+        assertEquals(returnedId, result);
         verify(fetch, times(1)).UpdateUser(userId, user);
         verify(fetch, times(1)).GetUser(returnedId);
     }

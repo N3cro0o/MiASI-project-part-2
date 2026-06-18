@@ -1,6 +1,7 @@
 package pl.krasmap.interaction.application.domain;
 
 import org.junit.jupiter.api.Test;
+import pl.krasmap.interaction.application.domain.data.review.Review;
 
 import java.time.OffsetDateTime;
 
