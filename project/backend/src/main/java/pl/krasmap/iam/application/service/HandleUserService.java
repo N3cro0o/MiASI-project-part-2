@@ -6,6 +6,7 @@ import pl.krasmap.iam.application.domain.data.User;
 import pl.krasmap.iam.application.domain.data.UserWeb;
 import pl.krasmap.iam.application.domain.event.UserCreatedEvent;
 import pl.krasmap.iam.application.domain.event.UserDeletedEvent;
+import pl.krasmap.iam.application.domain.event.UserHiddenEvent;
 import pl.krasmap.iam.application.domain.event.UserUpdatedEvent;
 
 import java.util.List;
@@ -54,6 +55,14 @@ public class HandleUserService {
         boolean b =  repos.DeleteUser(userId);
         if (b)
             events.publishEvent(new UserDeletedEvent(userId, u.role(), u.login()));
+        return b;
+    }
+
+    public boolean HideUser(int userId) {
+        User u = GetUser(userId);
+        boolean b =  repos.HideUser(userId);
+        if (b)
+            events.publishEvent(new UserHiddenEvent(userId, u.role(), u.login()));
         return b;
     }
 }
