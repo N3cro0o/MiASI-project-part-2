@@ -105,8 +105,7 @@ public class HandleUserServiceIntegrationTest {
         User retrievedAfterDelete = handleUserService.GetUser(addedUser.id());
 
         assertTrue(deleted);
-        assertNotNull(retrievedAfterDelete);
-        assertFalse(retrievedAfterDelete.active());
+        assertNull(retrievedAfterDelete);
     }
 
     @Test

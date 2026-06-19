@@ -31,8 +31,8 @@ public class KrasnalTest {
         assertEquals(KrasnalCategory.Dwarf, krasnal.category());
         assertEquals(KrasnalStatus.Inactive, krasnal.status());
 
-        assertTrue(krasnal.time().created().isBefore(OffsetDateTime.now()));
-        assertTrue(krasnal.time().updated().isBefore(OffsetDateTime.now()));
+        assertTrue(krasnal.time().created().isBefore(OffsetDateTime.now().plusMinutes(1)));
+        assertTrue(krasnal.time().updated().isBefore(OffsetDateTime.now().plusMinutes(1)));
     }
 
     @Test

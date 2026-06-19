@@ -1,4 +1,4 @@
-package pl.krasmap.iam.application.service;
+package pl.krasmap.iam.application.domain.service;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.context.annotation.Lazy;
@@ -8,6 +8,7 @@ import pl.krasmap.common.auth.template.UserAuthInterface;
 import pl.krasmap.iam.application.domain.data.UserNew;
 import pl.krasmap.iam.application.domain.data.UserWeb;
 import pl.krasmap.iam.application.domain.data.User;
+import pl.krasmap.iam.application.service.HandleUserService;
 
 @Service
 public class LoginService {

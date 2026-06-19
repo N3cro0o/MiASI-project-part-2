@@ -88,7 +88,7 @@ public class HoldUserRepoTest {
         int userId = 3;
         when(fetch.HideUser(userId)).thenReturn(true);
 
-        boolean result = repo.DeleteUser(userId);
+        boolean result = repo.HideUser(userId);
 
         assertTrue(result);
         verify(fetch, times(1)).HideUser(userId);
@@ -99,7 +99,7 @@ public class HoldUserRepoTest {
         int userId = 4;
         when(fetch.HideUser(userId)).thenReturn(false);
 
-        boolean result = repo.DeleteUser(userId);
+        boolean result = repo.HideUser(userId);
 
         assertFalse(result);
         verify(fetch, times(1)).HideUser(userId);

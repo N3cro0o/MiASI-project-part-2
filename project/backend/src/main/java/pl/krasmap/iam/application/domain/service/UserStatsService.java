@@ -1,4 +1,4 @@
-package pl.krasmap.iam.application.service;
+package pl.krasmap.iam.application.domain.service;
 
 import org.springframework.stereotype.Service;
 import pl.krasmap.iam.application.domain.data.stats.UserStats;

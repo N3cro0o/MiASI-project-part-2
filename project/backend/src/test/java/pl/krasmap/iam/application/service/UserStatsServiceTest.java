@@ -9,6 +9,7 @@ import pl.krasmap.iam.application.domain.data.stats.UserReview;
 import pl.krasmap.iam.application.domain.data.stats.UserStats;
 import pl.krasmap.iam.application.domain.data.stats.UserSubmission;
 import pl.krasmap.iam.application.domain.data.stats.UserVisits;
+import pl.krasmap.iam.application.domain.service.UserStatsService;
 import pl.krasmap.iam.application.port.out.GetUserReviewsInterface;
 import pl.krasmap.iam.application.port.out.GetUserSubmissionsInterface;
 import pl.krasmap.iam.application.port.out.GetUserVisitsInterface;

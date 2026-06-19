@@ -12,6 +12,7 @@ import pl.krasmap.common.data.UserRole;
 import pl.krasmap.iam.application.domain.data.User;
 import pl.krasmap.iam.application.domain.data.UserNew;
 import pl.krasmap.iam.application.domain.data.UserWeb;
+import pl.krasmap.iam.application.domain.service.LoginService;
 
 import java.time.OffsetDateTime;
 

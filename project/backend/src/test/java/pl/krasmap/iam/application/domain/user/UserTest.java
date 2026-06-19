@@ -41,8 +41,8 @@ public class UserTest {
         User dummy = User.dummy();
 
         assertEquals(-1, dummy.id());
-        assertEquals("lorem", dummy.login());
-        assertEquals("ipsum@pwr.edu.pl", dummy.email());
+        assertEquals("example", dummy.login());
+        assertEquals("example@pwr.edu.pl", dummy.email());
         assertEquals(UserRole.Guest, dummy.role());
         assertFalse(dummy.active());
         assertNotNull(dummy.created(), "dummy.created should be set");

@@ -16,7 +16,7 @@ import pl.krasmap.iam.application.domain.data.User;
 import pl.krasmap.iam.application.port.in.UserControllerInterface;
 import pl.krasmap.iam.application.service.HandleUserService;
 import pl.krasmap.iam.application.service.HoldUserRepo;
-import pl.krasmap.iam.application.service.UserStatsService;
+import pl.krasmap.iam.application.domain.service.UserStatsService;
 import pl.krasmap.iam.application.service.UserSubmissionsService;
 import pl.krasmap.iam.infrastructure.out.UserFetchPostgres;
 
@@ -33,7 +33,7 @@ public class UserControllerWeb implements UserControllerInterface {
 
     private final BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder(12);
 
-    public UserControllerWeb(HandleUserService repo, UserSubmissionsService subs, UserStatsService stat, @Lazy UserAuthInterface authServ) { /*Dzięki temu małemu skurwysynowi @Lazy cała autoryzacja zaczyna nie niszczyć aplikacji. JAK NIE WIEM*/
+    public UserControllerWeb(HandleUserService repo, UserSubmissionsService subs, UserStatsService stat, @Lazy UserAuthInterface authServ) {
         userHandle = repo;
         auth = authServ;
         userSubs = subs;
@@ -166,7 +166,7 @@ public class UserControllerWeb implements UserControllerInterface {
         return userHandle.UpdateUser(userId, userToUpdate);
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/{userId}/force")
     public ResponseEntity<Boolean> RemoveUserWrapper(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
@@ -182,6 +182,24 @@ public class UserControllerWeb implements UserControllerInterface {
     @Override
     public boolean RemoveUser(int userId) {
         return userHandle.DeleteUser(userId);
+    }
+
+    @DeleteMapping("/{userId}/")
+    public ResponseEntity<Boolean> SoftRemoveUserWrapper(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        if (o) {
+            boolean p = SoftRemoveUser(userId);
+            if (!p) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public boolean SoftRemoveUser(int userId) {
+        return userHandle.HideUser(userId);
     }
 
     @GetMapping("/me/subs")

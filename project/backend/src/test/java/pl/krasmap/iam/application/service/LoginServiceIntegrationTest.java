@@ -15,6 +15,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import pl.krasmap.common.data.UserRole;
 import pl.krasmap.iam.application.domain.data.User;
 import pl.krasmap.iam.application.domain.data.UserNew;
+import pl.krasmap.iam.application.domain.service.LoginService;
 
 import static org.junit.jupiter.api.Assertions.*;
 

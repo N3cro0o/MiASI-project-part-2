@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import pl.krasmap.submission.application.domain.data.ReviewKrasnal;
 import pl.krasmap.submission.application.domain.data.submission.Submission;
 import pl.krasmap.submission.application.port.in.RequestSubmissionsInterface;
-import pl.krasmap.submission.application.service.CheckSubmission;
+import pl.krasmap.submission.application.domain.service.CheckSubmission;
 import pl.krasmap.submission.application.service.HandleSubmissionService;
 import pl.krasmap.submission.application.service.HoldSubmissionRepo;
 
