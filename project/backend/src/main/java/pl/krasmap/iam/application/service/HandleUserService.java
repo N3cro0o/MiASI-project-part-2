@@ -4,9 +4,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import pl.krasmap.iam.application.domain.data.User;
 import pl.krasmap.iam.application.domain.data.UserWeb;
+import pl.krasmap.common.data.UserRole;
 import pl.krasmap.iam.application.domain.event.UserCreatedEvent;
 import pl.krasmap.iam.application.domain.event.UserDeletedEvent;
 import pl.krasmap.iam.application.domain.event.UserHiddenEvent;
+import pl.krasmap.iam.application.domain.event.UserRestoredEvent;
+import pl.krasmap.iam.application.domain.event.UserRoleChangedEvent;
 import pl.krasmap.iam.application.domain.event.UserUpdatedEvent;
 
 import java.util.List;
@@ -64,5 +67,22 @@ public class HandleUserService {
         if (b)
             events.publishEvent(new UserHiddenEvent(userId, u.role(), u.login()));
         return b;
+    }
+
+    public boolean ActivateUser(int userId) {
+        User u = GetUser(userId);
+        boolean b = repos.ActivateUser(userId);
+        if (b)
+            events.publishEvent(new UserRestoredEvent(userId, u.role(), u.login()));
+        return b;
+    }
+
+    public User UpdateUserRole(int userId, UserRole newRole) {
+        User u = GetUser(userId);
+        boolean b = repos.UpdateUserRole(userId, newRole);
+        if (b) {
+            events.publishEvent(new UserRoleChangedEvent(userId, u.role(), newRole, u.login()));
+        }
+        return GetUser(userId);
     }
 }

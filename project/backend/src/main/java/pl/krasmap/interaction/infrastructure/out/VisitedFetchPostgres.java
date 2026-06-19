@@ -79,14 +79,13 @@ public class VisitedFetchPostgres implements VisitedFetchInterface {
 
     @Override
     public List<VisitedKrasnal> GetVisitsFromKrasnal(int krasnalId) {
-        List<VisitedKrasnal> list = null;
+        List<VisitedKrasnal> list = new ArrayList<>();
         String sql = "SELECT * FROM interaction.visited_entries WHERE krasnal_id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
             PreparedStatement stat = conn.prepareStatement(sql);
             stat.setInt(1, krasnalId);
             var output = stat.executeQuery();
-            list = new ArrayList<>();
             while(output.next()){
                 list.add(VisitFromStatement(output));
             }
@@ -99,14 +98,13 @@ public class VisitedFetchPostgres implements VisitedFetchInterface {
 
     @Override
     public List<VisitedKrasnal> GetVisitsFromUser(int userId) {
-        List<VisitedKrasnal> list = null;
+        List<VisitedKrasnal> list = new ArrayList<>();
         String sql = "SELECT * FROM interaction.visited_entries WHERE user_id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
             PreparedStatement stat = conn.prepareStatement(sql);
             stat.setInt(1, userId);
             var output = stat.executeQuery();
-            list = new ArrayList<>();
             while(output.next()){
                 list.add(VisitFromStatement(output));
             }

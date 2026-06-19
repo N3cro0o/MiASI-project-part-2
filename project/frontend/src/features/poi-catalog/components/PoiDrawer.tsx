@@ -101,7 +101,7 @@ const PoiDrawer: React.FC<PoiDrawerProps> = ({
       <aside
         id="poi-drawer"
         className={[
-          'flex flex-col h-full',
+          'h-screen flex flex-col overflow-y-auto',
           'bg-wroclaw-sand/95 backdrop-blur-sm shadow-2xl',
           'w-[30vw] min-w-[320px] max-w-[420px]',
           'rounded-r-2xl',

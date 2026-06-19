@@ -184,7 +184,7 @@ public class UserControllerWeb implements UserControllerInterface {
         return userHandle.DeleteUser(userId);
     }
 
-    @DeleteMapping("/{userId}/")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<Boolean> SoftRemoveUserWrapper(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
         jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
         var o = auth.CheckAccess(jwt, UserRole.Admin);
@@ -200,6 +200,47 @@ public class UserControllerWeb implements UserControllerInterface {
     @Override
     public boolean SoftRemoveUser(int userId) {
         return userHandle.HideUser(userId);
+    }
+
+    // Safe role-only update — does not touch the password or other fields
+    @PatchMapping("/{userId}/role")
+    public ResponseEntity<User> UpdateUserRoleWrapper(@PathVariable int userId, @RequestBody java.util.Map<String, String> body, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        if (o) {
+            String roleStr = body.get("role");
+            if (roleStr == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            UserRole newRole = UserRole.FromString(roleStr);
+            User p = UpdateUserRole(userId, newRole);
+            if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public User UpdateUserRole(int userId, UserRole newRole) {
+        return userHandle.UpdateUserRole(userId, newRole);
+    }
+
+    // Restore a previously soft-deleted (deactivated) user account
+    @PatchMapping("/{userId}/activate")
+    public ResponseEntity<Boolean> ActivateUserWrapper(@PathVariable int userId, @RequestHeader("Authorization") String jwt) {
+        jwt = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
+        var o = auth.CheckAccess(jwt, UserRole.Admin);
+        if (o == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(500));
+        if (o) {
+            boolean p = ActivateUser(userId);
+            if (!p) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(p, HttpStatus.valueOf(200));
+        }
+        return new ResponseEntity<>((HttpHeaders) null, HttpStatus.valueOf(400));
+    }
+
+    @Override
+    public boolean ActivateUser(int userId) {
+        return userHandle.ActivateUser(userId);
     }
 
     @GetMapping("/me/subs")

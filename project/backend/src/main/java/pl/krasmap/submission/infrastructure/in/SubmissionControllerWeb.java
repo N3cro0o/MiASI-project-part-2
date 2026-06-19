@@ -19,6 +19,7 @@ import pl.krasmap.submission.application.port.in.SubmissionControllerInterface;
 import pl.krasmap.submission.application.domain.service.CheckSubmission;
 import pl.krasmap.submission.application.service.HandleSubmissionService;
 import pl.krasmap.submission.application.service.HoldSubmissionRepo;
+import pl.krasmap.iam.application.port.in.UserGetInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +31,13 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
     private final HandleSubmissionService subHandle;
     private final CheckSubmission subCheck;
     private final UserAuthInterface auth;
+    private final UserGetInterface userFetch;
 
-    public SubmissionControllerWeb(HandleSubmissionService repo, CheckSubmission check, @Lazy UserAuthInterface authServ) {
+    public SubmissionControllerWeb(HandleSubmissionService repo, CheckSubmission check, @Lazy UserAuthInterface authServ, @Lazy UserGetInterface userGet) {
         subHandle = repo;
         subCheck = check;
         auth = authServ;
+        userFetch = userGet;
     }
 
     @PostMapping
@@ -47,6 +50,12 @@ public class SubmissionControllerWeb implements SubmissionControllerInterface {
             var sub = new NewSubmission(userId, submission);
             Submission p = PostSubmission(sub);
             if (p == null) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.BAD_REQUEST);
+            
+            if (userFetch.GetUserRole(userId) == UserRole.Admin) {
+                subCheck.AutoAcceptSubmission(userId, p.id());
+                p = subHandle.GetSubmission(p.id()); // Return updated status
+            }
+            
             return new ResponseEntity<>(p, HttpStatus.valueOf(200));
         }
         return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);

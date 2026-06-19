@@ -116,7 +116,7 @@ public class UserFetchPostgres implements UserFetchInterface {
         try {
             Connection conn = GetDatabaseConnection();
             PreparedStatement stat = conn.prepareStatement("INSERT INTO iam.users (login, email, hashed_password, role, active)" +
-                    " VALUES (?, ?, ?, ?, ?) RETURNING iam.users.id;");
+                    " VALUES (?, ?, ?, ?::iam.user_role, ?) RETURNING iam.users.id;");
             stat.setString(1, user.login());
             stat.setString(2, user.email());
             stat.setString(3, user.password());
@@ -139,7 +139,7 @@ public class UserFetchPostgres implements UserFetchInterface {
         try {
             Connection conn = GetDatabaseConnection();
             PreparedStatement stat = conn.prepareStatement("UPDATE iam.users SET (login, email, hashed_password, role, active) = " +
-                    "(?, ?, ?, ?, ?) WHERE id = ?;");
+                    "(?, ?, ?, ?::iam.user_role, ?) WHERE id = ?;");
             stat.setString(1, user.login());
             stat.setString(2, user.email());
             stat.setString(3, user.password());
@@ -180,6 +180,43 @@ public class UserFetchPostgres implements UserFetchInterface {
             Connection conn = GetDatabaseConnection();
             PreparedStatement stat = conn.prepareStatement("DELETE FROM iam.users WHERE id = ?;");
             stat.setInt(1, userId);
+            stat.execute();
+            check = true;
+            conn.close();
+        }
+        catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return check;
+    }
+
+    @Override
+    public boolean ActivateUser(int userId) {
+        boolean check = false;
+        try {
+            Connection conn = GetDatabaseConnection();
+            // Restore a previously soft-deleted user account
+            PreparedStatement stat = conn.prepareStatement("UPDATE iam.users SET active = 't' WHERE id = ?;");
+            stat.setInt(1, userId);
+            stat.execute();
+            check = true;
+            conn.close();
+        }
+        catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return check;
+    }
+
+    @Override
+    public boolean UpdateUserRole(int userId, UserRole role) {
+        boolean check = false;
+        try {
+            Connection conn = GetDatabaseConnection();
+            // Update only the role column without touching the password or other fields
+            PreparedStatement stat = conn.prepareStatement("UPDATE iam.users SET role = ?::iam.user_role WHERE id = ?;");
+            stat.setString(1, role.toString());
+            stat.setInt(2, userId);
             stat.execute();
             check = true;
             conn.close();

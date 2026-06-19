@@ -66,6 +66,16 @@ public class CheckSubmission {
         return k;
     }
 
+    public ReviewKrasnal AutoAcceptSubmission(int adminUserId, int subId) {
+        SubmissionReview rev = SubmissionReview.newObject(adminUserId, "Auto-accepted by Admin", OffsetDateTime.now());
+        Submission sub = subHandle.GetSubmission(subId);
+        Submission newSub = sub.With(SubmissionStatus.Accepted, rev);
+        subHandle.UpdateSubReview(newSub);
+        var k = GenerateKrasnalFromJson(sub.json());
+        events.publishEvent(new SubmissionAcceptedEvent(subId, adminUserId, k));
+        return k;
+    }
+
     public Boolean Check(int userId, int subId) {
         Submission sub = subHandle.GetSubmission(subId);
         return sub.userId() != userId;

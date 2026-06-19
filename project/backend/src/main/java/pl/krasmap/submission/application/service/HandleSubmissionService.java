@@ -24,6 +24,9 @@ public class HandleSubmissionService {
     public Submission AddSubmission(NewSubmission submission) {
         int id = subRepo.AddSubmission(submission);
         var s = GetSubmission(id);
+        if (s == null) {
+            throw new IllegalStateException("Database insert failed");
+        }
         events.publishEvent(new SubCreatedEvent(id, s.userId(), s.status()));
         return s;
     }

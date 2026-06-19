@@ -61,7 +61,7 @@ function App() {
   }) || [];
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-screen w-full overflow-hidden">
       {/* Base layer — full-screen Leaflet map */}
       <MapView
         selectedPoi={selectedPoi}

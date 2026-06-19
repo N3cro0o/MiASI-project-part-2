@@ -21,10 +21,14 @@ public class LoginWeb implements LoginInterface {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginWrapper(@RequestBody LoginData loginData) {
-        Pair<Boolean, String> p = login(loginData.loginOrEmail(), loginData.password());
-        if (p == null || !p.getLeft()) return new ResponseEntity<>((HttpHeaders) null, HttpStatus.UNAUTHORIZED);
-        return new ResponseEntity<>(p.getRight(), HttpStatus.valueOf(200));
+    public ResponseEntity<?> loginWrapper(@RequestBody LoginData loginData) {
+        try {
+            Pair<Boolean, String> p = login(loginData.loginOrEmail(), loginData.password());
+            return new ResponseEntity<>(p.getRight(), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(java.util.Map.of("message", e.getMessage()));
+        }
     }
 
     @Override

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useLogin, useRegister } from '../api/useAuthMutations';
-import { AxiosError } from 'axios';
 
 export interface AuthModalProps {
   isOpen: boolean;
@@ -21,10 +20,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [login, setLogin] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Mutations
-  const { mutate: loginMutate, isPending: isLoginPending, error: loginError } = useLogin();
-  const { mutate: registerMutate, isPending: isRegisterPending, error: registerError } = useRegister();
+  const { mutate: loginMutate, isPending: isLoginPending } = useLogin();
+  const { mutate: registerMutate, isPending: isRegisterPending } = useRegister();
 
   if (!isOpen) {
     return null;
@@ -36,12 +36,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setLogin('');
     setEmail('');
     setPassword('');
+    setErrorMsg(null);
     setView('LOGIN');
     onClose();
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    setErrorMsg(null); // Clear previous errors
 
     if (view === 'LOGIN') {
       loginMutate(
@@ -50,6 +53,27 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           onSuccess: () => {
             handleClose();
           },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onError: (error: any) => {
+            console.error("Login failed:", error);
+            console.log("Full error object:", error);
+            console.log("Response data:", error.response?.data);
+
+            if (!error.response) {
+              setErrorMsg("Server is unreachable. Please check if the backend is running.");
+              return;
+            }
+
+            const rawMsg = error.response?.data?.message;
+            const msg = typeof rawMsg === 'string' ? rawMsg.trim() : "";
+            
+            switch (msg) {
+              case "USER_NOT_FOUND": setErrorMsg("User with this login does not exist."); break;
+              case "ACCOUNT_BLOCKED": setErrorMsg("This account is blocked."); break;
+              case "INVALID_PASSWORD": setErrorMsg("Incorrect password."); break;
+              default: setErrorMsg("Login failed: " + (msg || "Unknown error"));
+            }
+          }
         }
       );
     } else {
@@ -59,23 +83,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           onSuccess: () => {
             handleClose();
           },
+          onError: () => {
+            setErrorMsg('Registration failed. Please check your details and try again.');
+          }
         }
       );
     }
   };
 
   const toggleView = () => {
+    setErrorMsg(null);
     setView((prev) => (prev === 'LOGIN' ? 'REGISTER' : 'LOGIN'));
   };
 
-  // Extract error message safely from Axios
-  const getErrorMessage = (error: any) => {
-    if (!error) return null;
-    const axiosError = error as AxiosError<{ message?: string }>;
-    return axiosError.response?.data?.message || axiosError.message || 'An unexpected error occurred';
-  };
-
-  const currentError = view === 'LOGIN' ? getErrorMessage(loginError) : getErrorMessage(registerError);
   const isPending = view === 'LOGIN' ? isLoginPending : isRegisterPending;
 
   return (
@@ -172,9 +192,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Error Message */}
-          {currentError && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg">
-              {currentError}
+          {errorMsg && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg mb-4 text-center font-medium">
+              {errorMsg}
             </div>
           )}
 

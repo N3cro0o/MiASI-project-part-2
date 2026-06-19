@@ -88,7 +88,7 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
     @Override
     public int SaveKrasnal(Krasnal k) {
         int id = -1;
-        String sql = "INSERT INTO poi_catalog.krasnals (name, description, latitude, longitude, category, status) VALUES (?, ?, ?, ?, ?, ?)" +
+        String sql = "INSERT INTO poi_catalog.krasnals (name, description, latitude, longitude, category, status) VALUES (?, ?, ?, ?, ?::poi_catalog.krasnal_category, ?::poi_catalog.krasnal_status)" +
                 " RETURNING poi_catalog.krasnals.id;";
         try {
             Connection conn = GetDatabaseConnection();
@@ -113,7 +113,7 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
 
     @Override
     public int UpdateKrasnal(Krasnal k) {
-        String sql = "UPDATE poi_catalog.krasnals SET (name, description, latitude, longitude, category, status) = (?, ?, ?, ?, ?, ?) " +
+        String sql = "UPDATE poi_catalog.krasnals SET (name, description, latitude, longitude, category, status) = (?, ?, ?, ?, ?::poi_catalog.krasnal_category, ?::poi_catalog.krasnal_status) " +
                 "WHERE id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
@@ -137,7 +137,7 @@ public class KrasnalFetchPostgres implements KrasnalFetchInterface {
     @Override
     public boolean HideKrasnal(int krasnalId) {
         boolean check = false;
-        String sql = "UPDATE poi_catalog.krasnals SET status = ? WHERE id = ?;";
+        String sql = "UPDATE poi_catalog.krasnals SET status = ?::poi_catalog.krasnal_status WHERE id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
             PreparedStatement stat = conn.prepareStatement(sql);

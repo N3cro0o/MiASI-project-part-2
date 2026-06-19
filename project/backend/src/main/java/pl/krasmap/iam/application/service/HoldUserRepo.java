@@ -3,6 +3,7 @@ package pl.krasmap.iam.application.service;
 import org.springframework.stereotype.Repository;
 import pl.krasmap.iam.application.domain.data.UserWeb;
 import pl.krasmap.iam.application.domain.data.User;
+import pl.krasmap.common.data.UserRole;
 import pl.krasmap.iam.application.port.out.UserFetchInterface;
 
 import java.util.List;
@@ -45,5 +46,13 @@ public class HoldUserRepo {
 
     public boolean HideUser(int userId) {
         return userFetch.HideUser(userId);
+    }
+
+    public boolean ActivateUser(int userId) {
+        return userFetch.ActivateUser(userId);
+    }
+
+    public boolean UpdateUserRole(int userId, UserRole role) {
+        return userFetch.UpdateUserRole(userId, role);
     }
 }

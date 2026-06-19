@@ -5,6 +5,7 @@ import pl.krasmap.iam.application.domain.data.User;
 import pl.krasmap.iam.application.domain.data.stats.UserStats;
 import pl.krasmap.iam.application.domain.data.stats.UserSubmission;
 import pl.krasmap.iam.application.domain.data.UserWeb;
+import pl.krasmap.common.data.UserRole;
 
 import java.util.List;
 
@@ -14,6 +15,8 @@ public interface UserControllerInterface {
     void CheckDBConnection();
     User AddUser(UserWeb userToAdd);
     User UpdateUser(int userId, UserWeb userToUpdate);
+    User UpdateUserRole(int userId, UserRole newRole);
+    boolean ActivateUser(int userId);
     boolean RemoveUser(int userId);
     boolean SoftRemoveUser(int userId);
     List<UserSubmission> GetUserSubmissions(int userId);

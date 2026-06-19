@@ -23,13 +23,22 @@ public class LoginService {
     }
 
     public Pair<Boolean, String> CheckLogin(String login, String pass){
-        String dbPass = userHandle.GetUserPass(login);
-        String jwt = "" ;
-        boolean ch = bcrypt.matches(pass, dbPass);
-        if (ch) {
-            jwt = auth.GenerateJwt(userHandle.GetUser(login).id());
+        User user = userHandle.GetUser(login);
+        if (user == null) {
+            throw new IllegalArgumentException("USER_NOT_FOUND");
         }
-        return Pair.of(ch, jwt);
+        if (!user.active()) {
+            throw new IllegalArgumentException("ACCOUNT_BLOCKED");
+        }
+        
+        String dbPass = userHandle.GetUserPass(login);
+        boolean ch = bcrypt.matches(pass, dbPass);
+        if (!ch) {
+            throw new IllegalArgumentException("INVALID_PASSWORD");
+        }
+        
+        String jwt = auth.GenerateJwt(user.id());
+        return Pair.of(true, jwt);
     }
 
     public Pair<Boolean, String> Register(UserNew newUser) {

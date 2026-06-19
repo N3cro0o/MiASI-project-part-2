@@ -36,8 +36,13 @@ apiClient.interceptors.response.use(
     if (status === 401) {
       // Session expired or invalid token — clear stored credentials
       localStorage.removeItem(AUTH_TOKEN_KEY);
+      
       // Forcefully downgrade to guest state by reloading the entire React app
-      window.location.reload();
+      // IMPORTANT: Do NOT reload if the 401 came from a failed login or register attempt
+      const url = error?.config?.url || '';
+      if (!url.includes('/api/auth/login') && !url.includes('/api/auth/register')) {
+        window.location.reload();
+      }
     }
 
     if (status === 403) {

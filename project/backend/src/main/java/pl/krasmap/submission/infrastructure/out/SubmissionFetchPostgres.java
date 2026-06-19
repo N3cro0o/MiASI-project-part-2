@@ -70,7 +70,7 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
     @Override
     public int AddSubmission(NewSubmission sub) {
         String json = GetJsonFromSub(sub);
-        String sql = "INSERT INTO verification.submissions (submitted_by_user_id, payload_json) VALUES (?, ?) RETURNING verification.submissions.id;";
+        String sql = "INSERT INTO verification.submissions (submitted_by_user_id, payload_json) VALUES (?, ?::jsonb) RETURNING verification.submissions.id;";
         int id = -1;
         try {
             Connection conn = GetDatabaseConnection();
@@ -126,13 +126,12 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
 
     @Override
     public List<Submission> GetSubmissionsFromUser(int userId) {
-        List<Submission> list = null;
+        List<Submission> list = new ArrayList<>();
         try {
             Connection conn = GetDatabaseConnection();
             PreparedStatement stat = conn.prepareStatement("SELECT * FROM verification.submissions WHERE submitted_by_user_id = ?;");
             stat.setInt(1, userId);
             var outcome = stat.executeQuery();
-            list = new ArrayList<>();
             while (outcome.next()){
                 list.add(GetSubFromStatement(outcome));
             }
@@ -146,7 +145,7 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
     @Override
     public boolean UpdateSubReview(Submission newSub) {
         boolean check = false;
-        String sql = "UPDATE verification.submissions SET (status, rejection_reason, reviewed_by_user_id, reviewed_at) = (?, ?, ?, ?) " +
+        String sql = "UPDATE verification.submissions SET (status, rejection_reason, reviewed_by_user_id, reviewed_at) = (?::verification.submission_status, ?, ?, ?) " +
                 "WHERE id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
@@ -166,7 +165,7 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
 
     @Override
     public int UpdateSubmission(int subId, NewSubmission submission) {
-        String sql = "UPDATE verification.submissions SET (submitted_by_user_id, payload_json) = (?, ?) WHERE id = ?;";
+        String sql = "UPDATE verification.submissions SET (submitted_by_user_id, payload_json) = (?, ?::jsonb) WHERE id = ?;";
         try {
             Connection conn = GetDatabaseConnection();
             PreparedStatement stat = conn.prepareStatement(sql);
@@ -183,12 +182,11 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
 
     @Override
     public List<Submission> GetAllSubmissions() {
-        List<Submission> list = null;
+        List<Submission> list = new ArrayList<>();
         try {
             Connection conn = GetDatabaseConnection();
             PreparedStatement stat = conn.prepareStatement("SELECT * FROM verification.submissions;");
             var outcome = stat.executeQuery();
-            list = new ArrayList<>();
             while (outcome.next()){
                 list.add(GetSubFromStatement(outcome));
             }
@@ -201,13 +199,12 @@ public class SubmissionFetchPostgres implements SubmissionFetchInterface {
 
     @Override
     public List<Submission> GetAllSubmissions(SubmissionStatus status) {
-        List<Submission> list = null;
+        List<Submission> list = new ArrayList<>();
         try {
             Connection conn = GetDatabaseConnection();
-            PreparedStatement stat = conn.prepareStatement("SELECT * FROM verification.submissions WHERE status = ?;");
+            PreparedStatement stat = conn.prepareStatement("SELECT * FROM verification.submissions WHERE status = ?::verification.submission_status;");
             stat.setString(1, status.toString());
             var outcome = stat.executeQuery();
-            list = new ArrayList<>();
             while (outcome.next()){
                 list.add(GetSubFromStatement(outcome));
             }
