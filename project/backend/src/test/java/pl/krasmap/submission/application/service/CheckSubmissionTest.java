@@ -8,6 +8,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import pl.krasmap.common.data.KrasnalCategory;
 import pl.krasmap.common.data.Position;
 //import pl.krasmap.submission.application.domain.Krasnal;
@@ -15,6 +16,7 @@ import pl.krasmap.submission.application.domain.data.ReviewKrasnal;
 import pl.krasmap.submission.application.domain.data.submission.Submission;
 import pl.krasmap.submission.application.domain.data.submission.SubmissionReview;
 import pl.krasmap.common.data.SubmissionStatus;
+import pl.krasmap.submission.application.port.out.GetKrasnalInterface;
 
 import java.time.OffsetDateTime;
 
@@ -25,7 +27,13 @@ import static org.mockito.Mockito.*;
 public class CheckSubmissionTest {
 
     @Mock
-    private HoldSubmissionRepo repo;
+    private HandleSubmissionService subHandle;
+
+    @Mock
+    private GetKrasnalInterface krasnalService;
+
+    @Mock
+    private ApplicationEventPublisher events;
 
     @InjectMocks
     private CheckSubmission check;
@@ -50,7 +58,7 @@ public class CheckSubmissionTest {
         int subId = 3;
         Submission sub = Submission.newObject(subId, 2, SAMPLE_JSON, SubmissionStatus.Pending, OffsetDateTime.now());
 
-        when(repo.GetSubmission(subId)).thenReturn(sub);
+        when(subHandle.GetSubmission(subId)).thenReturn(sub);
 
         Pair<Submission, ReviewKrasnal> pair = check.GetSubmissonPair(subId);
 
@@ -64,7 +72,7 @@ public class CheckSubmissionTest {
         assertEquals("krasnal student z piwem", k.description());
         assertEquals(new Position(43.22, 54.34), k.position());
         assertEquals(KrasnalCategory.Dwarf, k.category());
-        verify(repo, times(1)).GetSubmission(subId);
+        verify(subHandle, times(1)).GetSubmission(subId);
     }
 
     @Test
@@ -80,14 +88,14 @@ public class CheckSubmissionTest {
         String reason = "krasnal doesn't exist";
         Submission sub = Submission.newObject(subId, 4, SAMPLE_JSON, SubmissionStatus.Pending, OffsetDateTime.now());
 
-        when(repo.GetSubmission(subId)).thenReturn(sub);
-        when(repo.UpdateSubReview(any(Submission.class))).thenReturn(false);
+        when(subHandle.GetSubmission(subId)).thenReturn(sub);
+        when(subHandle.UpdateSubReview(any(Submission.class))).thenReturn(false);
 
         boolean result = check.RejectSubmission(userId, subId, reason);
 
         assertFalse(result);
-        verify(repo, times(1)).GetSubmission(subId);
-        verify(repo, times(1)).UpdateSubReview(subCaptor.capture());
+        verify(subHandle, times(1)).GetSubmission(subId);
+        verify(subHandle, times(1)).UpdateSubReview(subCaptor.capture());
 
         Submission updatedSub = subCaptor.getValue();
         assertNotNull(updatedSub);
@@ -105,8 +113,8 @@ public class CheckSubmissionTest {
         int subId = 98;
         Submission sub = Submission.newObject(subId, 2, SAMPLE_JSON, SubmissionStatus.Pending, OffsetDateTime.now());
 
-        when(repo.GetSubmission(subId)).thenReturn(sub);
-        when(repo.UpdateSubReview(any(Submission.class))).thenReturn(false);
+        when(subHandle.GetSubmission(subId)).thenReturn(sub);
+        when(subHandle.UpdateSubReview(any(Submission.class))).thenReturn(false);
 
         ReviewKrasnal returned = check.AcceptSubmission(userId, subId);
 
@@ -114,8 +122,8 @@ public class CheckSubmissionTest {
         assertEquals("krasnal student", returned.name());
         assertEquals("krasnal student z piwem", returned.description());
 
-        verify(repo, times(1)).GetSubmission(subId);
-        verify(repo, times(1)).UpdateSubReview(subCaptor.capture());
+        verify(subHandle, times(1)).GetSubmission(subId);
+        verify(subHandle, times(1)).UpdateSubReview(subCaptor.capture());
 
         Submission newSub = subCaptor.getValue();
         assertNotNull(newSub);

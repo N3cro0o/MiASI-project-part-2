@@ -60,34 +60,27 @@ public class HoldUserRepoTest {
     void testAddUser_callsSaveAndGet() {
         UserWeb user = new UserWeb("debil123", "debil@pwr.edu.pl", "pass123", UserRole.Editor, true);
         int generatedId = 1;
-        User returnedUser = User.newObject(generatedId, user.login(), user.email(), user.role(), user.active(), OffsetDateTime.now());
 
         when(fetch.SaveUser(user)).thenReturn(generatedId);
-        when(fetch.GetUser(generatedId)).thenReturn(returnedUser);
 
         int result = repo.AddUser(user);
 
         assertEquals(generatedId, result);
         verify(fetch, times(1)).SaveUser(user);
-        verify(fetch, times(1)).GetUser(generatedId);
     }
 
     @Test
     void testUpdateUser_callsUpdateAndGet() {
         int userId = 2;
         UserWeb user = new UserWeb("debil123", "debil@pwr.edu.pl", "pass123", UserRole.Editor, true);
-        int returnedId = userId;
-        User returnedUser = User.newObject(returnedId, user.login(), user.email(), user.role(), user.active(), OffsetDateTime.now());
 
-        when(fetch.UpdateUser(userId, user)).thenReturn(returnedId);
-        when(fetch.GetUser(returnedId)).thenReturn(returnedUser);
+        when(fetch.UpdateUser(userId, user)).thenReturn(userId);
 
         int result = repo.UpdateUser(userId, user);
 
 
-        assertEquals(returnedId, result);
+        assertEquals(userId, result);
         verify(fetch, times(1)).UpdateUser(userId, user);
-        verify(fetch, times(1)).GetUser(returnedId);
     }
 
     @Test

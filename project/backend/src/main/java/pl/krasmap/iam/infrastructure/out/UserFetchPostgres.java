@@ -117,7 +117,7 @@ public class UserFetchPostgres implements UserFetchInterface {
         try {
             Connection conn = GetDatabaseConnection();
             PreparedStatement stat = conn.prepareStatement("INSERT INTO iam.users (login, email, hashed_password, role, active)" +
-                    " VALUES (?, ?, ?, ?, ?) RETURNING iam.users.id;");
+                    " VALUES (?, ?, ?, ?::iam.user_role, ?) RETURNING iam.users.id;");
             stat.setString(1, user.login());
             stat.setString(2, user.email());
             stat.setString(3, user.password());
@@ -140,7 +140,7 @@ public class UserFetchPostgres implements UserFetchInterface {
         try {
             Connection conn = GetDatabaseConnection();
             PreparedStatement stat = conn.prepareStatement("UPDATE iam.users SET (login, email, hashed_password, role, active) = " +
-                    "(?, ?, ?, ?, ?) WHERE id = ?;");
+                    "(?, ?, ?, ?::iam.user_role, ?) WHERE id = ?;");
             stat.setString(1, user.login());
             stat.setString(2, user.email());
             stat.setString(3, user.password());

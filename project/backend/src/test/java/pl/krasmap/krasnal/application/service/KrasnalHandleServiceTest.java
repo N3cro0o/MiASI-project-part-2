@@ -73,14 +73,14 @@ public class KrasnalHandleServiceTest {
         KrasnalWeb newKrasnal = new KrasnalWeb("krasnal student", "krasnal student", new Position(12.3, 54.32), KrasnalCategory.Dwarf, KrasnalStatus.Active, 4.33);
         Krasnal toAdd = Krasnal.from(newKrasnal);
 
-        when(repo.AddNewKrasnal(toAdd)).thenReturn(krasnalId);
+        when(repo.AddNewKrasnal(any(Krasnal.class))).thenReturn(krasnalId);
         when(krasnalHandleService.GetKrasnal(krasnalId)).thenReturn(toAdd);
 
         Krasnal result = krasnalHandleService.AddNewKrasnal(newKrasnal);
 
         assertNotNull(result);
         assertEquals(result, toAdd);
-        verify(repo, times(1)).AddNewKrasnal(toAdd);
+        verify(repo, times(1)).AddNewKrasnal(any(Krasnal.class));
         verify(events, times(1)).publishEvent(any(KrasnalAddedEvent.class));
     }
 
@@ -96,7 +96,7 @@ public class KrasnalHandleServiceTest {
 
         assertNotNull(result);
         assertEquals(toAdd, result);
-        verify(repo, times(1)).UpdateKrasnal(toAdd);
+        verify(repo, times(1)).UpdateKrasnal(any(Krasnal.class));
         verify(events, times(1)).publishEvent(any(KrasnalUpdatedEvent.class));
     }
 

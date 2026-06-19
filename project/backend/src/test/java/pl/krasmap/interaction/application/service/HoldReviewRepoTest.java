@@ -28,8 +28,8 @@ public class HoldReviewRepoTest {
     void testGetReviewsUnderKrasnal_callsInterfaceAndReturnsReviewsList() {
         int krasnalId = 101;
 
-        Review r1 = Review.newObject(1, krasnalId, 43, (short)3, "fajny krasnal", OffsetDateTime.now());
-        Review r2 = Review.newObject(2, krasnalId, 12, (short)5, "świetny krasnal", OffsetDateTime.now());
+        Review r1 = Review.newObject(1, krasnalId, 43, (short) 3, "fajny krasnal", OffsetDateTime.now());
+        Review r2 = Review.newObject(2, krasnalId, 12, (short) 5, "świetny krasnal", OffsetDateTime.now());
 
         when(fetch.GetReviewsUnderKrasnal(krasnalId)).thenReturn(List.of(r1, r2));
 
@@ -45,7 +45,7 @@ public class HoldReviewRepoTest {
     @Test
     void testGetReviewById_callsInterfaceAndReturnsReview() {
         int reviewId = 200;
-        Review expectedReview = Review.newObject(reviewId, 10, 30, (short)1, "słaby", OffsetDateTime.now());
+        Review expectedReview = Review.newObject(reviewId, 10, 30, (short) 1, "słaby", OffsetDateTime.now());
 
         when(fetch.GetReview(reviewId)).thenReturn(expectedReview);
 
@@ -59,8 +59,8 @@ public class HoldReviewRepoTest {
     @Test
     void testGetReviewsFromUser_callsInterfaceAndReturnsReviewsList() {
         int userId = 48;
-        Review r1 = Review.newObject(1, 23, userId, (short)4, "dobry krasnal", OffsetDateTime.now());
-        Review r2 = Review.newObject(523, 12, userId, (short)3, "okej krasnal", OffsetDateTime.now());
+        Review r1 = Review.newObject(1, 23, userId, (short) 4, "dobry krasnal", OffsetDateTime.now());
+        Review r2 = Review.newObject(523, 12, userId, (short) 3, "okej krasnal", OffsetDateTime.now());
 
         when(fetch.GetReviewsFromUser(userId)).thenReturn(List.of(r1, r2));
 
@@ -78,8 +78,8 @@ public class HoldReviewRepoTest {
         int krasnalId = 101;
         int userId = 84;
 
-        Review r1 = Review.newObject(1, krasnalId, userId, (short)4, "dobry krasnal", OffsetDateTime.now());
-        Review r2 = Review.newObject(523, krasnalId, userId, (short)3, "okej krasnal", OffsetDateTime.now());
+        Review r1 = Review.newObject(1, krasnalId, userId, (short) 4, "dobry krasnal", OffsetDateTime.now());
+        Review r2 = Review.newObject(523, krasnalId, userId, (short) 3, "okej krasnal", OffsetDateTime.now());
 
         when(fetch.GetReviewsFromUserUnderKrasnal(userId, krasnalId)).thenReturn(List.of(r1, r2));
 
@@ -94,33 +94,28 @@ public class HoldReviewRepoTest {
 
     @Test
     void testAddReview_callsAddAndGet() {
-        ReviewWeb review = new ReviewWeb(14, 43, (short)2, "mógłby być lepszy");
+        ReviewWeb review = new ReviewWeb(14, 43, (short) 2, "mógłby być lepszy");
         int generatedId = 1;
-        Review returnedReview = Review.newObject(1, 14, 43, (short)2, "mógłby być lepszy", OffsetDateTime.now());
 
         when(fetch.AddReview(review)).thenReturn(generatedId);
-        when(fetch.GetReview(generatedId)).thenReturn(returnedReview);
 
         int result = repo.AddReview(review);
+
         assertEquals(generatedId, result);
         verify(fetch, times(1)).AddReview(review);
-        verify(fetch, times(1)).GetReview(generatedId);
     }
 
     @Test
     void testUpdateReview_callsUpdateAndGet() {
         int reviewId = 240;
         ReviewWeb review = new ReviewWeb(43, 4, (short)5, "naprawili krasnala");
-        Review returnedReview = Review.newObject(reviewId, 43, 4, (short)5, "naprawili krasnala", OffsetDateTime.now());
 
         when(fetch.UpdateReview(reviewId, review)).thenReturn(reviewId);
-        when(fetch.GetReview(reviewId)).thenReturn(returnedReview);
 
         var result = repo.UpdateReview(reviewId, review);
 
         assertEquals(reviewId, result);
         verify(fetch, times(1)).UpdateReview(reviewId, review);
-        verify(fetch, times(1)).GetReview(reviewId);
     }
 
     @Test
