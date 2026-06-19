@@ -15,6 +15,7 @@ public interface UserControllerInterface {
     User AddUser(UserWeb userToAdd);
     User UpdateUser(int userId, UserWeb userToUpdate);
     boolean RemoveUser(int userId);
+    boolean SoftRemoveUser(int userId);
     List<UserSubmission> GetUserSubmissions(int userId);
     UserStats GetUserStats(int userId);
 }

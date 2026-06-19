@@ -40,6 +40,10 @@ public class HoldUserRepo {
     }
 
     public boolean DeleteUser(int userId) {
+        return userFetch.DeleteUser(userId);
+    }
+
+    public boolean HideUser(int userId) {
         return userFetch.HideUser(userId);
     }
 }

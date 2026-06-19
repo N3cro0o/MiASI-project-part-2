@@ -175,7 +175,19 @@ public class UserFetchPostgres implements UserFetchInterface {
 
     @Override
     public boolean DeleteUser(int userId) {
-        return false;
+        boolean check = false;
+        try {
+            Connection conn = GetDatabaseConnection();
+            PreparedStatement stat = conn.prepareStatement("DELETE FROM iam.users WHERE id = ?;");
+            stat.setInt(1, userId);
+            stat.execute();
+            check = true;
+            conn.close();
+        }
+        catch (Exception e) {
+            System.err.println(e.toString());
+        }
+        return check;
     }
 
     @Override
